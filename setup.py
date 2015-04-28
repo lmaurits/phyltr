@@ -5,11 +5,9 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from nufi.main import __version__ as version
-
 setup(
     name='phyltr',
-    version=version,
+    version='dev',
     description='Unix filters for manipulating and analysing (samples of) phylogenetic trees represented in the Newick format',
     author='Luke Maurits',
     author_email='luke@maurits.id.au',
