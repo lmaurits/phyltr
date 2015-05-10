@@ -1,9 +1,29 @@
+"""Usage:
+    phyltr stat [<files>]
+
+Print basic properties of a tree stream, such as the number of trees and taxa.
+
+OPTIONS:
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
 
 import ete2
 
+import phyltr.utils.phyoptparse as optparse
+
 def run():
 
+    # Parse options
+    parser = optparse.OptionParser(__doc__)
+    options, files = parser.parse_args()
+
+    # Go
     tree_count = 0
     taxa_count = 0
     ultrametric = False

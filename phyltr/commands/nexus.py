@@ -1,15 +1,31 @@
+"""Usage:
+    phyltr nexus [<files>]
+
+Convert a treestream to a file in the NEXUS forma.  The NEXUS output is printed to stdout, where it can be redirected to a file.
+
+OPTIONS:
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 
 import ete2
 
+import phyltr.utils.phyoptparse as optparse
+
 def run():
 
-    print_header()
+    # Parse options
+    parser = optparse.OptionParser(__doc__)
+    options, files = parser.parse_args()
 
     # Read trees
     first = True
-    for count, line in enumerate(fileinput.input(),1):
+    for count, line in enumerate(fileinput.input(files),1):
         t = ete2.Tree(line)
         leaves = t.get_leaves()
         # If first tree, get names

@@ -1,14 +1,37 @@
+"""Usage:
+    phyltr support [<options>] [<files>]
+
+Annotate a treestream with clade support probabilities, and optionally save clade support information to a file
+
+OPTIONS:
+
+    -s, --sort
+        Reorder tree stream to print trees in order from highest to lowest
+        product of clade credibilities.
+
+    -o, --output
+        Filename to save a clade credibility report to
+
+    -f, --frequency
+        Minimum clade frequency to include in report
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 
 import ete2
 
 import phyltr.utils.cladeprob
+import phyltr.utils.phyoptparse as optparse
 
 def run():
 
     # Parse options
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
     parser.add_option("-o", "--output", action="store", dest="filename",
         help="save clades to FILE", metavar="FILE")

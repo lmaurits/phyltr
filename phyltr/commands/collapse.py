@@ -1,7 +1,29 @@
+"""Usage:
+    phyltr collapse [<options>] [<files>]
+
+Collapse monophyletic sets of leaf nodes, by turning their MRCA into a leaf,
+and giving the newly formed leaf a specified label.
+
+OPTIONS:
+
+    -t, --translate
+        The filename of the translate file.  Each line of the translate file
+        should be of the format:
+            "label:taxa1,taxa2,taxa3,...."
+        The MRCA of the specified taxa will be replaced by a leaf named
+        "label".
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 
 import ete2
+
+import phyltr.utils.phyoptparse as optparse
 
 def read_clade_file(filename):
 
@@ -20,7 +42,7 @@ def read_clade_file(filename):
 def run():
 
     # Parse options
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-t', '--translate',
                 help='Specifies the translation file.')
     options, files = parser.parse_args()

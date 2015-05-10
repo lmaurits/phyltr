@@ -1,13 +1,30 @@
+"""Usage:
+    phyltr prune taxa [<files>]
+
+Delete a specified set of nodes from the tree.
+
+OPTIONS:
+
+    taxa
+        A comma-separated list of leaf taxon to prune the tree down to
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 import sys
 
 import ete2
 
+import phyltr.utils.phyoptparse as optparse
+
 def run():
 
     # Parse options
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-t', '--taxa', action="store", dest="taxa")
     options, files = parser.parse_args()
 

@@ -1,23 +1,41 @@
+"""Usage:
+    phyltr cat [<options>] [<files>]
+
+Extract phylogenetic trees from the specified files and print them as a treestream.  The trees may contain trees formatted as a phyltr treestream or a NEXUS file.
+
+OPTIONS:
+
+    -b, --burnin
+        Percentage of trees from each file to discard as "burnin".  Default is 0.
+        
+    -s, --subsample
+        Frequency at which to subsample trees, i.e. "-s 10" will include
+        only every 10th tree in the treestream.  Default is 1.
+        
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 import sys
 
 import ete2
 
+import phyltr.utils.phyoptparse as optparse
+
 def run():
 
     # Parse options
-    parser = optparse.OptionParser()
-    parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
-    parser.add_option("-o", "--output", action="store", dest="filename",
-        help="save clades to FILE", metavar="FILE")
-    parser.add_option('-f', '--frequency', type="float", dest="frequency",
-            default=1.0, help='Minimum clade frequency to report.')
+    parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
     options, files = parser.parse_args()
     if not files:
         files = ["-"]
 
+    # Read files
     for filename in files:
         if filename == "-":
             fp = sys.stdin

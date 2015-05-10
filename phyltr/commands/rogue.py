@@ -1,15 +1,36 @@
+"""Usage:
+    phyltr rogue [<options>] [<files>]
+
+Remove rogue taxa which assume many contradictory locations in a treestream,
+lowering clade supports.
+
+OPTIONS:
+
+    -n
+        The number of rogue taxa to remove.
+
+    -g, --guard
+        A comma-separated list of taxa names which should be guarded from
+        removal by the rogue searching algorithm
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 import sys
 
-import phyltr.utils.cladeprob
-
 import ete2
+
+import phyltr.utils.cladeprob
+import phyltr.utils.phyoptparse as optparse
 
 def run():
 
     # Parse options
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-n', action="store", dest="iterations", type="int", default=1)
     parser.add_option('-g', "--guard", action="store", dest="guarded")
     options, files = parser.parse_args()

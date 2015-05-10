@@ -1,11 +1,28 @@
+"""Usage:
+    phyltr pretty [<options>] [<files>]
+
+Print an "ASCII art" representation of a treestream.
+
+OPTIONS:
+
+    -c, --compress
+        Compress highly supported clades to a single node
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
-import optparse
 
 import ete2
 
+import phyltr.utils.phyoptparse as optparse
+
 def run():
     # Parse options
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(__doc__)
     parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
     options, files = parser.parse_args()
 
