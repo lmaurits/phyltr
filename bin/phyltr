@@ -8,10 +8,9 @@ The available phyltr commands are:
     cat         Convert file(s) to tree streams
     clades      List clade supports
     collapse    Collapse clades to named taxa
-    delete      Delete specified taxa from trees
     nexus       Convert tree stream to NEXUS file
     pretty      Pretty print a tree (ASCII art)
-    prune       Prune a tree down to specified taxa
+    prune       Prune specified taxa from a tree
     rename      Rename specified taxa
     rogue       Remove rogue taxon or taxons
     stat        Summary statistics on a set of trees
@@ -46,8 +45,6 @@ def main():
         import phyltr.commands.clades as comm
     elif command in ("col", "collapse"):
         import phyltr.commands.collapse as comm
-    elif command in ("del", "delete"):
-        import phyltr.commands.delete as comm
     elif command in ("nex", "nexus"):
         import phyltr.commands.nexus as comm
     elif command in ("pre", "pretty"):
