@@ -14,7 +14,7 @@ The available phyltr commands are:
     rename      Rename specified taxa
     rogue       Remove rogue taxon or taxons
     stat        Summary statistics on a set of trees
-    sup         Add clade support information to a tree stream
+    support     Add clade support information to a tree stream
     uniq        Merge trees with matching topologies
 
 All commands can be abbreviated to their first three letters, e.g. running
