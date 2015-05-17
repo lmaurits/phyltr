@@ -61,7 +61,7 @@ def main():
         import phyltr.commands.support as comm
     elif command in ("uni", "uniq"):
         import phyltr.commands.uniq as comm
-    elif command in ("help", "usage"):
+    elif command in ("--help", "help", "--usage", "usage"):
         usage()
         sys.exit(0)
 
