@@ -64,6 +64,9 @@ def main():
     elif command in ("--help", "help", "--usage", "usage"):
         usage()
         sys.exit(0)
+    else:
+        sys.stderr.write("phyltr: '%s' is not a phyltr command.  See 'phyltr --help'.\n" % command)
+        sys.exit(0)
 
     sys.exit(comm.run())
 
