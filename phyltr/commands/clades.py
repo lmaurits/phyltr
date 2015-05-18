@@ -22,8 +22,9 @@ import fileinput
 
 import ete2
 
-import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
+import phyltr.utils.cladeprob
+from phyltr.commands.support import save_clades
 
 def run():
 
@@ -41,17 +42,8 @@ def run():
         cp.add_tree(t)
     cp.compute_probabilities()
 
-    # Prepare clade list
-    clade_probs = [(cp.clade_probs[c], c) for c in cp.clade_probs]
-    if options.threshold < 1.0:
-        clade_probs = [(p, c) for (p, c) in clade_probs if p >= options.threshold]
-    if options.sort:
-        clade_probs.sort()
-        clade_probs.reverse()
-
     # Output
-    for p, c in clade_probs:
-        print "%f: [%s]" % (p, c)
+    save_clades(cp, "/dev/stdout", options.threshold)
 
     # Done
     return 0
