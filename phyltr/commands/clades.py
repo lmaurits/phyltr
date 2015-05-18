@@ -29,7 +29,6 @@ def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
     parser.add_option('-f', '--frequency', type="float", dest="threshold",
             default=1.0, help='Minimum clade frequency to report.')
     options, files = parser.parse_args()
