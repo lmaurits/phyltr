@@ -79,15 +79,16 @@ def run():
                         name = name[:-1]
                     nexus_trans[index] = name
 
-            # Attempt to parse the first whitespace-separated chunk on the line
-            # which starts with an opening bracket.  Fail silently.
-            chunks = line.split()
-            for chunk in chunks:
-                if chunk.startswith("("):
-                    if chunk.count("(") == chunk.count(")"):
-                        # Smells like a tree!
-                        tree_strings.append(chunk)
-                        break
+            # Try to find a likely tree on this line and extract it
+            if (
+                    ")" in line and
+                    ";" in line and
+                    line.count("(") == line.count(")")
+               ):
+                # Smells like a tree!
+                start = line.index("(")
+                end = line.rindex(";") + 1
+                tree_strings.append(line[start:end])
 
         burnin = int(round((options.burnin/100.0)*len(tree_strings)))
         tree_strings = tree_strings[burnin::options.subsample]
