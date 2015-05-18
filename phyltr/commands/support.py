@@ -13,7 +13,8 @@ OPTIONS:
         Filename to save a clade credibility report to
 
     -f, --frequency
-        Minimum clade frequency to include in report
+        Minimum clade frequency to include in output (default 0.0, i.e. all
+        clades are included)
 
     files
         A whitespace-separated list of filenames to read treestreams from.
