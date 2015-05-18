@@ -1,3 +1,23 @@
+"""Usage:
+    phyltr clades [<options>] [<files>]
+
+Produce a list showing all clades in a treestream and the proportion of trees
+in the stream which contain each clade.  The format of the output is
+identical to that produced by the 'phyltr support' command when using the
+'-o' option, and some of the same options are available.
+
+OPTIONS:
+
+    -f, --frequency
+        Minimum clade frequency to include in output (default 0.0, i.e. all
+        clades are included)
+
+    files
+        A whitespace-separated list of filenames to read treestreams from.
+        Use a filename of "-" to read from stdin.  If no filenames are
+        specified, the treestream will be read from stdin.
+"""
+
 import fileinput
 
 import ete2
