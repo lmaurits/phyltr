@@ -64,7 +64,10 @@ def run():
             if not clade_leaves:
                 continue
             # Check monophyly
-            mrca = t.get_common_ancestor(clade_leaves)
+            if len(clade_leaves) == 1:
+                mrca = clade_leaves[0]  # .get_common_ancestor works oddly for singletons
+            else:
+                mrca = t.get_common_ancestor(clade_leaves)
             mrca_leaves = cache[mrca]
             if set(mrca_leaves) == set(clade_leaves):
                 # Clade is monophyletic, so rename and prune
