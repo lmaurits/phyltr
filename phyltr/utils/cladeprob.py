@@ -29,7 +29,7 @@ class CladeProbabilities:
         """Populate the self.clade_probs dictionary with probability values,
         based on the current clade and tree counts."""
 
-        self.clade_probs = {c: self.clade_counts[c] / self.tree_count for c in self.clade_counts}
+        self.clade_probs = dict((c, self.clade_counts[c] / self.tree_count) for c in self.clade_counts)
 
     def get_tree_prob(self, t):
 
