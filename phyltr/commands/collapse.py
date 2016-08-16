@@ -71,7 +71,10 @@ def run():
             mrca_leaves = cache[mrca]
             if set(mrca_leaves) == set(clade_leaves):
                 # Clade is monophyletic, so rename and prune
+                # But don't mess up distances
                 mrca.name = name
+                leaf, dist = mrca.get_farthest_leaf()
+                mrca.dist += dist
                 for child in mrca.get_children():
                     child.detach()
 
