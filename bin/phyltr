@@ -8,6 +8,7 @@ The available phyltr commands are:
     cat         Convert file(s) to tree streams
     clades      List clade supports
     collapse    Collapse clades to named taxa
+    consensus   Build majority rules consensus tree
     nexus       Convert tree stream to NEXUS file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
@@ -45,6 +46,8 @@ def main():
         import phyltr.commands.clades as comm
     elif command in ("col", "collapse"):
         import phyltr.commands.collapse as comm
+    elif command in ("con", "consensus"):
+        import phyltr.commands.consensus as comm
     elif command in ("nex", "nexus"):
         import phyltr.commands.nexus as comm
     elif command in ("pre", "pretty"):
