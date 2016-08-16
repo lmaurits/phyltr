@@ -32,7 +32,7 @@ def run():
 
         # Add support to interior nodes
         for node in t.traverse():
-            if node.name == "NoName":
+            if not node.is_leaf():
                 node.name = "%.2f" % node.support
 
         # Collapse high probability clades
