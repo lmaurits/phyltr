@@ -48,7 +48,7 @@ def run():
             if not options.inverse:
                 leaves = [l.name for l in t.get_leaves()]
                 taxa = set(leaves) - taxa
-        t.prune(taxa)
+        t.prune(taxa, preserve_branch_length=True)
         print t.write()
 
     # Done
