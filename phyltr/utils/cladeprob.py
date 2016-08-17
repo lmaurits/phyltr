@@ -62,3 +62,18 @@ class CladeProbabilities:
             clade = ",".join(sorted(leaves))
             node.support = self.clade_probs[clade]
 
+    def save_clade_report(self, filename, threshold=0.0):
+        clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]
+        if threshold < 1.0:
+            clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
+        # Sort by clade string, ignoring case...
+        clade_probs.sort(key=lambda x:x[1].lower())
+        # ...then by clade probability
+        # (this results in a list sorted by probability and then name)
+        clade_probs.sort(key=lambda x:x[0],reverse=True)
+
+        fp = open(filename, "w")
+        for p, c in clade_probs:
+            line = "%.4f: [%s]\n" % (p, c)
+            fp.write(line)
+        fp.close()

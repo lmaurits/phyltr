@@ -24,7 +24,6 @@ import ete2
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
-from phyltr.commands.support import save_clades
 
 def run():
 
@@ -43,7 +42,7 @@ def run():
     cp.compute_probabilities()
 
     # Output
-    save_clades(cp, "/dev/stdout", options.threshold)
+    cp.save_clade_report("/dev/stdout", options.threshold)
 
     # Done
     return 0
