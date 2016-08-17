@@ -20,6 +20,7 @@ OPTIONS:
 """
 
 import fileinput
+import sys
 
 import ete2
 
@@ -77,6 +78,10 @@ def run():
                 mrca.dist += dist
                 for child in mrca.get_children():
                     child.detach()
+            else:
+                # Clade is not monophyletic.  We can't collapse it.
+                sys.stderr.write("Monophyly failure for clade: %s\n" % name)
+                return 1
 
         # Output
         print t.write()
