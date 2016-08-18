@@ -17,6 +17,7 @@ The available phyltr commands are:
     rogue       Remove rogue taxon or taxons
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
+    subtree     Extract minimal subtrees containing specified taxa
     uniq        Merge trees with matching topologies
 
 All commands can be abbreviated to their first three letters, e.g. running
@@ -65,6 +66,8 @@ def main():
         import phyltr.commands.stat as comm
     elif command in ("sup", "support"):
         import phyltr.commands.support as comm
+    elif command in ("sub", "subtree"):
+        import phyltr.commands.subtree as comm
     elif command in ("uni", "uniq"):
         import phyltr.commands.uniq as comm
     elif command in ("--help", "help", "--usage", "usage"):
