@@ -20,7 +20,6 @@ import ete2
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
-from phyltr.commands.support import save_clades
 
 def run():
 
