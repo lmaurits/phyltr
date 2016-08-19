@@ -13,7 +13,7 @@ OPTIONS:
 
 import fileinput
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -25,7 +25,7 @@ def run():
 
     # Read trees
     for line in fileinput.input():
-        t = ete2.Tree(line)
-        print(t.get_farthest_leaf()[1])
+        t = dendropy.Tree.get_from_string(line,schema="newick")
+        print(t.seed_node.distance_from_tip())
 
     return 0
