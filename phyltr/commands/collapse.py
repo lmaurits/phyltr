@@ -20,9 +20,8 @@ OPTIONS:
 """
 
 import fileinput
-import sys
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -34,6 +33,8 @@ def read_clade_file(filename):
     trans = []
     fp = open(filename, "r")
     for line in fp:
+        if not line:
+            continue
         name, clade = line.strip().split(":")
         clade = clade.strip().split(",")
         trans.append((clade, name))
@@ -56,35 +57,28 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        cache = t.get_cached_content()
-        tree_leaves = cache[t]
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t.calc_node_ages()
+        tree_leaves = [l.taxon.label for l in t.leaf_nodes()]
         for clade, name in trans:
             # Get a list of leaves in this tree
-            clade_leaves = [l for l in tree_leaves if l.name in clade]
+            clade_leaves = [l for l in tree_leaves if l in clade]
             if not clade_leaves:
                 continue
             # Check monophyly
-            if len(clade_leaves) == 1:
-                mrca = clade_leaves[0]  # .get_common_ancestor works oddly for singletons
-            else:
-                mrca = t.get_common_ancestor(clade_leaves)
-            mrca_leaves = cache[mrca]
-            if set(mrca_leaves) == set(clade_leaves):
+            mrca = t.mrca(taxon_labels = clade_leaves)
+            if set([l.taxon.label for l in mrca.leaf_iter()]) == set(clade_leaves):
                 # Clade is monophyletic, so rename and prune
-                # But don't mess up distances
-                mrca.name = name
-                leaf, dist = mrca.get_farthest_leaf()
-                mrca.dist += dist
-                for child in mrca.get_children():
-                    child.detach()
+                dist = mrca.distance_from_tip()
+                for child in mrca.child_nodes():
+                    mrca.remove_child(child)
+                mrca.taxon = dendropy.datamodel.taxonmodel.Taxon(name)
+                mrca.edge.length += dist
             else:
-                # Clade is not monophyletic.  We can't collapse it.
-                sys.stderr.write("Monophyly failure for clade: %s\n" % name)
-                return 1
+                print "Monophyly failure for %s" % name
 
         # Output
-        print t.write()
+        print t.as_string(schema="newick", suppress_rooting=True).strip()
 
     # Done
     return 0
