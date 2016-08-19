@@ -20,7 +20,7 @@ OPTIONS:
 
 import fileinput
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
@@ -37,7 +37,7 @@ def run():
     trees = []
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
+        t = dendropy.Tree.get_from_string(line,schema="newick")
         cp.add_tree(t)
     cp.compute_probabilities()
 
