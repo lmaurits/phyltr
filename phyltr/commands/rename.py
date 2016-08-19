@@ -18,7 +18,7 @@ OPTIONS:
 
 import fileinput
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -51,14 +51,16 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
         # Rename nodes
-        for node in t.traverse():
-            if node.name in rename:
-                node.name = rename[node.name]
+        for node in t.seed_node.post_order_iter():
+            if node.label in rename:
+                node.label = relabel[node.label]
+            if node.taxon.label in rename:
+                node.taxon.label = relabel[node.taxon.label]
 
         # Output
-        print t.write()
+        print t.as_string(schema="newick", suppress_rooting=True).strip()
 
     # Done
     return 0
