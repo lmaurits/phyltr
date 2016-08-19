@@ -102,7 +102,7 @@ def run():
                for node in t.leaf_node_iter():
                    if node.taxon.label and node.taxon.label in nexus_trans:
                        node.taxon.label = nexus_trans[node.taxon.label]
-           print t.as_string(schema="newick")
+           print t.as_string(schema="newick",suppress_rooting=True).strip()
 
     # Done
     return 0
