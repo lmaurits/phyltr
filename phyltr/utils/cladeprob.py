@@ -8,21 +8,18 @@ class CladeProbabilities:
 
         self.clade_counts = {}
         self.tree_count = 0
-        self.caches ={}
 
     def add_tree(self, tree):
 
         """Record clade counts for the given tree."""
 
-        cache = tree.get_cached_content()
         self.tree_count += 1
-        for subtree in tree.traverse():
-            leaves = [leaf.name for leaf in cache[subtree]]
-            if len(leaves) == 1:
+        for subtree in tree.seed_node.postorder_iter():
+            leaf_names = [l.taxon.label for l in subtree.leaf_nodes()]
+            if len(leaf_names) == 1:
                 continue
-            clade = ",".join(sorted(leaves))
+            clade = ",".join(sorted(leaf_names))
             self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
-        self.caches[tree] = cache
 
     def compute_probabilities(self):
 
@@ -37,30 +34,28 @@ class CladeProbabilities:
         probabilities of all of its constituent clades according to the
         current self.clade_probs values."""
 
-        cache = self.caches.get(t,t.get_cached_content())
         prob = 0
-        for node in t.traverse():
-            if node == t:
+        for clade in t.seed_node.postorder_iter():
+            if clade == t.seed_node:
                 continue
-            leaves = [leaf.name for leaf in cache[node]]
-            if len(leaves) == 1:
+            leaf_names = [l.taxon.label for l in clade.leaf_nodes()]
+            if len(leaf_names) == 1:
                 continue
-            clade = ",".join(sorted(leaves))
+            clade = ",".join(sorted(leaf_names))
             prob += math.log(self.clade_probs[clade])
         return prob
 
-    def annotate_tree(self, tree):
+    def annotate_tree(self, t):
 
         """Set the support attribute of the nodes in tree using the current
         self.clade_probs values."""
 
-        cache = self.caches.get(tree,tree.get_cached_content())
-        for node in tree.traverse():
-            leaves = [leaf.name for leaf in cache[node]]
-            if len(leaves) == 1:
+        for clade in t.seed_node.postorder_iter():
+            leaf_names = [l.taxon.label for l in clade.leaf_nodes()]
+            if len(leaf_names) == 1:
                 continue
-            clade = ",".join(sorted(leaves))
-            node.support = self.clade_probs[clade]
+            clade = ",".join(sorted(leaf_names))
+            node.annotations["posterior"] = self.clade_probs[clade]
 
     def save_clade_report(self, filename, threshold=0.0):
         clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]
