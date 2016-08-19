@@ -21,7 +21,7 @@ OPTIONS:
 import fileinput
 import sys
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -95,14 +95,14 @@ def run():
 
         for tree_string in tree_strings:
            try:
-               t = ete2.Tree(tree_string)
-           except ete2.parser.newick.NewickError:
+               t = dendropy.Tree.get_from_string(tree_string,schema="newick")
+           except ValueError, dendropy.dataio.newickreader.NewickReaderMalformedStatementError:
                continue
            if isNexus and nexus_trans:
-               for node in t.traverse():
-                   if node.name != "NoName" and node.name in nexus_trans:
-                       node.name = nexus_trans[node.name]
-           print t.write(format=5)
+               for node in t.leaf_node_iter():
+                   if node.taxon.label and node.taxon.label in nexus_trans:
+                       node.taxon.label = nexus_trans[node.taxon.label]
+           print t.as_string(schema="newick")
 
     # Done
     return 0
