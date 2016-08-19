@@ -94,15 +94,15 @@ def run():
         tree_strings = tree_strings[burnin::options.subsample]
 
         for tree_string in tree_strings:
-           try:
-               t = dendropy.Tree.get_from_string(tree_string,schema="newick")
-           except ValueError, dendropy.dataio.newickreader.NewickReaderMalformedStatementError:
-               continue
-           if isNexus and nexus_trans:
-               for node in t.leaf_node_iter():
-                   if node.taxon.label and node.taxon.label in nexus_trans:
-                       node.taxon.label = nexus_trans[node.taxon.label]
-           print t.as_string(schema="newick",suppress_rooting=True).strip()
+            try:
+                t = dendropy.Tree.get_from_string(tree_string,schema="newick")
+            except ValueError, dendropy.dataio.newickreader.NewickReaderMalformedStatementError:
+                continue
+            if isNexus and nexus_trans:
+                for node in t.leaf_node_iter():
+                    if node.taxon.label and node.taxon.label in nexus_trans:
+                        node.taxon.label = nexus_trans[node.taxon.label]
+            print t.as_string(schema="newick",suppress_rooting=True).strip()
 
     # Done
     return 0
