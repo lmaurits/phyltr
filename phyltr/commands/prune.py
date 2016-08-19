@@ -21,7 +21,7 @@ OPTIONS:
 import fileinput
 import sys
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -42,14 +42,12 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        if first:
-            first = False
-            if not options.inverse:
-                leaves = [l.name for l in t.get_leaves()]
-                taxa = set(leaves) - taxa
-        t.prune(taxa, preserve_branch_length=True)
-        print t.write()
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        if options.inverse:
+            t.retain_taxa_with_labels(taxa)
+        else:
+            t.prune_taxa_with_labels(taxa)
+        print t.as_string(schema="newick", suppress_rooting=True,suppress_annotations=False).strip()
 
     # Done
     return 0
