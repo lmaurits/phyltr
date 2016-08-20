@@ -15,6 +15,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -33,7 +34,7 @@ def run():
     tns = dendropy.TaxonNamespace()
     # Read trees
     for line in fileinput.input():
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted",taxon_namespace=tns)
+        t = read_tree(t)
         tree_leaves = t.leaf_nodes()
         tree_count += 1
         if firsttree:

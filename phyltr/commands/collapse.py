@@ -23,6 +23,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def read_clade_file(filename):
@@ -57,7 +58,7 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
         tree_leaves = [l.taxon.label for l in t.leaf_nodes()]
         for clade, name in trans:
             # Get a list of leaves in this tree
@@ -77,7 +78,7 @@ def run():
                 print "Monophyly failure for %s" % name
 
         # Output
-        print t.as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(t)
 
     # Done
     return 0

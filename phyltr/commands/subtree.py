@@ -17,8 +17,7 @@ OPTIONS:
 import fileinput
 import sys
 
-import dendropy
-
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -37,9 +36,9 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(t)
         t.seed_node = t.mrca(taxon_labels=taxa)
-        print t.as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(t)
 
     # Done
     return 0

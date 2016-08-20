@@ -18,6 +18,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -28,7 +29,7 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
 
         # Add support to interior nodes
         for node in t.seed_node.preorder_internal_node_iter():

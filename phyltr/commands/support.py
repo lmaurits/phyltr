@@ -26,6 +26,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -44,7 +45,7 @@ def run():
     trees = []
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick")
+        t = read_tree(line)
         trees.append(t)
         cp.add_tree(t)
     cp.compute_probabilities()
@@ -66,7 +67,7 @@ def run():
 
     # Output
     for t in trees:
-        print t.as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(t)
 
     # Done
     return 0

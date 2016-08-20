@@ -22,8 +22,7 @@ OPTIONS:
 import fileinput
 import sys
 
-import dendropy
-
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -44,7 +43,7 @@ def run():
     # Read trees
     trees = []
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
         trees.append(t)
 
     # Remove rogue nodes
@@ -54,7 +53,7 @@ def run():
 
     # Output
     for t in trees:
-        print t.as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(t)
 
     # Done
     return 0

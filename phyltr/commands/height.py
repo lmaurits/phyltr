@@ -13,8 +13,7 @@ OPTIONS:
 
 import fileinput
 
-import dendropy
-
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -25,7 +24,7 @@ def run():
 
     # Read trees
     for line in fileinput.input():
-        t = dendropy.Tree.get_from_string(line,schema="newick")
+        t = read_tree(line)
         print(t.seed_node.distance_from_tip())
 
     return 0

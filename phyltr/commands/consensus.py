@@ -18,6 +18,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
 
@@ -31,7 +32,7 @@ def run():
     # Read trees and compute clade probabilities
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
         cp.add_tree(t)
     cp.compute_probabilities()
 
@@ -39,7 +40,7 @@ def run():
     t = build_consensus_tree(cp, options.frequency)
 
     # Output
-    print t.as_string(schema="newick", suppress_rooting=True, suppress_annotations=False).strip()
+    write_tree(t)
 
     # Done
     return 0

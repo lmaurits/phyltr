@@ -20,6 +20,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def read_rename_file(filename):
@@ -51,7 +52,7 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
         # Rename nodes
         for node in t.seed_node.preorder_iter():
             if node.label in rename:
@@ -60,7 +61,7 @@ def run():
                 node.taxon.label = rename[node.taxon.label]
 
         # Output
-        print t.as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(t)
 
     # Done
     return 0

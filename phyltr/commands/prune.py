@@ -23,6 +23,7 @@ import sys
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -42,12 +43,12 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(t)
         if options.inverse:
             t.retain_taxa_with_labels(taxa)
         else:
             t.prune_taxa_with_labels(taxa)
-        print t.as_string(schema="newick", suppress_rooting=True,suppress_annotations=False).strip()
+        write_tree(t)
 
     # Done
     return 0

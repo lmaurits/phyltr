@@ -22,6 +22,7 @@ import itertools
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -36,7 +37,7 @@ def run():
     topologies = {}
     tns = dendropy.TaxonNamespace()
     for line in fileinput.input(files):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted",taxon_namespace=tns)
+        t = read_tree(t)
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         matched = False
@@ -65,7 +66,7 @@ def run():
             elif options.lengths == "min":
                 dist = min(dists)
             nodes[0].edge.length = dist
-        print equ_class[0].as_string(schema="newick", suppress_rooting=True).strip()
+        write_tree(equ_class[0])
 
     # Done
     return 0

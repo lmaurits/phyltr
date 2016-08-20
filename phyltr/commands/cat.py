@@ -23,6 +23,7 @@ import sys
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -95,14 +96,14 @@ def run():
 
         for tree_string in tree_strings:
             try:
-                t = dendropy.Tree.get_from_string(tree_string,schema="newick")
+                t = read_tree(tree_string)
             except ValueError, dendropy.dataio.newickreader.NewickReaderMalformedStatementError:
                 continue
             if isNexus and nexus_trans:
                 for node in t.leaf_node_iter():
                     if node.taxon.label and node.taxon.label in nexus_trans:
                         node.taxon.label = nexus_trans[node.taxon.label]
-            print t.as_string(schema="newick",suppress_rooting=True).strip()
+            write_tree(t)
 
     # Done
     return 0

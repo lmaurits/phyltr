@@ -15,6 +15,7 @@ import fileinput
 
 import dendropy
 
+from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -27,7 +28,7 @@ def run():
     # Read trees
     first = True
     for count, line in enumerate(fileinput.input(files),1):
-        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t = read_tree(line)
         treelist.append(t)
 
     print treelist.as_string(schema="nexus", suppress_rooting=True, suppress_annotations=False, translate_tree_taxa=True)
