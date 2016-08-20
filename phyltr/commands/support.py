@@ -24,9 +24,8 @@ OPTIONS:
 
 import fileinput
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -45,14 +44,14 @@ def run():
     trees = []
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = read_tree(line)
+        t = ete2.Tree(line)
         trees.append(t)
         cp.add_tree(t)
     cp.compute_probabilities()
 
     # Save clade probabilities
     if options.filename:
-        save_clades(cp, options.filename, options.frequency)
+        cp.save_clade_report(options.filename, options.frequency)
 
     # Annotate trees
     for t in trees:
@@ -67,22 +66,8 @@ def run():
 
     # Output
     for t in trees:
-        write_tree(t)
+        print t.write()
 
     # Done
     return 0
 
-def save_clades(cp, filename, threshold):
-    clade_probs = [(cp.clade_probs[c], c) for c in cp.clade_probs]
-    if threshold < 1.0:
-        clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
-    # Sort by clade string, ignoring case...
-    clade_probs.sort(key=lambda x:x[1].lower())
-    # ...then by clade probability
-    # (this results in a list sorted by probability and then name)
-    clade_probs.sort(key=lambda x:x[0],reverse=True)
-
-    fp = open(filename, "w")
-    for p, c in clade_probs:
-        fp.write("%f: [%s]\n" % (p, c))
-    fp.close()

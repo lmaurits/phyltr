@@ -13,7 +13,8 @@ OPTIONS:
 
 import fileinput
 
-from phyltr.utils.treestream_io import read_tree, write_tree
+import ete2
+
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -24,7 +25,7 @@ def run():
 
     # Read trees
     for line in fileinput.input():
-        t = read_tree(line)
-        print(t.seed_node.distance_from_tip())
+        t = ete2.Tree(line)
+        print(t.get_farthest_leaf()[1])
 
     return 0

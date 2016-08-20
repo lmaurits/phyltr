@@ -20,9 +20,8 @@ OPTIONS:
 import fileinput
 import itertools
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -35,14 +34,13 @@ def run():
 
     # Read trees and compute clade probabilities
     topologies = {}
-    tns = dendropy.TaxonNamespace()
     for line in fileinput.input(files):
-        t = read_tree(t)
+        t = ete2.Tree(line)
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         matched = False
         for exemplar in topologies:
-            if dendropy.calculate.treecompare.symmetric_difference(t,exemplar) == 0:
+            if t.robinson_foulds(exemplar)[0] == 0.0:
                 matched = True
                 topologies[exemplar].append(t)
                 break
@@ -50,8 +48,8 @@ def run():
             topologies[t] = [t]
         
     for equ_class in topologies.values():
-        for nodes in itertools.izip(*[t.seed_node.child_node_iter() for t in equ_class]):
-            dists = [n.edge.length for n in nodes]
+        for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
+            dists = [n.dist for n in nodes]
             if options.lengths == "max":
                 dist = max(dists)
             elif options.lengths == "mean":
@@ -65,8 +63,8 @@ def run():
                     dist = dists[l/2]
             elif options.lengths == "min":
                 dist = min(dists)
-            nodes[0].edge.length = dist
-        write_tree(equ_class[0])
+            nodes[0].dist = dist
+        print equ_class[0].write()
 
     # Done
     return 0

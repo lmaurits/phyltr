@@ -21,9 +21,8 @@ OPTIONS:
 import fileinput
 import sys
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -95,15 +94,15 @@ def run():
         tree_strings = tree_strings[burnin::options.subsample]
 
         for tree_string in tree_strings:
-            try:
-                t = read_tree(tree_string)
-            except ValueError, dendropy.dataio.newickreader.NewickReaderMalformedStatementError:
-                continue
-            if isNexus and nexus_trans:
-                for node in t.leaf_node_iter():
-                    if node.taxon.label and node.taxon.label in nexus_trans:
-                        node.taxon.label = nexus_trans[node.taxon.label]
-            write_tree(t)
+           try:
+               t = ete2.Tree(tree_string)
+           except ete2.parser.newick.NewickError:
+               continue
+           if isNexus and nexus_trans:
+               for node in t.traverse():
+                   if node.name != "NoName" and node.name in nexus_trans:
+                       node.name = nexus_trans[node.name]
+           print t.write(format=5)
 
     # Done
     return 0

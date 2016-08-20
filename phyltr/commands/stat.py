@@ -13,9 +13,8 @@ OPTIONS:
 
 import fileinput
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -31,24 +30,24 @@ def run():
     topologically_unique_trees = []
     tree_ages = []
     firsttree = True
-    tns = dendropy.TaxonNamespace()
     # Read trees
     for line in fileinput.input():
-        t = read_tree(t)
-        tree_leaves = t.leaf_nodes()
+        t = ete2.Tree(line)
+        cache = t.get_cached_content()
+        tree_leaves = cache[t]
         tree_count += 1
         if firsttree:
             taxa_count = len(tree_leaves)
-            taxa_names = [l.taxon.label for l in tree_leaves]
+            taxa_names = [l.name for l in tree_leaves]
             topologically_unique_trees.append(t)
-            leave_ages = [l.distance_from_root() for l in tree_leaves]
+            leave_ages = [t.get_distance(l) for l in tree_leaves]
             if abs(max(leave_ages) - min(leave_ages)) < max(leave_ages)/1000.0:
                 ultrametric = True
             firsttree = False
-        tree_ages.append(max(leave_ages))
+        tree_ages.append(t.get_farthest_leaf()[1])
         unique = True
         for u in topologically_unique_trees:
-            if dendropy.calculate.treecompare.symmetric_difference(t,u) == 0:
+            if u.robinson_foulds(t)[0] == 0.0:
                 unique = False
                 break
         if unique:

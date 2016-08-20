@@ -20,7 +20,8 @@ OPTIONS:
 
 import fileinput
 
-from phyltr.utils.treestream_io import read_tree, write_tree
+import ete2
+
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
 
@@ -36,7 +37,7 @@ def run():
     trees = []
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = read_tree(line)
+        t = ete2.Tree(line)
         cp.add_tree(t)
     cp.compute_probabilities()
 

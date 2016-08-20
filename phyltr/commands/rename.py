@@ -18,9 +18,8 @@ OPTIONS:
 
 import fileinput
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def read_rename_file(filename):
@@ -52,16 +51,14 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = read_tree(line)
+        t = ete2.Tree(line)
         # Rename nodes
-        for node in t.seed_node.preorder_iter():
-            if node.label in rename:
-                node.label = rename[node.label]
-            if node.taxon and node.taxon.label in rename:
-                node.taxon.label = rename[node.taxon.label]
+        for node in t.traverse():
+            if node.name in rename:
+                node.name = rename[node.name]
 
         # Output
-        write_tree(t)
+        print t.write()
 
     # Done
     return 0

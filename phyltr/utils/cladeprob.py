@@ -7,30 +7,22 @@ class CladeProbabilities:
     def __init__(self):
 
         self.clade_counts = {}
-        self.clade_ages = {}
-        self.max_clade_ages = {}
-        self.mean_clade_ages = {}
-        self.median_clade_ages = {}
-        self.min_clade_ages = {}
-        self.hpd_clade_ages = {}
         self.tree_count = 0
+        self.caches ={}
 
     def add_tree(self, tree):
 
         """Record clade counts for the given tree."""
 
+        cache = tree.get_cached_content()
         self.tree_count += 1
-        for subtree in tree.seed_node.postorder_iter():
-            leaf_names = [l.taxon.label for l in subtree.leaf_nodes()]
-            if len(leaf_names) == 1:
+        for subtree in tree.traverse():
+            leaves = [leaf.name for leaf in cache[subtree]]
+            if len(leaves) == 1:
                 continue
-            clade = ",".join(sorted(leaf_names))
+            clade = ",".join(sorted(leaves))
             self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
-            age = subtree.distance_from_tip()
-            if clade not in self.clade_ages:
-                self.clade_ages[clade] = [age]
-            else:
-                self.clade_ages[clade].append(age)
+        self.caches[tree] = cache
 
     def compute_probabilities(self):
 
@@ -38,19 +30,6 @@ class CladeProbabilities:
         based on the current clade and tree counts."""
 
         self.clade_probs = dict((c, self.clade_counts[c] / self.tree_count) for c in self.clade_counts)
-        self.mean_clade_ages = {}
-        self.hpd_clade_ages = {}
-        for clade, ages in self.clade_ages.items():
-            mean = sum(ages)/len(ages)
-            self.mean_clade_ages[clade] = mean
-            self.max_clade_ages[clade] = max(ages)
-            self.min_clade_ages[clade] = min(ages)
-            ages.sort()
-            lower = ages[int(0.05*len(ages))]
-            med = ages[int(0.50*len(ages))]
-            upper = ages[int(0.95*len(ages))]
-            self.median_clade_ages[clade] = med
-            self.hpd_clade_ages[clade] = (lower, upper)
 
     def get_tree_prob(self, t):
 
@@ -58,29 +37,30 @@ class CladeProbabilities:
         probabilities of all of its constituent clades according to the
         current self.clade_probs values."""
 
+        cache = self.caches.get(t,t.get_cached_content())
         prob = 0
-        for clade in t.seed_node.postorder_iter():
-            if clade == t.seed_node:
+        for node in t.traverse():
+            if node == t:
                 continue
-            leaf_names = [l.taxon.label for l in clade.leaf_nodes()]
-            if len(leaf_names) == 1:
+            leaves = [leaf.name for leaf in cache[node]]
+            if len(leaves) == 1:
                 continue
-            clade = ",".join(sorted(leaf_names))
+            clade = ",".join(sorted(leaves))
             prob += math.log(self.clade_probs[clade])
         return prob
 
-    def annotate_tree(self, t):
+    def annotate_tree(self, tree):
 
         """Set the support attribute of the nodes in tree using the current
         self.clade_probs values."""
 
-        for node in t.seed_node.postorder_iter():
-            if node.is_leaf():
-                node.annotations["posterior"] = 1.0
+        cache = self.caches.get(tree,tree.get_cached_content())
+        for node in tree.traverse():
+            leaves = [leaf.name for leaf in cache[node]]
+            if len(leaves) == 1:
                 continue
-            leaf_names = [l.taxon.label for l in node.leaf_nodes()]
-            clade = ",".join(sorted(leaf_names))
-            node.annotations["posterior"] = self.clade_probs[clade]
+            clade = ",".join(sorted(leaves))
+            node.support = self.clade_probs[clade]
 
     def save_clade_report(self, filename, threshold=0.0):
         clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]

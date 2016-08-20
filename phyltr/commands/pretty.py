@@ -16,9 +16,8 @@ OPTIONS:
 
 import fileinput
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -29,26 +28,26 @@ def run():
 
     # Read trees
     for line in fileinput.input(files):
-        t = read_tree(line)
+        t = ete2.Tree(line)
 
         # Add support to interior nodes
-        for node in t.seed_node.preorder_internal_node_iter():
-            for name in ("posterior","support"):
-                if node.annotations.get_value(name,None):
-                    node.label = "(%.2f)" % float(node.annotations[name])
+        for node in t.traverse():
+            if not node.is_leaf():
+                node.name = "%.2f" % node.support
 
         # Collapse high probability clades
         if options.compress:
             dead_nodes = []
-            for node in t.preorder_internal_node_iter():
+            for node in t.traverse("preorder"):
                 if node in dead_nodes or node.is_leaf():
                     continue
-                desc = list(node.preorder_iter())
-                if all([float(n.annotations.get_value("posterior",0.0)) >=0.9 for n in desc]):
+                desc = node.get_descendants()
+                desc.append(node)
+                if all([n.support >=0.9 for n in desc]):
                     dead_nodes.extend(desc)
-                    node.label = "(%.2f) %s" % (float(n.annotations["posterior"]), "+".join(sorted([l.taxon.label for l in node.leaf_iter()])))
-                    for child in node.child_node_iter():
-                        node.remove_child(child)
-        print t.as_ascii_plot(width=80,show_internal_node_labels=True)
+                    node.name = "(%.2f) %s" % (n.support, "+".join(sorted([l.name for l in node.get_leaves()])))
+                    for child in node.get_children():
+                        child.detach()
+        print t.get_ascii()
 
     return 0

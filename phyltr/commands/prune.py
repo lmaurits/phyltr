@@ -21,9 +21,8 @@ OPTIONS:
 import fileinput
 import sys
 
-import dendropy
+import ete2
 
-from phyltr.utils.treestream_io import read_tree, write_tree
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -43,12 +42,14 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = read_tree(t)
-        if options.inverse:
-            t.retain_taxa_with_labels(taxa)
-        else:
-            t.prune_taxa_with_labels(taxa)
-        write_tree(t)
+        t = ete2.Tree(line)
+        if first:
+            first = False
+            if not options.inverse:
+                leaves = [l.name for l in t.get_leaves()]
+                taxa = set(leaves) - taxa
+        t.prune(taxa, preserve_branch_length=True)
+        print t.write()
 
     # Done
     return 0

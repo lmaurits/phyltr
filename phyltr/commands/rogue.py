@@ -22,7 +22,8 @@ OPTIONS:
 import fileinput
 import sys
 
-from phyltr.utils.treestream_io import read_tree, write_tree
+import ete2
+
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
 
@@ -43,7 +44,7 @@ def run():
     # Read trees
     trees = []
     for line in fileinput.input(files):
-        t = read_tree(line)
+        t = ete2.Tree(line)
         trees.append(t)
 
     # Remove rogue nodes
@@ -53,23 +54,23 @@ def run():
 
     # Output
     for t in trees:
-        write_tree(t)
+        print t.write()
 
     # Done
     return 0
 
 def remove_rogue(trees, guarded):
 
-    leaves = [l.taxon.label for l in trees[0].leaf_nodes()]
-    candidates = [l for l in leaves if l not in guarded]
+    leaves = trees[0].get_leaves()
+    candidates = [l for l in leaves if l.name not in guarded]
     scores = []
     # Compute maximum clade credibility for each candidate rogue
     for candidate in candidates:
         # Make a list of trees which have had candidate removed
-        pruned_trees = [t.clone() for t in trees]
+        pruned_trees = [t.copy() for t in trees]
         survivors = set(leaves) - set(candidate)
         for pruned in pruned_trees:
-            pruned.retain_taxa_with_labels(survivors)
+            pruned.prune([s.name for s in survivors])
 
         # Compute clade probs
         cp = phyltr.utils.cladeprob.CladeProbabilities()
@@ -94,8 +95,9 @@ def remove_rogue(trees, guarded):
 
     # Prune trees
     for t in trees:
-        leaves = [l.taxon.label for l in t.leaf_nodes()]
-        survivors = set(leaves) - set([rogue,])
-        t.retain_taxa_with_labels(survivors)
+        leaves = t.get_leaves()
+        rogue = t.get_leaves_by_name(rogue.name)[0]
+        survivors = set(leaves) - set(rogue)
+        t.prune(survivors)
 
-    return rogue
+    return rogue.name

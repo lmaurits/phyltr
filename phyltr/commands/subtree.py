@@ -17,7 +17,8 @@ OPTIONS:
 import fileinput
 import sys
 
-from phyltr.utils.treestream_io import read_tree, write_tree
+import ete2
+
 import phyltr.utils.phyoptparse as optparse
 
 def run():
@@ -36,9 +37,9 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = read_tree(t)
-        t.seed_node = t.mrca(taxon_labels=taxa)
-        write_tree(t)
+        t = ete2.Tree(line)
+        t = t.get_common_ancestor(taxa)
+        print t.write()
 
     # Done
     return 0
