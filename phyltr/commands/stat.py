@@ -47,7 +47,7 @@ def run():
         tree_ages.append(max(leave_ages))
         unique = True
         for u in topologically_unique_trees:
-            if dendropy.calculate.treecompare.euclidean_distance(t,u) == 0:
+            if dendropy.calculate.treecompare.symmetric_difference(t,u) == 0:
                 unique = False
                 break
         if unique:
