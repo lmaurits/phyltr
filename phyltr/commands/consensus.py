@@ -16,7 +16,7 @@ OPTIONS:
 
 import fileinput
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
@@ -31,7 +31,7 @@ def run():
     # Read trees and compute clade probabilities
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
         cp.add_tree(t)
     cp.compute_probabilities()
 
@@ -39,7 +39,7 @@ def run():
     t = build_consensus_tree(cp, options.frequency)
 
     # Output
-    print t.write()
+    print t.as_string(schema="newick", suppress_rooting=True, suppress_annotations=False).strip()
 
     # Done
     return 0
@@ -59,17 +59,35 @@ def build_consensus_tree(cp, threshold):
     clades.reverse()
 
     # Start out with a tree in which all leaves are joined in one big polytomy
-    t = ete2.Tree()
+    t = dendropy.Tree()
     for l in all_leaves:
-        t.add_child(name=l)
+        taxon = dendropy.datamodel.taxonmodel.Taxon(l)
+        node = dendropy.datamodel.treemodel.Node(taxon=taxon)
+        t.seed_node.add_child(node)
 
     # Now recursively resolve the polytomy by greedily grouping clades
-    return recursive_builder(t, clades)
+    new_seed = recursive_builder(t.seed_node, clades)
+    t = dendropy.Tree(seed_node=new_seed)
+
+    # Set branch lengths
+    for node in t.postorder_node_iter():
+        if node.is_leaf():
+            node.annotations["age"] = 0.0
+            node.annotations["age_HPD"] = "{0.00,0.00}"
+            continue
+        clade_str = ",".join(sorted([l.taxon.label for l in node.leaf_nodes()]))
+        mean = cp.mean_clade_ages[clade_str]
+        node.annotations["age"] = mean
+        node.annotations["age_HPD"] = "{%.2f,%.2f}" % cp.hpd_clade_ages[clade_str]
+        for child in node.child_node_iter():
+            child.edge.length = mean - child.annotations.get_value("age",0.0)
+    t.update_taxon_namespace()
+    return t
 
 def recursive_builder(t, clades):
 
     # Get a list of all my children
-    children = set([c.name for c in t.get_children()])
+    children = set([child.taxon.label for child in t.child_nodes()])
     # For as long as it's possible...
     while True:
         matched = False
@@ -82,11 +100,13 @@ def recursive_builder(t, clades):
             break
         # ...remove the children in that clade and add them under a new child
         clades.remove((length, p, clade))
-        clade_nodes = set([t.get_leaves_by_name(l)[0] for l in clade])
+        clade_nodes = set(t.leaf_iter(lambda l:l.taxon.label in clade))
         for l in clade_nodes:
             t.remove_child(l)
-        child = t.add_child()
-        child.support = p
+        child = dendropy.datamodel.treemodel.Node()
+        child.annotations["posterior"] = p
+        cladestr = ",".join(sorted(clade))
+        t.add_child(child)
         for l in clade_nodes:
             child.add_child(l)
         # ...remove the children in the clade I just grouped from the list of
@@ -95,6 +115,7 @@ def recursive_builder(t, clades):
         if not children:
             break
     # Resolve polytomies one level down
-    for child in t.get_children():
+    for child in t.child_node_iter():
         recursive_builder(child, clades)
+
     return t
