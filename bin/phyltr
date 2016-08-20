@@ -42,8 +42,6 @@ def main():
 
     if command == "cat":
         import phyltr.commands.cat as comm
-    elif command in ("age", "ages"):
-        import phyltr.commands.ages as comm
     elif command in ("cla", "clades"):
         import phyltr.commands.clades as comm
     elif command in ("col", "collapse"):
