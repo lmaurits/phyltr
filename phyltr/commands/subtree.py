@@ -17,7 +17,7 @@ OPTIONS:
 import fileinput
 import sys
 
-import ete2
+import dendropy
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -37,9 +37,9 @@ def run():
 
     first = True
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        t = t.get_common_ancestor(taxa)
-        print t.write()
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
+        t.seed_node = t.mrca(taxon_labels=taxa)
+        print t.as_string(schema="newick", suppress_rooting=True).strip()
 
     # Done
     return 0
