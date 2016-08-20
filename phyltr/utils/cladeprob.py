@@ -74,10 +74,11 @@ class CladeProbabilities:
         """Set the support attribute of the nodes in tree using the current
         self.clade_probs values."""
 
-        for clade in t.seed_node.postorder_iter():
-            leaf_names = [l.taxon.label for l in clade.leaf_nodes()]
-            if len(leaf_names) == 1:
+        for node in t.seed_node.postorder_iter():
+            if node.is_leaf():
+                node.annotations["posterior"] = 1.0
                 continue
+            leaf_names = [l.taxon.label for l in node.leaf_nodes()]
             clade = ",".join(sorted(leaf_names))
             node.annotations["posterior"] = self.clade_probs[clade]
 
