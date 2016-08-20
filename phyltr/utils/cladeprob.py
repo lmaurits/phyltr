@@ -7,6 +7,12 @@ class CladeProbabilities:
     def __init__(self):
 
         self.clade_counts = {}
+        self.clade_ages = {}
+        self.max_clade_ages = {}
+        self.mean_clade_ages = {}
+        self.median_clade_ages = {}
+        self.min_clade_ages = {}
+        self.hpd_clade_ages = {}
         self.tree_count = 0
 
     def add_tree(self, tree):
@@ -20,6 +26,11 @@ class CladeProbabilities:
                 continue
             clade = ",".join(sorted(leaf_names))
             self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
+            age = subtree.distance_from_tip()
+            if clade not in self.clade_ages:
+                self.clade_ages[clade] = [age]
+            else:
+                self.clade_ages[clade].append(age)
 
     def compute_probabilities(self):
 
@@ -27,6 +38,19 @@ class CladeProbabilities:
         based on the current clade and tree counts."""
 
         self.clade_probs = dict((c, self.clade_counts[c] / self.tree_count) for c in self.clade_counts)
+        self.mean_clade_ages = {}
+        self.hpd_clade_ages = {}
+        for clade, ages in self.clade_ages.items():
+            mean = sum(ages)/len(ages)
+            self.mean_clade_ages[clade] = mean
+            self.max_clade_ages[clade] = max(ages)
+            self.min_clade_ages[clade] = min(ages)
+            ages.sort()
+            lower = ages[int(0.05*len(ages))]
+            med = ages[int(0.50*len(ages))]
+            upper = ages[int(0.95*len(ages))]
+            self.median_clade_ages[clade] = med
+            self.hpd_clade_ages[clade] = (lower, upper)
 
     def get_tree_prob(self, t):
 
