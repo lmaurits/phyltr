@@ -39,7 +39,7 @@ def run():
     t = build_consensus_tree(cp, options.frequency)
 
     # Output
-    print t.write()
+    print t.write(features=[])
 
     # Done
     return 0
@@ -64,7 +64,26 @@ def build_consensus_tree(cp, threshold):
         t.add_child(name=l)
 
     # Now recursively resolve the polytomy by greedily grouping clades
-    return recursive_builder(t, clades)
+    t = recursive_builder(t, clades)
+    cache = t.get_cached_content()
+
+    # Add age annotations
+    for clade in t.traverse("postorder"):
+        if clade.is_leaf():
+            continue
+        clade_key = ",".join(sorted([l.name for l in cache[clade]]))
+        ages = cp.clade_ages[clade_key]
+        mean = sum(ages)/len(ages)
+        for c in clade.get_children():
+            leaf, age = c.get_farthest_leaf()
+            c.dist = mean - age
+        ages.sort()
+        lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
+        clade.add_feature("age_mean", mean)
+        clade.add_feature("age_median", median)
+        clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
+
+    return t
 
 def recursive_builder(t, clades):
 

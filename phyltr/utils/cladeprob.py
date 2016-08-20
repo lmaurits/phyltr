@@ -6,8 +6,9 @@ class CladeProbabilities:
 
     def __init__(self):
 
-        self.clade_counts = {}
         self.tree_count = 0
+        self.clade_counts = {}
+        self.clade_ages = {}
         self.caches ={}
 
     def add_tree(self, tree):
@@ -22,6 +23,11 @@ class CladeProbabilities:
                 continue
             clade = ",".join(sorted(leaves))
             self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
+            leaf, age = subtree.get_farthest_leaf()
+            if clade in self.clade_ages:
+                self.clade_ages[clade].append(age)
+            else:
+                self.clade_ages[clade] = [age]
         self.caches[tree] = cache
 
     def compute_probabilities(self):
