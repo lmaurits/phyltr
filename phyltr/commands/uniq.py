@@ -20,7 +20,7 @@ OPTIONS:
 import fileinput
 import itertools
 
-import ete2
+import dendropy
 
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
@@ -34,13 +34,14 @@ def run():
 
     # Read trees and compute clade probabilities
     topologies = {}
+    tns = dendropy.TaxonNamespace()
     for line in fileinput.input(files):
-        t = ete2.Tree(line)
+        t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted",taxon_namespace=tns)
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         matched = False
         for exemplar in topologies:
-            if t.robinson_foulds(exemplar)[0] == 0.0:
+            if dendropy.calculate.treecompare.symmetric_difference(t,exemplar) == 0:
                 matched = True
                 topologies[exemplar].append(t)
                 break
@@ -48,8 +49,8 @@ def run():
             topologies[t] = [t]
         
     for equ_class in topologies.values():
-        for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
-            dists = [n.dist for n in nodes]
+        for nodes in itertools.izip(*[t.seed_node.child_node_iter() for t in equ_class]):
+            dists = [n.edge.length for n in nodes]
             if options.lengths == "max":
                 dist = max(dists)
             elif options.lengths == "mean":
@@ -63,8 +64,8 @@ def run():
                     dist = dists[l/2]
             elif options.lengths == "min":
                 dist = min(dists)
-            nodes[0].dist = dist
-        print equ_class[0].write()
+            nodes[0].edge.length = dist
+        print equ_class[0].as_string(schema="newick", suppress_rooting=True).strip()
 
     # Done
     return 0
