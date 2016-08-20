@@ -19,7 +19,7 @@ setup(
     ],
     scripts=['bin/phyltr',],
     packages = ['phyltr','phyltr/commands', 'phyltr/utils'],
-    requires=['ete2'],
-    install_requires=['ete2']
+    requires=['dendropy'],
+    install_requires=['dendropy']
 
 )
