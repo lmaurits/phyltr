@@ -58,7 +58,6 @@ def run():
     # Read trees
     for line in fileinput.input(files):
         t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
-        t.calc_node_ages()
         tree_leaves = [l.taxon.label for l in t.leaf_nodes()]
         for clade, name in trans:
             # Get a list of leaves in this tree
