@@ -53,11 +53,11 @@ def run():
     for line in fileinput.input(files):
         t = dendropy.Tree.get_from_string(line,schema="newick",rooting="default-rooted")
         # Rename nodes
-        for node in t.seed_node.post_order_iter():
+        for node in t.seed_node.preorder_iter():
             if node.label in rename:
-                node.label = relabel[node.label]
-            if node.taxon.label in rename:
-                node.taxon.label = relabel[node.taxon.label]
+                node.label = rename[node.label]
+            if node.taxon and node.taxon.label in rename:
+                node.taxon.label = rename[node.taxon.label]
 
         # Output
         print t.as_string(schema="newick", suppress_rooting=True).strip()
