@@ -68,7 +68,7 @@ class CladeProbabilities:
             clade = ",".join(sorted(leaves))
             node.support = self.clade_probs[clade]
 
-    def save_clade_report(self, filename, threshold=0.0):
+    def save_clade_report(self, filename, threshold=0.0, age=False):
         clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]
         if threshold < 1.0:
             clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
@@ -80,6 +80,13 @@ class CladeProbabilities:
 
         fp = open(filename, "w")
         for p, c in clade_probs:
-            line = "%.4f: [%s]\n" % (p, c)
+            if age:
+                ages = self.clade_ages[c]
+                mean = sum(ages)/len(ages)
+                ages.sort()
+                lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
+                line = "%.4f, %.2f (%.2f-%.2f) [%s]\n" % (p, mean, lower, upper, c)
+            else:
+                line = "%.4f, [%s]\n" % (p, c)
             fp.write(line)
         fp.close()
