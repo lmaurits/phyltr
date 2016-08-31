@@ -102,7 +102,7 @@ def run():
                for node in t.traverse():
                    if node.name != "NoName" and node.name in nexus_trans:
                        node.name = nexus_trans[node.name]
-           print t.write()
+           print t.write(format=5)
 
     # Done
     return 0

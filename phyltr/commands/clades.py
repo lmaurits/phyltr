@@ -24,13 +24,13 @@ import ete2
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
-from phyltr.commands.support import save_clades
 
 def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--frequency', type="float", dest="threshold",
+    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
+    parser.add_option('-f', '--frequency', type="float", dest="frequency",
             default=1.0, help='Minimum clade frequency to report.')
     options, files = parser.parse_args()
 
@@ -43,7 +43,7 @@ def run():
     cp.compute_probabilities()
 
     # Output
-    save_clades(cp, "/dev/stdout", options.threshold)
+    cp.save_clade_report("/dev/stdout", options.frequency, options.age)
 
     # Done
     return 0

@@ -8,6 +8,8 @@ The available phyltr commands are:
     cat         Convert file(s) to tree streams
     clades      List clade supports
     collapse    Collapse clades to named taxa
+    consensus   Build majority rules consensus tree
+    height      Print the height of each tree in a tree stream
     nexus       Convert tree stream to NEXUS file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
@@ -15,6 +17,7 @@ The available phyltr commands are:
     rogue       Remove rogue taxon or taxons
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
+    subtree     Extract minimal subtrees containing specified taxa
     uniq        Merge trees with matching topologies
 
 All commands can be abbreviated to their first three letters, e.g. running
@@ -39,12 +42,14 @@ def main():
 
     if command == "cat":
         import phyltr.commands.cat as comm
-    elif command in ("age", "ages"):
-        import phyltr.commands.ages as comm
     elif command in ("cla", "clades"):
         import phyltr.commands.clades as comm
     elif command in ("col", "collapse"):
         import phyltr.commands.collapse as comm
+    elif command in ("con", "consensus"):
+        import phyltr.commands.consensus as comm
+    elif command in ("hei", "height"):
+        import phyltr.commands.height as comm
     elif command in ("nex", "nexus"):
         import phyltr.commands.nexus as comm
     elif command in ("pre", "pretty"):
@@ -59,6 +64,8 @@ def main():
         import phyltr.commands.stat as comm
     elif command in ("sup", "support"):
         import phyltr.commands.support as comm
+    elif command in ("sub", "subtree"):
+        import phyltr.commands.subtree as comm
     elif command in ("uni", "uniq"):
         import phyltr.commands.uniq as comm
     elif command in ("--help", "help", "--usage", "usage"):

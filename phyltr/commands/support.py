@@ -33,11 +33,12 @@ def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
-    parser.add_option("-o", "--output", action="store", dest="filename",
-        help="save clades to FILE", metavar="FILE")
+    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
     parser.add_option('-f', '--frequency', type="float", dest="frequency",
             default=1.0, help='Minimum clade frequency to report.')
+    parser.add_option("-o", "--output", action="store", dest="filename",
+        help="save clades to FILE", metavar="FILE")
+    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
     options, files = parser.parse_args()
 
     # Read trees and compute clade probabilities
@@ -51,7 +52,7 @@ def run():
 
     # Save clade probabilities
     if options.filename:
-        save_clades(cp, options.filename, options.frequency)
+        cp.save_clade_report(options.filename, options.frequency, options.age)
 
     # Annotate trees
     for t in trees:
@@ -71,17 +72,3 @@ def run():
     # Done
     return 0
 
-def save_clades(cp, filename, threshold):
-    clade_probs = [(cp.clade_probs[c], c) for c in cp.clade_probs]
-    if threshold < 1.0:
-        clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
-    # Sort by clade string, ignoring case...
-    clade_probs.sort(key=lambda x:x[1].lower())
-    # ...then by clade probability
-    # (this results in a list sorted by probability and then name)
-    clade_probs.sort(key=lambda x:x[0],reverse=True)
-
-    fp = open(filename, "w")
-    for p, c in clade_probs:
-        fp.write("%f: [%s]\n" % (p, c))
-    fp.close()

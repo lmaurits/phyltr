@@ -1,16 +1,12 @@
 """Usage:
-    phyltr prune taxa [<options>] [<files>]
+    phyltr subtree taxa [<options>] [<files>]
 
-Delete a specified set of nodes from the tree.
+Replace each tree with the minimal subtree containing the specified taxa.
 
 OPTIONS:
 
     taxa
-        A comma-separated list of leaf taxon to delete from the tree
-
-    -i, --inverse
-        Specify an "inverse prune": delete all taxa *except* those given in
-        the taxa option.
+        A comma-separated list of leaf taxa to keep in the tree
 
     files
         A whitespace-separated list of filenames to read treestreams from.
@@ -29,7 +25,6 @@ def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
     options, files = parser.parse_args()
 
     if files:
@@ -43,12 +38,7 @@ def run():
     first = True
     for line in fileinput.input(files):
         t = ete2.Tree(line)
-        if first:
-            first = False
-            if not options.inverse:
-                leaves = [l.name for l in t.get_leaves()]
-                taxa = set(leaves) - taxa
-        t.prune(taxa, preserve_branch_length=True)
+        t = t.get_common_ancestor(taxa)
         print t.write()
 
     # Done

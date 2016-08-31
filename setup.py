@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='phyltr',
-    version='0.1.0',
+    version='0.2.0',
     description='Unix filters for manipulating and analysing (samples of) phylogenetic trees represented in the Newick format',
     author='Luke Maurits',
     author_email='luke@maurits.id.au',
