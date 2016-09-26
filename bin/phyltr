@@ -40,7 +40,9 @@ def main():
     else:
         command = "usage"
 
-    if command == "cat":
+    if command in ("ann", "annotate"):
+        import phyltr.commands.annotate as comm
+    elif command == "cat":
         import phyltr.commands.cat as comm
     elif command in ("cla", "clades"):
         import phyltr.commands.clades as comm
@@ -52,6 +54,8 @@ def main():
         import phyltr.commands.height as comm
     elif command in ("nex", "nexus"):
         import phyltr.commands.nexus as comm
+    elif command in ("plo", "plot"):
+        import phyltr.commands.plot as comm
     elif command in ("pre", "pretty"):
         import phyltr.commands.pretty as comm
     elif command in ("pru", "prune"):
