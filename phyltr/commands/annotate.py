@@ -16,6 +16,7 @@ OPTIONS:
 
 import csv
 import fileinput
+import sys
 
 import ete2
 
@@ -40,8 +41,11 @@ def annotate_tree(t, annotations):
             for key, value in annotations[node.name].items():
                 node.add_feature(key, value)
 
-def extract_annotations(t, filename):
-    fp = open(filename, "w")
+def extract_annotations(t, filename, tree_no=None):
+    if filename == "-" or not filename:
+        fp = sys.stdout
+    else:
+        fp = open(filename, "w")
     features = []
     for node in t.traverse():
         for f in node.features:
@@ -49,13 +53,30 @@ def extract_annotations(t, filename):
                 features.append(f)
     features.sort()
     fieldnames = ["name"]
+    if tree_no:
+        fieldnames.append("tree_number")
     fieldnames.extend(features)
     writer = csv.DictWriter(fp, fieldnames=fieldnames)
     writer.writeheader()
     for node in t.traverse():
+        # Only include the root node or nodes with names
         if any([hasattr(node,f) for f in features]):
-            writer.writerow({f:getattr(node, f, "?") for f in fieldnames})
-    fp.close()
+            if not node.name and not node.up:
+                # Temporarily give the node a name
+                node.name = "root"
+                fix_root_name = True
+            else:
+                fix_root_name = False
+            rowdict = {f:getattr(node, f, "?") for f in fieldnames}
+            if tree_no:
+                rowdict["tree_number"] = tree_no
+            writer.writerow(rowdict)
+            if fix_root_name:
+                node.name = None
+    if filename == "-" or not filename:
+        pass
+    else:
+        fp.close()
 
 def run():
 
@@ -64,6 +85,7 @@ def run():
     parser.add_option('-e', '--extract', action="store_true", help="Extract data from annotated tree to file.")
     parser.add_option('-f', '--file', dest="filename", help="File to read/write annotation data from/to.")
     parser.add_option('-k', '--key', dest="key", help="Name of column in annotation file to match against taxon names")
+    parser.add_option('-m', '--multiple', default=False, action="store_true")
     options, files = parser.parse_args()
 
     # Read annotation file
@@ -71,14 +93,23 @@ def run():
         annotations = read_annotation_file(options.filename, options.key)
 
     # Read trees and annotate them
-    for line in fileinput.input(files):
+    for n, line in enumerate(fileinput.input(files)):
         t = ete2.Tree(line)
         if options.extract:
-            pass
-            extract_annotations(t, options.filename)
+            if options.multiple:
+                extract_annotations(t, options.filename, n+1)
+            else:
+                extract_annotations(t, options.filename)
         else:
             annotate_tree(t, annotations)
-        print t.write(features=[])
+
+        if options.extract:
+            if not options.multiple:
+                return 0
+            if options.filename == "-":
+                # Suppress output
+                continue
+        print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
