@@ -14,10 +14,9 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import ete2
 import fileinput
 import sys
-
-import ete2
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -25,21 +24,29 @@ def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
+    parser.add_option('-a', '--attribute', default=None)
+    parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
 
-    if files:
-        taxa = set(files[0].split(","))
-        files = files[1:]
-    else:
-        # Improper usage
-        sys.stderr.write("Must specify a list of taxa.\n")
-        sys.exit(1)
+    if not (options.attribute and options.value):
+        if files:
+            taxa = set(files[0].split(","))
+            files = files[1:]
+        else:
+            # Improper usage
+            sys.stderr.write("Must specify a list of taxa.\n")
+            sys.exit(1)
 
     first = True
     for line in fileinput.input(files):
         t = ete2.Tree(line)
-        t = t.get_common_ancestor(taxa)
-        print t.write()
+        if options.attribute and options.value:
+            mrca = list(t.get_monophyletic([options.value], options.attribute))[0]
+            assert mrca != t
+            t = mrca
+        else:
+            t.seed_node = t.mrca(taxon_labels=taxa)
+        print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
