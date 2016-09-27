@@ -19,6 +19,7 @@ OPTIONS:
 """
 
 import fileinput
+import re
 import sys
 
 import ete2
@@ -93,16 +94,61 @@ def run():
         burnin = int(round((options.burnin/100.0)*len(tree_strings)))
         tree_strings = tree_strings[burnin::options.subsample]
 
-        for tree_string in tree_strings:
-           try:
-               t = ete2.Tree(tree_string)
-           except ete2.parser.newick.NewickError:
-               continue
-           if isNexus and nexus_trans:
-               for node in t.traverse():
-                   if node.name != "NoName" and node.name in nexus_trans:
-                       node.name = nexus_trans[node.name]
-           print t.write(format=5)
+        while tree_strings:
+            tree_string = tree_strings.pop()
+            t = get_tree(tree_string)
+            if not t:
+                continue
+            if isNexus and nexus_trans:
+                for node in t.traverse():
+                    if node.name and node.name in nexus_trans:
+                        node.name = nexus_trans[node.name]
+            print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
+
+def get_tree(tree_string):
+    # Try to parse tree as is
+    try:
+        t = ete2.Tree(tree_string)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        pass
+
+    # If we get here, that didn't work
+    # Maybe this tree has non-standard BEAST-style annotations?
+    # Attempt a repair and parse again...
+    tree_string = re.sub(_BEAST_ANNOTATION_REGEX, repl, tree_string)
+    try:
+        t = ete2.Tree(tree_string)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        # That didn't fix it.  Give up
+        return None
+
+_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)"
+
+def repl(m):
+    name, annotation, dist = m.groups()
+    dist = float(dist)
+    if annotation:
+        bits = annotation[2:-1].split(",")
+        # Handle BEAST's "vector annotations"
+        # (comma-separated elements inside {}s)
+        # by replacing the commas with pipes
+        # (this approach subject to change?)
+        newbits = []
+        inside = False
+        for bit in bits:
+            if inside:
+                newbits[-1] += "|" + bit
+                if "}" in bit:
+                    inside = False
+            else:
+                newbits.append(bit)
+                if "{" in bit:
+                    inside = True
+        annotation = "[&&NHX:%s]" % ":".join(newbits)
+    return "%s:%f%s" % (name, dist, annotation)
+
