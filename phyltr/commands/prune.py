@@ -61,7 +61,7 @@ def run():
                 pruning_taxa = [l for l in t.get_leaves() if l.name not in taxa]
         # Do the deed
         t.prune(pruning_taxa)
-        print t.write()
+        print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
