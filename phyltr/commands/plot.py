@@ -77,7 +77,7 @@ def run():
                         kw[o] = getattr(options, o)
             if options.multiple:
                 base, ext = os.path.splitext(options.output)
-                filename = base + ("_%06d" % n) + ext
+                filename = base + ("_%06d" % (n+1)) + ext
             else:
                 filename = options.output
             t.render(filename, ultrametric, tree_style=ts, **kw)
