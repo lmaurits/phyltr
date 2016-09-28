@@ -45,7 +45,10 @@ def extract_annotations(t, filename, tree_no=None):
     if filename == "-" or not filename:
         fp = sys.stdout
     else:
-        fp = open(filename, "w")
+        if tree_no and tree_no > 1:
+            fp = open(filename, "a")
+        else:
+            fp = open(filename, "w")
     features = []
     for node in t.traverse():
         for f in node.features:
@@ -57,11 +60,14 @@ def extract_annotations(t, filename, tree_no=None):
         fieldnames.append("tree_number")
     fieldnames.extend(features)
     writer = csv.DictWriter(fp, fieldnames=fieldnames)
-    writer.writeheader()
+    if tree_no in (None, 1):
+        writer.writeheader()
     for node in t.traverse():
         # Only include the root node or nodes with names
+        if not node.name and node.up:
+            continue
         if any([hasattr(node,f) for f in features]):
-            if not node.name and not node.up:
+            if not node.name:
                 # Temporarily give the node a name
                 node.name = "root"
                 fix_root_name = True
