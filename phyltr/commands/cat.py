@@ -95,7 +95,7 @@ def run():
         tree_strings = tree_strings[burnin::options.subsample]
 
         while tree_strings:
-            tree_string = tree_strings.pop()
+            tree_string = tree_strings.pop(0)
             t = get_tree(tree_string)
             if not t:
                 continue
