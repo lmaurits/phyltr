@@ -30,19 +30,25 @@ def run():
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
+    parser.add_option('-f', '--file', dest="filename",
+            help='Specifies a file from which to read')
     parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
     parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
 
     if options.attribute and options.value:
         by_attribute = True
+    elif options.filename:
+        fp = open(options.filename, "r")
+        taxa = [t.strip() for t in fp.readlines()]
+        by_attribute = False
     elif files:
         taxa = set(files[0].split(","))
         files = files[1:]
         by_attribute = False
     else:
         # Improper usage
-        sys.stderr.write("Must specify either a list of taxa or an attribute and value.\n")
+        sys.stderr.write("Must specify either a list of taxa, a file of taxa, or an attribute and value.\n")
         sys.exit(1)
 
     first = True
