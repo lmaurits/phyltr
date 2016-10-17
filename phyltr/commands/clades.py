@@ -35,7 +35,6 @@ def run():
     options, files = parser.parse_args()
 
     # Read trees and compute clade probabilities
-    trees = []
     cp = phyltr.utils.cladeprob.CladeProbabilities()
     for line in fileinput.input(files):
         t = ete2.Tree(line)
