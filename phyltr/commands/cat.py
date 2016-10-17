@@ -109,9 +109,19 @@ def run():
     return 0
 
 def get_tree(tree_string):
+    # FIXME
+    # Make this much more elegant
+    # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
     # Try to parse tree as is
     try:
         t = ete2.Tree(tree_string)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        pass
+
+    # Try to parse tree with internal node labels
+    try:
+        t = ete2.Tree(tree_string, format=1)
         return t
     except (ValueError,ete2.parser.newick.NewickError):
         pass
@@ -125,12 +135,26 @@ def get_tree(tree_string):
         return t
     except (ValueError,ete2.parser.newick.NewickError):
         # That didn't fix it.  Give up
+        pass
+
+    # There is a slightly different version of BEAST annotation out there.
+    # Let's try that too...
+    tree_string = re.sub(_BEAST_ANNOTATION_REGEX_2, repl, tree_string)
+    try:
+        t = ete2.Tree(tree_string)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        # That didn't fix it.  Give up
         return None
 
-_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)"
+_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)?([0-9])*"
+_BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?):(\[&.*?\])([0-9\.]+)([Ee])?(\-)?([0-9])*"
 
 def repl(m):
-    name, annotation, dist = m.groups()
+    name, annotation, dist = m.groups()[0:3]
+    if len(m.groups()) > 3:
+        # Exponential notation
+        dist += "".join([str(x) for x in m.groups()[3:] if x])
     dist = float(dist)
     if annotation:
         bits = annotation[2:-1].split(",")
