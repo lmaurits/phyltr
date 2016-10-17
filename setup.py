@@ -15,7 +15,7 @@ setup(
     license="BSD (2 clause)",
     classifiers=[
         'Programming Language :: Python',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
     scripts=['bin/phyltr',],
     packages = ['phyltr','phyltr/commands', 'phyltr/utils'],
