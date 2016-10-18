@@ -5,6 +5,7 @@ Usage:
     phyltr <command> [<args>]
 
 The available phyltr commands are:
+    annotate    Annotate nodes with metadata from .csv file
     cat         Convert file(s) to tree streams
     clades      List clade supports
     collapse    Collapse clades to named taxa
@@ -12,6 +13,7 @@ The available phyltr commands are:
     dedupe      Remove duplicate taxa (by name)
     height      Print the height of each tree in a tree stream
     nexus       Convert tree stream to NEXUS file
+    plot        Plot tree using ETE interactive viewer, or to file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
