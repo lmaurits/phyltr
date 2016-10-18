@@ -45,7 +45,11 @@ def run():
             assert mrca != t
             t = mrca
         else:
-            t.seed_node = t.mrca(taxon_labels=taxa)
+            leaves = []
+            for taxon in taxa:
+                leaves.extend(t.get_leaves_by_name(taxon))
+            mrca = leaves[0].get_common_ancestor(leaves[1:])
+            t = mrca
         print t.write(features=[],format_root_node=True)
 
     # Done
