@@ -31,7 +31,7 @@ def run():
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
     parser.add_option('-f', '--file', dest="filename",
-            help='Specifies a file from which to read')
+            help='Specifies a file from which to read taxa')
     parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
     parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
