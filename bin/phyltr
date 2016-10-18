@@ -16,6 +16,7 @@ The available phyltr commands are:
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
     rogue       Remove rogue taxon or taxons
+    scale       Scale branch lengths of a set of trees
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
     subtree     Extract minimal subtrees containing specified taxa
@@ -68,6 +69,8 @@ def main():
         import phyltr.commands.rename as comm
     elif command in ("rog", "rogue"):
         import phyltr.commands.rogue as comm
+    elif command in ("sca", "scale"):
+        import phyltr.commands.scale as comm
     elif command in ("sta", "stat"):
         import phyltr.commands.stat as comm
     elif command in ("sup", "support"):
