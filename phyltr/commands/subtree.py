@@ -25,10 +25,15 @@ def run():
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
+    parser.add_option('-f', '--file', dest="filename",
+            help='Specifies a file from which to read taxa')
     parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
 
-    if not (options.attribute and options.value):
+    if options.filename:
+        fp = open(options.filename, "r")
+        taxa = [t.strip() for t in fp.readlines()]
+    elif not (options.attribute and options.value):
         if files:
             taxa = set(files[0].split(","))
             files = files[1:]
