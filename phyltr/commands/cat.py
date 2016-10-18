@@ -26,6 +26,11 @@ import ete2
 
 import phyltr.utils.phyoptparse as optparse
 
+_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?):(\[&.*?\])([0-9\.]+)([Ee])?(\-)?([0-9])*"
+_BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)?([0-9])*"
+regex1 = re.compile(_BEAST_ANNOTATION_REGEX)
+regex2 = re.compile(_BEAST_ANNOTATION_REGEX_2)
+
 def run():
 
     # Parse options
@@ -129,7 +134,7 @@ def get_tree(tree_string):
     # If we get here, that didn't work
     # Maybe this tree has non-standard BEAST-style annotations?
     # Attempt a repair and parse again...
-    tree_string = re.sub(_BEAST_ANNOTATION_REGEX, repl, tree_string)
+    tree_string = regex1.sub(repl, tree_string)
     try:
         t = ete2.Tree(tree_string)
         return t
@@ -139,7 +144,7 @@ def get_tree(tree_string):
 
     # There is a slightly different version of BEAST annotation out there.
     # Let's try that too...
-    tree_string = re.sub(_BEAST_ANNOTATION_REGEX_2, repl, tree_string)
+    tree_string = regex2.sub(repl, tree_string)
     try:
         t = ete2.Tree(tree_string)
         return t
@@ -147,8 +152,6 @@ def get_tree(tree_string):
         # That didn't fix it.  Give up
         return None
 
-_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)?([0-9])*"
-_BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?):(\[&.*?\])([0-9\.]+)([Ee])?(\-)?([0-9])*"
 
 def repl(m):
     name, annotation, dist = m.groups()[0:3]
