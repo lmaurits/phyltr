@@ -117,6 +117,13 @@ def get_tree(tree_string):
     # FIXME
     # Make this much more elegant
     # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
+
+    # Do we need regex magic?
+    if "[&" in tree_string and "&&NHX" not in tree_string:
+        tree_string = regex1.sub(repl, tree_string)
+        if "NHX" not in tree_string:
+            tree_string = regex2.sub(repl, tree_string)
+
     # Try to parse tree as is
     try:
         t = ete2.Tree(tree_string)
@@ -129,29 +136,8 @@ def get_tree(tree_string):
         t = ete2.Tree(tree_string, format=1)
         return t
     except (ValueError,ete2.parser.newick.NewickError):
-        pass
-
-    # If we get here, that didn't work
-    # Maybe this tree has non-standard BEAST-style annotations?
-    # Attempt a repair and parse again...
-    tree_string = regex1.sub(repl, tree_string)
-    try:
-        t = ete2.Tree(tree_string)
-        return t
-    except (ValueError,ete2.parser.newick.NewickError):
-        # That didn't fix it.  Give up
-        pass
-
-    # There is a slightly different version of BEAST annotation out there.
-    # Let's try that too...
-    tree_string = regex2.sub(repl, tree_string)
-    try:
-        t = ete2.Tree(tree_string)
-        return t
-    except (ValueError,ete2.parser.newick.NewickError):
         # That didn't fix it.  Give up
         return None
-
 
 def repl(m):
     name, annotation, dist = m.groups()[0:3]
