@@ -31,7 +31,7 @@ def read_rename_file(filename):
     fp = open(filename, "r")
     for line in fp:
         old, new = line.strip().split(":")
-        rename[old] = new
+        rename[old.strip()] = new.strip()
     fp.close()
     return rename
 

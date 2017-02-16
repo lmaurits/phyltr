@@ -19,11 +19,17 @@ OPTIONS:
 """
 
 import fileinput
+import re
 import sys
 
 import ete2
 
 import phyltr.utils.phyoptparse as optparse
+
+_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?):(\[&.*?\])([0-9\.]+)([Ee])?(\-)?([0-9])*"
+_BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)?([0-9])*"
+regex1 = re.compile(_BEAST_ANNOTATION_REGEX)
+regex2 = re.compile(_BEAST_ANNOTATION_REGEX_2)
 
 def run():
 
@@ -31,6 +37,7 @@ def run():
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
+    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
     options, files = parser.parse_args()
     if not files:
         files = ["-"]
@@ -93,16 +100,72 @@ def run():
         burnin = int(round((options.burnin/100.0)*len(tree_strings)))
         tree_strings = tree_strings[burnin::options.subsample]
 
-        for tree_string in tree_strings:
-           try:
-               t = ete2.Tree(tree_string)
-           except ete2.parser.newick.NewickError:
-               continue
-           if isNexus and nexus_trans:
-               for node in t.traverse():
-                   if node.name != "NoName" and node.name in nexus_trans:
-                       node.name = nexus_trans[node.name]
-           print t.write(format=5)
+        while tree_strings:
+            tree_string = tree_strings.pop(0)
+            t = get_tree(tree_string)
+            if not t:
+                continue
+            if isNexus and nexus_trans:
+                for node in t.traverse():
+                    if node.name and node.name in nexus_trans:
+                        node.name = nexus_trans[node.name]
+            if options.no_annotations:
+                print t.write(format_root_node=True)
+            else:
+                print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
+
+def get_tree(tree_string):
+    # FIXME
+    # Make this much more elegant
+    # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
+
+    # Do we need regex magic?
+    if "[&" in tree_string and "&&NHX" not in tree_string:
+        tree_string = regex1.sub(repl, tree_string)
+        if "NHX" not in tree_string:
+            tree_string = regex2.sub(repl, tree_string)
+
+    # Try to parse tree as is
+    try:
+        t = ete2.Tree(tree_string)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        pass
+
+    # Try to parse tree with internal node labels
+    try:
+        t = ete2.Tree(tree_string, format=1)
+        return t
+    except (ValueError,ete2.parser.newick.NewickError):
+        # That didn't fix it.  Give up
+        return None
+
+def repl(m):
+    name, annotation, dist = m.groups()[0:3]
+    if len(m.groups()) > 3:
+        # Exponential notation
+        dist += "".join([str(x) for x in m.groups()[3:] if x])
+    dist = float(dist)
+    if annotation:
+        bits = annotation[2:-1].split(",")
+        # Handle BEAST's "vector annotations"
+        # (comma-separated elements inside {}s)
+        # by replacing the commas with pipes
+        # (this approach subject to change?)
+        newbits = []
+        inside = False
+        for bit in bits:
+            if inside:
+                newbits[-1] += "|" + bit
+                if "}" in bit:
+                    inside = False
+            else:
+                newbits.append(bit)
+                if "{" in bit:
+                    inside = True
+        annotation = "[&&NHX:%s]" % ":".join(newbits)
+    return "%s:%f%s" % (name, dist, annotation)
+

@@ -9,6 +9,7 @@ class CladeProbabilities:
         self.tree_count = 0
         self.clade_counts = {}
         self.clade_ages = {}
+        self.clade_attributes = {}
         self.caches ={}
 
     def add_tree(self, tree):
@@ -28,6 +29,19 @@ class CladeProbabilities:
                 self.clade_ages[clade].append(age)
             else:
                 self.clade_ages[clade] = [age]
+            extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
+            for f in extra_features:
+                value = getattr(subtree, f)
+                try:
+                    value = float(value)
+                    if f not in self.clade_attributes:
+                        self.clade_attributes[f] = {}
+                    if clade in self.clade_attributes[f]:
+                        self.clade_attributes[f][clade].append(value)
+                    else:
+                        self.clade_attributes[f][clade] = [value]
+                except ValueError:
+                    continue
         self.caches[tree] = cache
 
     def compute_probabilities(self):

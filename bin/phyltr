@@ -5,19 +5,24 @@ Usage:
     phyltr <command> [<args>]
 
 The available phyltr commands are:
+    annotate    Annotate nodes with metadata from .csv file
     cat         Convert file(s) to tree streams
     clades      List clade supports
     collapse    Collapse clades to named taxa
     consensus   Build majority rules consensus tree
+    dedupe      Remove duplicate taxa (by name)
     height      Print the height of each tree in a tree stream
     nexus       Convert tree stream to NEXUS file
+    plot        Plot tree using ETE interactive viewer, or to file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
     rogue       Remove rogue taxon or taxons
+    scale       Scale branch lengths of a set of trees
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
     subtree     Extract minimal subtrees containing specified taxa
+    taxa        Extract taxa names from a tree
     uniq        Merge trees with matching topologies
 
 All commands can be abbreviated to their first three letters, e.g. running
@@ -40,7 +45,9 @@ def main():
     else:
         command = "usage"
 
-    if command == "cat":
+    if command in ("ann", "annotate"):
+        import phyltr.commands.annotate as comm
+    elif command == "cat":
         import phyltr.commands.cat as comm
     elif command in ("cla", "clades"):
         import phyltr.commands.clades as comm
@@ -48,10 +55,14 @@ def main():
         import phyltr.commands.collapse as comm
     elif command in ("con", "consensus"):
         import phyltr.commands.consensus as comm
+    elif command in ("ded", "dedupe"):
+        import phyltr.commands.dedupe as comm
     elif command in ("hei", "height"):
         import phyltr.commands.height as comm
     elif command in ("nex", "nexus"):
         import phyltr.commands.nexus as comm
+    elif command in ("plo", "plot"):
+        import phyltr.commands.plot as comm
     elif command in ("pre", "pretty"):
         import phyltr.commands.pretty as comm
     elif command in ("pru", "prune"):
@@ -60,12 +71,16 @@ def main():
         import phyltr.commands.rename as comm
     elif command in ("rog", "rogue"):
         import phyltr.commands.rogue as comm
+    elif command in ("sca", "scale"):
+        import phyltr.commands.scale as comm
     elif command in ("sta", "stat"):
         import phyltr.commands.stat as comm
     elif command in ("sup", "support"):
         import phyltr.commands.support as comm
     elif command in ("sub", "subtree"):
         import phyltr.commands.subtree as comm
+    elif command in ("tax", "taxa"):
+        import phyltr.commands.taxa as comm
     elif command in ("uni", "uniq"):
         import phyltr.commands.uniq as comm
     elif command in ("--help", "help", "--usage", "usage"):
