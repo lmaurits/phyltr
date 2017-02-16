@@ -37,6 +37,7 @@ def run():
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
+    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
     options, files = parser.parse_args()
     if not files:
         files = ["-"]
@@ -108,7 +109,10 @@ def run():
                 for node in t.traverse():
                     if node.name and node.name in nexus_trans:
                         node.name = nexus_trans[node.name]
-            print t.write(features=[],format_root_node=True)
+            if options.no_annotations:
+                print t.write(format_root_node=True)
+            else:
+                print t.write(features=[],format_root_node=True)
 
     # Done
     return 0
