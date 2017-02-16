@@ -83,6 +83,14 @@ def build_consensus_tree(cp, threshold):
         clade.add_feature("age_median", median)
         clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
 
+        for f in cp.clade_attributes:
+            values = cp.clade_attributes[f][clade_key]
+            mean = sum(values)/len(values)
+            values.sort()
+            lower, median, upper = [values[int(x*len(values))] for x in 0.025,0.5,0.975]
+            clade.add_feature("%s_mean" % f, mean)
+            clade.add_feature("%s_median" % f, median)
+            clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
     return t
 
 def recursive_builder(t, clades):
@@ -94,6 +102,8 @@ def recursive_builder(t, clades):
         matched = False
         # ...find the largest clade which is a subset of my children
         for length, p, clade in clades:
+            if len(clade) == 1:
+                continue
             if clade.issubset(children):
                 matched = True
                 break
