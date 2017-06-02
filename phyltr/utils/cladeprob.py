@@ -86,8 +86,8 @@ class CladeProbabilities:
         clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]
         if threshold < 1.0:
             clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
-        # Sort by clade string, ignoring case...
-        clade_probs.sort(key=lambda x:x[1].lower())
+        # Sort by clade size and then case-insensitive alpha...
+        clade_probs.sort(key=lambda x:(x[1].count(","),x[1].lower()),reverse=True)
         # ...then by clade probability
         # (this results in a list sorted by probability and then name)
         clade_probs.sort(key=lambda x:x[0],reverse=True)
