@@ -33,6 +33,7 @@ def run():
             print t.write(features=[],format_root_node=True)
             continue
         # Remove dupes one at a time
+        victims = []
         for dupe in dupes:
             dupe_taxa = t.get_leaves_by_name(dupe)
             assert all([d.is_leaf() for d in dupe_taxa])
@@ -45,8 +46,9 @@ def run():
                     child.detach()
             # If the dupe is non-monophyletic, kill at random
             else:
-                victims = random.sample(dupe_taxa,len(dupe_taxa)-1)
-                t.prune([l for l in t.get_leaves() if l not in victims])
+                victims.extend(random.sample(dupe_taxa,len(dupe_taxa)-1))
+        if victims:
+            t.prune([l for l in t.get_leaves() if l not in victims], preserve_branch_length=True)
 #                for v in victims:
 #                    v.detach()
         print t.write(features=[],format_root_node=True)
