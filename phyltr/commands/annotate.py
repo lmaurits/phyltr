@@ -15,74 +15,97 @@ OPTIONS:
 """
 
 import csv
-import fileinput
 import sys
 
-import ete2
-
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
 
-def read_annotation_file(filename, key):
-    annotations = {}
-    fp = open(filename, "r")
-    dialect = csv.Sniffer().sniff(fp.read(1024))
-    fp.seek(0)
-    dr = csv.DictReader(fp, dialect=dialect)
-    assert key in dr.fieldnames
-    for row in dr:
-        this_key = row.pop(key)
-        annotations[this_key] = row
-    fp.close()
-    return annotations
+class Annotate(PhyltrCommand):
 
-def annotate_tree(t, annotations):
-    for node in t.traverse():
-        if node.name in annotations:
-            for key, value in annotations[node.name].items():
-                node.add_feature(key, value)
+    def __init__(self, filename, key, extract=False, multiple=False):
+        self.filename = filename
+        self.key = key
+        self.extract = extract
+        self.multiple = multiple
 
-def extract_annotations(t, filename, tree_no=None):
-    if filename == "-" or not filename:
-        fp = sys.stdout
-    else:
-        if tree_no and tree_no > 1:
-            fp = open(filename, "a")
+        self.n = 0
+
+        if not self.extract:
+            self.read_annotation_file()
+
+    def process_tree(self, t):
+        if self.extract:
+            # Break out of consume if we've done one
+            if not self.multiple:
+                if self.n > 0:
+                    raise StopIteration
+            self.extract_annotations(t)
+            if self.filename == "-":
+                # Don't emit trees if using stdout for extracted data
+                return None
         else:
-            fp = open(filename, "w")
-    features = []
-    for node in t.traverse():
-        for f in node.features:
-            if f not in ["dist", "support", "name"] and f not in features:
-                features.append(f)
-    features.sort()
-    fieldnames = ["name"]
-    if tree_no:
-        fieldnames.append("tree_number")
-    fieldnames.extend(features)
-    writer = csv.DictWriter(fp, fieldnames=fieldnames)
-    if tree_no in (None, 1):
-        writer.writeheader()
-    for node in t.traverse():
-        # Only include the root node or nodes with names
-        if not node.name and node.up:
-            continue
-        if any([hasattr(node,f) for f in features]):
-            if not node.name:
-                # Temporarily give the node a name
-                node.name = "root"
-                fix_root_name = True
-            else:
-                fix_root_name = False
-            rowdict = {f:getattr(node, f, "?") for f in fieldnames}
-            if tree_no:
-                rowdict["tree_number"] = tree_no
-            writer.writerow(rowdict)
-            if fix_root_name:
-                node.name = None
-    if filename == "-" or not filename:
-        pass
-    else:
+           self.annotate_tree(t)
+
+        return t
+
+    def read_annotation_file(self):
+        self.annotations = {}
+        fp = open(self.filename, "r")
+        dialect = csv.Sniffer().sniff(fp.read(1024))
+        fp.seek(0)
+        dr = csv.DictReader(fp, dialect=dialect)
+        assert self.key in dr.fieldnames
+        for row in dr:
+            this_key = row.pop(self.key)
+            self.annotations[this_key] = row
         fp.close()
+
+    def annotate_tree(self, t):
+        for node in t.traverse():
+            if node.name in self.annotations:
+                for key, value in self.annotations[node.name].items():
+                    node.add_feature(key, value)
+
+    def extract_annotations(self, t):
+        if self.filename == "-" or not self.filename:
+            fp = sys.stdout
+        else:
+            if self.n > 1:
+                fp = open(self.filename, "a")
+            else:
+                fp = open(self.filename, "w")
+        features = []
+        for node in t.traverse():
+            for f in node.features:
+                if f not in ["dist", "support", "name"] and f not in features:
+                    features.append(f)
+        features.sort()
+        fieldnames = ["name"]
+        if self.multiple:
+            fieldnames.append("tree_number")
+        fieldnames.extend(features)
+        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+        if self.n == 0:
+            writer.writeheader()
+        for node in t.traverse():
+            # Only include the root node or nodes with names
+            if not node.name and node.up:
+                continue
+            if any([hasattr(node,f) for f in features]):
+                if not node.name:
+                    # Temporarily give the node a name
+                    node.name = "root"
+                    fix_root_name = True
+                else:
+                    fix_root_name = False
+                rowdict = {f:getattr(node, f, "?") for f in fieldnames}
+                if tree_no:
+                    rowdict["tree_number"] = tree_no
+                writer.writerow(rowdict)
+                if fix_root_name:
+                    node.name = None
+        if self.filename and self.filename != "-":
+            fp.close()
 
 def run():
 
@@ -94,28 +117,6 @@ def run():
     parser.add_option('-m', '--multiple', default=False, action="store_true")
     options, files = parser.parse_args()
 
-    # Read annotation file
-    if not options.extract:
-        annotations = read_annotation_file(options.filename, options.key)
+    annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
+    plumb(annotate, files)
 
-    # Read trees and annotate them
-    for n, line in enumerate(fileinput.input(files)):
-        t = ete2.Tree(line)
-        if options.extract:
-            if options.multiple:
-                extract_annotations(t, options.filename, n+1)
-            else:
-                extract_annotations(t, options.filename)
-        else:
-            annotate_tree(t, annotations)
-
-        if options.extract:
-            if not options.multiple:
-                return 0
-            if options.filename == "-":
-                # Suppress output
-                continue
-        print t.write(features=[],format_root_node=True)
-
-    # Done
-    return 0

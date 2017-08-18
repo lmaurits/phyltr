@@ -11,21 +11,19 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
-
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+
+class Height(PhyltrCommand):
+
+    def process_tree(self, t):
+        print(t.get_farthest_leaf()[1])
+        return None
 
 def run():
 
-    # Parse options
     parser = optparse.OptionParser(__doc__)
     options, files = parser.parse_args()
 
-    # Read trees
-    for line in fileinput.input():
-        t = ete2.Tree(line)
-        print(t.get_farthest_leaf()[1])
-
-    return 0
+    height = Height()
+    plumb(height, files)

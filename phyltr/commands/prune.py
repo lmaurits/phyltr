@@ -18,16 +18,52 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
 import sys
 
-import ete2
-
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+
+class Prune(PhyltrCommand):
+
+    def __init__(self, taxa=None, filename=None, attribute=None, value=None, inverse=False):
+        self.attribute = attribute
+        self.filename = filename
+        self.inverse = inverse
+        self.value = value
+
+        self.by_attribute = False
+
+        if taxa:
+            self.taxa = taxa
+        elif filename:
+            with open(options.filename, "r") as fp:
+                self.taxa = [t.strip() for t in fp.readlines()]
+            if not self.taxa:
+                raise ValueError("Empty file!")
+        elif self.attribute and self.value:
+            self.taxa = []
+        else:
+            raise ValueError("Incompatible arguments")
+
+    def process_tree(self, t):
+        if self.taxa:
+            # Pruning by a list of taxa
+            if self.inverse:
+                pruning_taxa = [l for l in t.get_leaves() if l.name in self.taxa]
+            else:
+                pruning_taxa = [l for l in t.get_leaves() if l.name not in self.taxa]
+        else:
+            # Pruning by an attribute value
+            if self.inverse:
+                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) == self.value]
+            else:
+                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) != self.value]
+        # Do the deed
+        t.prune(pruning_taxa)
+        return t
 
 def run():
 
-    # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
     parser.add_option('-f', '--file', dest="filename",
@@ -36,38 +72,15 @@ def run():
     parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
 
-    if options.attribute and options.value:
-        by_attribute = True
-    elif options.filename:
-        fp = open(options.filename, "r")
-        taxa = [t.strip() for t in fp.readlines()]
-        by_attribute = False
-    elif files:
-        taxa = set(files[0].split(","))
-        files = files[1:]
-        by_attribute = False
+    if (options.attribute and options.value) or options.filename:
+        taxa = []
     else:
-        # Improper usage
-        sys.stderr.write("Must specify either a list of taxa, a file of taxa, or an attribute and value.\n")
-        sys.exit(1)
-
-    first = True
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        # Decide which leaves to prune
-        if by_attribute:
-            if options.inverse:
-                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,options.attribute) and getattr(l,options.attribute) == options.value]
-            else:
-                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,options.attribute) and getattr(l,options.attribute) != options.value]
+        if files:
+            taxa = set(files[0].split(","))
+            files = files[1:]
         else:
-            if options.inverse:
-                pruning_taxa = [l for l in t.get_leaves() if l.name in taxa]
-            else:
-                pruning_taxa = [l for l in t.get_leaves() if l.name not in taxa]
-        # Do the deed
-        t.prune(pruning_taxa)
-        print t.write(features=[],format_root_node=True)
+            sys.stderr.write("Must specify either a list of taxa, a file of taxa, or an attribute and value.\n")
+            sys.exit(1)
 
-    # Done
-    return 0
+    prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
+    plumb(prune, files)

@@ -21,12 +21,24 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
-
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
+from phyltr.commands.generic import PhyltrCommand, plumb
+
+class Clades(PhyltrCommand):
+    
+    def __init__(self, frequency=1.0, ages=False):
+        self.frequency = frequency
+        self.ages = ages
+        self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    def process_tree(self, t):
+        self.cp.add_tree(t)
+
+    def postprocess(self):
+        self.cp.compute_probabilities()
+        self.cp.save_clade_report("/dev/stdout", self.frequency, self.ages)
+        return []
 
 def run():
 
@@ -37,15 +49,6 @@ def run():
             default=1.0, help='Minimum clade frequency to report.')
     options, files = parser.parse_args()
 
-    # Read trees and compute clade probabilities
-    cp = phyltr.utils.cladeprob.CladeProbabilities()
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        cp.add_tree(t)
-    cp.compute_probabilities()
+    clades = Clades(options.frequency, options.age)
+    plumb(clades, files)
 
-    # Output
-    cp.save_clade_report("/dev/stdout", options.frequency, options.age)
-
-    # Done
-    return 0

@@ -14,84 +14,75 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
 import ete2
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
+from phyltr.commands.generic import PhyltrCommand, plumb
 
-def run():
+class Consensus(PhyltrCommand):
 
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
-    options, files = parser.parse_args()
+    def __init__(self, frequency=0.5):
+        self.frequency = frequency
+        self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
-    # Read trees and compute clade probabilities
-    cp = phyltr.utils.cladeprob.CladeProbabilities()
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        cp.add_tree(t)
-    cp.compute_probabilities()
+    def process_tree(self, t):
+        self.cp.add_tree(t)
 
-    # Build consensus tree
-    t = build_consensus_tree(cp, options.frequency)
+    def postprocess(self):
+        self.cp.compute_probabilities()
+        # Build consensus tree
+        t = self.build_consensus_tree()
+        yield t
 
-    # Output
-    print t.write(features=[])
+    def build_consensus_tree(self):
 
-    # Done
-    return 0
+        # Build a list of all clades in the treestream with frequency above the
+        # requested threshold, sorted first by size and then by frequency.  Do not
+        # include the trivial clade of all leaves.
+        clades = []
+        for clade, p in self.cp.clade_probs.items():
+            if p >= self.frequency:
+                clade = clade.split(",")
+                clades.append((len(clade), p, set(clade)))
+        clades.sort()
+        junk, trash, all_leaves = clades.pop()
+        clades.reverse()
 
-def build_consensus_tree(cp, threshold):
+        # Start out with a tree in which all leaves are joined in one big polytomy
+        t = ete2.Tree()
+        for l in all_leaves:
+            t.add_child(name=l)
 
-    # Build a list of all clades in the treestream with frequency above the
-    # requested threshold, sorted first by size and then by frequency.  Do not
-    # include the trivial clade of all leaves.
-    clades = []
-    for clade, p in cp.clade_probs.items():
-        if p >= threshold:
-            clade = clade.split(",")
-            clades.append((len(clade), p, set(clade)))
-    clades.sort()
-    junk, trash, all_leaves = clades.pop()
-    clades.reverse()
+        # Now recursively resolve the polytomy by greedily grouping clades
+        t = recursive_builder(t, clades)
+        cache = t.get_cached_content()
 
-    # Start out with a tree in which all leaves are joined in one big polytomy
-    t = ete2.Tree()
-    for l in all_leaves:
-        t.add_child(name=l)
+        # Add age annotations
+        for clade in t.traverse("postorder"):
+            if clade.is_leaf():
+                continue
+            clade_key = ",".join(sorted([l.name for l in cache[clade]]))
+            ages = self.cp.clade_ages[clade_key]
+            mean = sum(ages)/len(ages)
+            for c in clade.get_children():
+                leaf, age = c.get_farthest_leaf()
+                c.dist = mean - age
+            ages.sort()
+            lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
+            clade.add_feature("age_mean", mean)
+            clade.add_feature("age_median", median)
+            clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
 
-    # Now recursively resolve the polytomy by greedily grouping clades
-    t = recursive_builder(t, clades)
-    cache = t.get_cached_content()
-
-    # Add age annotations
-    for clade in t.traverse("postorder"):
-        if clade.is_leaf():
-            continue
-        clade_key = ",".join(sorted([l.name for l in cache[clade]]))
-        ages = cp.clade_ages[clade_key]
-        mean = sum(ages)/len(ages)
-        for c in clade.get_children():
-            leaf, age = c.get_farthest_leaf()
-            c.dist = mean - age
-        ages.sort()
-        lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
-        clade.add_feature("age_mean", mean)
-        clade.add_feature("age_median", median)
-        clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
-
-        for f in cp.clade_attributes:
-            values = cp.clade_attributes[f][clade_key]
-            mean = sum(values)/len(values)
-            values.sort()
-            lower, median, upper = [values[int(x*len(values))] for x in 0.025,0.5,0.975]
-            clade.add_feature("%s_mean" % f, mean)
-            clade.add_feature("%s_median" % f, median)
-            clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
-    return t
+            for f in self.cp.clade_attributes:
+                values = self.cp.clade_attributes[f][clade_key]
+                mean = sum(values)/len(values)
+                values.sort()
+                lower, median, upper = [values[int(x*len(values))] for x in 0.025,0.5,0.975]
+                clade.add_feature("%s_mean" % f, mean)
+                clade.add_feature("%s_median" % f, median)
+                clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
+        return t
 
 def recursive_builder(t, clades):
 
@@ -127,3 +118,13 @@ def recursive_builder(t, clades):
     for child in t.get_children():
         recursive_builder(child, clades)
     return t
+
+def run():
+
+    parser = optparse.OptionParser(__doc__)
+    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
+    options, files = parser.parse_args()
+
+    consensus = Consensus(options.frequency)
+    plumb(consensus, file)
+

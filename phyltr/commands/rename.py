@@ -16,49 +16,44 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
+import sys
 
-import ete2
+from phyltr.commands.generic import PhyltrCommand, plumb
 
 import phyltr.utils.phyoptparse as optparse
 
-def read_rename_file(filename):
+class Rename(PhyltrCommand):
+    
+    def __init__(self, filename):
+        self.read_rename_file(filename)
 
-    """Read a file of names and their desired replacements and return a
-    dictionary of this data."""
+    def read_rename_file(self, filename):
 
-    rename = {}
-    fp = open(filename, "r")
-    for line in fp:
-        old, new = line.strip().split(":")
-        rename[old.strip()] = new.strip()
-    fp.close()
-    return rename
+        """Read a file of names and their desired replacements and return a
+        dictionary of this data."""
+
+        rename = {}
+        with open(filename, "r") as fp:
+            for line in fp:
+                old, new = line.strip().split(":")
+                rename[old.strip()] = new.strip()
+            fp.close()
+        self.rename = rename
+
+    def process_tree(self, t):
+        # Rename nodes
+        for node in t.traverse():
+            if node.name in self.rename:
+                node.name = self.rename[node.name]
+        return t
 
 def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--file', dest="filename",
-                help='Specifies the translation file.')
+    parser.add_option('-f', '--file', dest="filename", help='Specifies the translation file.')
+    print(sys.argv)
     options, files = parser.parse_args()
 
-    # Read translation file
-    try:
-        rename = read_rename_file(options.filename)
-    except IOError:
-        return 1
-
-    # Read trees
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        # Rename nodes
-        for node in t.traverse():
-            if node.name in rename:
-                node.name = rename[node.name]
-
-        # Output
-        print t.write()
-
-    # Done
-    return 0
+    rename = Rename(options.filename)
+    plumb(rename, files)
