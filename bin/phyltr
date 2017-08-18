@@ -54,7 +54,7 @@ _COMMANDS = (
         "scale",
         "stat",
         "support",
-        "subtree"
+        "subtree",
         "taxa",
         "uniq",
     )
