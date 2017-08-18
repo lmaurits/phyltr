@@ -19,45 +19,32 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
 import sys
-
-import ete2
 
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.generic import PhyltrCommand, plumb
 
-def run():
+class Rogue(PhyltrCommand):
 
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-n', action="store", dest="iterations", type="int", default=1)
-    parser.add_option('-g', "--guard", action="store", dest="guarded")
-    options, files = parser.parse_args()
+    def __init__(self, iterations=1, guarded=None):
+        self.iterations = iterations
+        if guarded:
+            self.guarded_taxa = guarded.split(",")
+        else:
+            self.guarded_taxa = []
+        self.trees = []
 
-    # Get list of guarded taxa
-    if options.guarded:
-        guarded_taxa = options.guarded.split(",")
-    else:
-        guarded_taxa = []
+    def process_tree(self, t):
+        self.trees.append(t)
 
-    # Read trees
-    trees = []
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        trees.append(t)
+    def postprocess(self):
+        for i in range(0, self.iterations):
+            rogue = remove_rogue(self.trees, self.guarded_taxa)
+            sys.stderr.write("Removing %s as rogue\n" % rogue)
 
-    # Remove rogue nodes
-    for i in range(0, options.iterations):
-        rogue = remove_rogue(trees, guarded_taxa)
-        sys.stderr.write("Removing %s as rogue\n" % rogue)
-
-    # Output
-    for t in trees:
-        print t.write()
-
-    # Done
-    return 0
+        for t in self.trees:
+            yield t
 
 def remove_rogue(trees, guarded):
 
@@ -101,3 +88,14 @@ def remove_rogue(trees, guarded):
         t.prune(survivors)
 
     return rogue.name
+
+def run():
+
+    # Parse options
+    parser = optparse.OptionParser(__doc__)
+    parser.add_option('-n', action="store", dest="iterations", type="int", default=1)
+    parser.add_option('-g', "--guard", action="store", dest="guarded")
+    options, files = parser.parse_args()
+
+    rogue = Rogue(options.iterations, options.guarded)
+    plumb(rogue, files)

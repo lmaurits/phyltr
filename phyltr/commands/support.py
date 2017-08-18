@@ -22,12 +22,47 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
 
 import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.generic import PhyltrCommand, plumb
+
+class Support(PhyltrCommand):
+   
+    def __init__(self, frequency, ages=False, sort=False, filename=None):
+        self.frequency = frequency
+        self.ages = ages
+        self.sort = sort
+        self.filename = filename
+        self.trees = []
+        self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    def process_tree(self, t):
+        self.trees.append(t)
+        self.cp.add_tree(t)
+        return None
+
+    def postprocess(self):
+        self.cp.compute_probabilities()
+
+        # Save clade probabilities
+        if self.filename:
+            cp.save_clade_report(self.filename, self.frequency, self.age)
+
+        # Annotate trees
+        for t in self.trees:
+            self.cp.annotate_tree(t)
+
+        # Sort
+        if self.sort:
+            trees = [(self.cp.get_tree_prob(t),t) for t in self.trees]
+            trees.sort()
+            trees.reverse()
+            self.trees = [t for (p,t) in trees]
+
+        # Output
+        for t in self.trees:
+            yield t
 
 def run():
 
@@ -41,34 +76,5 @@ def run():
     parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
     options, files = parser.parse_args()
 
-    # Read trees and compute clade probabilities
-    trees = []
-    cp = phyltr.utils.cladeprob.CladeProbabilities()
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        trees.append(t)
-        cp.add_tree(t)
-    cp.compute_probabilities()
-
-    # Save clade probabilities
-    if options.filename:
-        cp.save_clade_report(options.filename, options.frequency, options.age)
-
-    # Annotate trees
-    for t in trees:
-        cp.annotate_tree(t)
-
-    # Sort
-    if options.sort:
-        trees = [(cp.get_tree_prob(t),t) for t in trees]
-        trees.sort()
-        trees.reverse()
-        trees = [t for (p,t) in trees]
-
-    # Output
-    for t in trees:
-        print t.write()
-
-    # Done
-    return 0
-
+    support = Support(options.frequency, options.age, options.sort, options.filename)
+    plumb(support, files)

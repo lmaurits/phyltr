@@ -14,11 +14,43 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import ete2
-import fileinput
 import sys
 
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+
+class Subtree(PhyltrCommand):
+
+    def __init__(self, taxa=None, filename=None, attribute=None, value=None):
+        self.attribute = attribute
+        self.filename = filename
+        self.value = value
+
+        self.by_attribute = False
+
+        if taxa:
+            self.taxa = taxa
+        elif filename:
+            with open(options.filename, "r") as fp:
+                self.taxa = [t.strip() for t in fp.readlines()]
+            if not self.taxa:
+                raise ValueError("Empty file!")
+        elif self.attribute and self.value:
+            self.taxa = []
+        else:
+            raise ValueError("Incompatible arguments")
+
+
+    def process_tree(self, t):
+        if self.taxa:
+            leaves = [l for l in t.get_leaves() if l.name in self.taxa]
+            mrca = leaves[0].get_common_ancestor(leaves[1:])
+            t = mrca
+        else:
+            mrca = list(t.get_monophyletic([self.value], self.attribute))[0]
+            assert mrca != t
+            t = mrca
+        return t
 
 def run():
 
@@ -30,30 +62,15 @@ def run():
     parser.add_option('-v', '--value', default=None)
     options, files = parser.parse_args()
 
-    if options.filename:
-        fp = open(options.filename, "r")
-        taxa = [t.strip() for t in fp.readlines()]
-    elif not (options.attribute and options.value):
+    if (options.attribute and options.value) or options.filename:
+        taxa = []
+    else:
         if files:
             taxa = set(files[0].split(","))
             files = files[1:]
         else:
-            # Improper usage
-            sys.stderr.write("Must specify a list of taxa.\n")
+            sys.stderr.write("Must specify either a list of taxa, a file of taxa, or an attribute and value.\n")
             sys.exit(1)
 
-    first = True
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        if options.attribute and options.value:
-            mrca = list(t.get_monophyletic([options.value], options.attribute))[0]
-            assert mrca != t
-            t = mrca
-        else:
-            leaves = [l for l in t.get_leaves() if l.name in taxa]
-            mrca = leaves[0].get_common_ancestor(leaves[1:])
-            t = mrca
-        print t.write(features=[],format_root_node=True)
-
-    # Done
-    return 0
+    subtree = Subtree(taxa, options.filename, options.attribute, options.value)
+    plumb(subtree, files)
