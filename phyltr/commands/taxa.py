@@ -11,22 +11,22 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
-
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+
+class Taxa(PhyltrCommand):
+
+    def process_tree(self, t):
+        names = [n.name for n in t.traverse() if n.name]
+        for n in sorted(names):
+            print(n)
+        raise StopIteration
 
 def run():
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
     options, files = parser.parse_args()
-
-    # Read trees
-    for line in fileinput.input():
-        t = ete2.Tree(line)
-        names = [n.name for n in t.traverse() if n.name]
-        for n in sorted(names):
-            print(n)
-        return 0
+    
+    taxa = Taxa()
+    plumb(taxa, files)

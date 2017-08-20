@@ -14,29 +14,23 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
+from phyltr.commands.generic import PhyltrCommand, plumb
 
 import phyltr.utils.phyoptparse as optparse
 
-def run():
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
-    options, files = parser.parse_args()
+class Pretty(PhyltrCommand):
 
-    # Read trees
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
+    def __init__(self, compress=False):
+        self.compress = compress
 
+    def process_tree(self, t):
         # Add support to interior nodes
         for node in t.traverse():
             if not node.is_leaf():
                 node.name = "%.2f" % node.support
 
         # Collapse high probability clades
-        if options.compress:
+        if self.compress:
             dead_nodes = []
             for node in t.traverse("preorder"):
                 if node in dead_nodes or node.is_leaf():
@@ -50,4 +44,11 @@ def run():
                         child.detach()
         print t.get_ascii()
 
-    return 0
+def run():
+    # Parse options
+    parser = optparse.OptionParser(__doc__)
+    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
+    options, files = parser.parse_args()
+    
+    pretty = Pretty(compress=options.compress)
+    plumb(pretty, files)

@@ -31,65 +31,61 @@ All commands can be abbreviated to their first three letters, e.g. running
 Command specific help is availble via "phyltr <command> --help".
 """
 
-import sys
+import importlib
 from signal import signal, SIGPIPE, SIG_DFL
+import sys
+
 signal(SIGPIPE,SIG_DFL) 
+
+_COMMANDS = (
+        "annotate",
+        "cat",
+        "clades",
+        "collapse",
+        "consensus",
+        "dedupe",
+        "height",
+        "nexus",
+        "plot",
+        "pretty",
+        "prune",
+        "rename",
+        "rogue",
+        "scale",
+        "stat",
+        "support",
+        "subtree",
+        "taxa",
+        "uniq",
+    )
 
 def usage():
     print __doc__
 
 def main():
 
+    # Running 'phyltr' with no command is the same as running 'phyltr help'
     if len(sys.argv) > 1:
         command = sys.argv.pop(1)
     else:
-        command = "usage"
+        command = "help"
 
-    if command in ("ann", "annotate"):
-        import phyltr.commands.annotate as comm
-    elif command == "cat":
-        import phyltr.commands.cat as comm
-    elif command in ("cla", "clades"):
-        import phyltr.commands.clades as comm
-    elif command in ("col", "collapse"):
-        import phyltr.commands.collapse as comm
-    elif command in ("con", "consensus"):
-        import phyltr.commands.consensus as comm
-    elif command in ("ded", "dedupe"):
-        import phyltr.commands.dedupe as comm
-    elif command in ("hei", "height"):
-        import phyltr.commands.height as comm
-    elif command in ("nex", "nexus"):
-        import phyltr.commands.nexus as comm
-    elif command in ("plo", "plot"):
-        import phyltr.commands.plot as comm
-    elif command in ("pre", "pretty"):
-        import phyltr.commands.pretty as comm
-    elif command in ("pru", "prune"):
-        import phyltr.commands.prune as comm
-    elif command in ("ren", "rename"):
-        import phyltr.commands.rename as comm
-    elif command in ("rog", "rogue"):
-        import phyltr.commands.rogue as comm
-    elif command in ("sca", "scale"):
-        import phyltr.commands.scale as comm
-    elif command in ("sta", "stat"):
-        import phyltr.commands.stat as comm
-    elif command in ("sup", "support"):
-        import phyltr.commands.support as comm
-    elif command in ("sub", "subtree"):
-        import phyltr.commands.subtree as comm
-    elif command in ("tax", "taxa"):
-        import phyltr.commands.taxa as comm
-    elif command in ("uni", "uniq"):
-        import phyltr.commands.uniq as comm
-    elif command in ("--help", "help", "--usage", "usage"):
-        usage()
-        sys.exit(0)
+    # Check if the supplied command is one we know about
+    for match in _COMMANDS:
+        if command in (match, match[0:3]):
+            comm = importlib.import_module("phyltr.commands."+match)
+            break
     else:
-        sys.stderr.write("phyltr: '%s' is not a phyltr command.  See 'phyltr --help'.\n" % command)
-        sys.exit(0)
+        # If it wasn't a real command, maybe it was a request for help?
+        if command in ("--help", "help", "--usage", "usage"):
+            usage()
+            sys.exit(0)
+        # If not, give up and tell the user to seek help 
+        else:
+            sys.stderr.write("phyltr: '%s' is not a phyltr command.  See 'phyltr --help'.\n" % command)
+            sys.exit(0)
 
+    # If we've gotten this far, we're running a real command, so let's do it!
     sys.exit(comm.run())
 
 if __name__ == "__main__":

@@ -14,11 +14,18 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
-
-import ete2
-
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+
+class Scale(PhyltrCommand):
+
+    def __init__(self, scalefactor=1.0):
+        self.scalefactor = scalefactor
+
+    def process_tree(self, t):
+        for node in t.traverse():
+            node.dist *= self.scalefactor
+        return t
 
 def run():
 
@@ -28,14 +35,5 @@ def run():
                 help='Scaling factor.')
     options, files = parser.parse_args()
 
-    # Read trees
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        # Scale branches
-        for node in t.traverse():
-            node.dist *= options.scale
-        # Output
-        print t.write()
-
-    # Done
-    return 0
+    scale = Scale(options.scale)
+    plumb(scale, files)

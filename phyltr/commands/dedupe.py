@@ -12,26 +12,20 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
 import random
 import sys
 
-import ete2
 
+from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
 
-def run():
+class Dedupe(PhyltrCommand):
 
-    parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args()
-
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
+    def process_tree(self, t):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
         dupes = set([n for n in leaf_names if leaf_names.count(n) > 1])
         if not dupes:
-            print t.write(features=[],format_root_node=True)
-            continue
+            return t
         # Remove dupes one at a time
         victims = []
         for dupe in dupes:
@@ -51,7 +45,13 @@ def run():
             t.prune([l for l in t.get_leaves() if l not in victims], preserve_branch_length=True)
 #                for v in victims:
 #                    v.detach()
-        print t.write(features=[],format_root_node=True)
+        return t
 
-    # Done
-    return 0
+def run():
+
+    parser = optparse.OptionParser(__doc__)
+    options, files = parser.parse_args()
+
+    dedupe = Dedupe()
+    plumb(dedupe, files)
+

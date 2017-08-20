@@ -20,24 +20,50 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
+import sys
 
-import ete2
+from phyltr.commands.generic import PhyltrCommand, plumb
 
 import phyltr.utils.phyoptparse as optparse
 
-def read_rename_file(filename):
+class Rename(PhyltrCommand):
+    
+    def __init__(self, filename):
+        self.read_rename_file(filename)
+        self.first = True
 
-    """Read a file of names and their desired replacements and return a
-    dictionary of this data."""
+    def read_rename_file(self, filename):
 
-    rename = {}
-    fp = open(filename, "r")
-    for line in fp:
-        old, new = line.strip().split(":")
-        rename[old.strip()] = new.strip()
-    fp.close()
-    return rename
+        """Read a file of names and their desired replacements and return a
+        dictionary of this data."""
+
+        rename = {}
+        with open(filename, "r") as fp:
+            for line in fp:
+                old, new = line.strip().split(":")
+                rename[old.strip()] = new.strip()
+            fp.close()
+        self.rename = rename
+
+    def process_tree(self, t):
+        # Rename nodes
+        for node in t.traverse():
+            node.name = self.rename.get(node.name,
+                    "KILL-THIS-NODE" if options.remove else node.name)
+
+        keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
+        if self.first:
+            n_leaves = len(t.get_leaves())
+            self.pruning_needed = len(keepers) < n_leaves
+            self.first = False
+
+        if self.pruning_needed:
+            mrca = t.get_common_ancestor(keepers)
+            if t != mrca:
+                t = mrca
+            t.prune(keepers, preserve_branch_length=True)
+
+        return t
 
 def run():
 
@@ -49,35 +75,6 @@ def run():
                 help='Remove untranslated taxa.')
     options, files = parser.parse_args()
 
-    # Read translation file
-    try:
-        rename = read_rename_file(options.filename)
-    except IOError:
-        return 1
+    rename = Rename(options.filename)
+    plumb(rename, files)
 
-    # Read trees
-    first = True
-    for line in fileinput.input(files):
-        t = ete2.Tree(line)
-        # Rename nodes
-        for node in t.traverse():
-            node.name = rename.get(node.name, "KILL-THIS-NODE" if options.remove else node.name)
-        # Find subtree if required
-        keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
-        if first:
-            n_leaves = len(t.get_leaves())
-            first = False
-            pruning_needed = len(keepers) < n_leaves
-        if pruning_needed:
-            mrca = t.get_common_ancestor(keepers)
-            if t != mrca:
-                t = mrca
-            t.prune(keepers, preserve_branch_length=True)
-#        if nodes_to_kill:
-#            mrca = keepers[0].get_common_ancestor(keepers[1:])
-#            t = mrca
-        # Output
-        print t.write()
-
-    # Done
-    return 0

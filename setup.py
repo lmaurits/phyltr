@@ -7,12 +7,12 @@ except ImportError:
 
 setup(
     name='phyltr',
-    version='0.2.0',
+    version='0.3.0',
     description='Unix filters for manipulating and analysing (samples of) phylogenetic trees represented in the Newick format',
     author='Luke Maurits',
     author_email='luke@maurits.id.au',
     url='https://github.com/lmaurits/phyltr',
-    license="BSD (2 clause)",
+    license="GPL3",
     classifiers=[
         'Programming Language :: Python',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
