@@ -28,8 +28,15 @@ import phyltr.utils.phyoptparse as optparse
 
 class Rename(PhyltrCommand):
     
-    def __init__(self, filename):
-        self.read_rename_file(filename)
+    def __init__(self, rename=None, filename=None, remove=False):
+        if rename:
+            self.rename = rename
+        elif filename:
+            self.read_rename_file(filename)
+        else:
+            raise ValueError("Must supply renaming dictionary or filename!")
+        self.remove = remove
+
         self.first = True
 
     def read_rename_file(self, filename):
@@ -49,7 +56,7 @@ class Rename(PhyltrCommand):
         # Rename nodes
         for node in t.traverse():
             node.name = self.rename.get(node.name,
-                    "KILL-THIS-NODE" if options.remove else node.name)
+                    "KILL-THIS-NODE" if self.remove else node.name)
 
         keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
         if self.first:
@@ -75,6 +82,6 @@ def run():
                 help='Remove untranslated taxa.')
     options, files = parser.parse_args()
 
-    rename = Rename(options.filename)
+    rename = Rename(filename=options.filename, remove=options.remove)
     plumb(rename, files)
 
