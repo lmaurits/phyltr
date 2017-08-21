@@ -24,7 +24,7 @@ from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Uniq(PhyltrCommand):
 
-    def __init__(self, lengths):
+    def __init__(self, lengths="mean"):
         self.lengths = lengths
 
         self.topologies = {}
