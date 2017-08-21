@@ -26,20 +26,21 @@ import phyltr.utils.phyoptparse as optparse
 
 class Collapse(PhyltrCommand):
 
-    def __init__(self, filename=None, attribute=None):
-        self.filename = filename
-        self.attribute = attribute
-
-        args = (filename, attribute)
-        if all(args) or not any(args):
-            raise ValueError("Provide a filename or an attribute, but not both.")
-        
-        if filename:
+    def __init__(self, clades={}, filename=None, attribute=None):
+        if clades:
+            self.trans = clades # trans = translation
+        elif filename:
+            self.filename = filename
             self.read_clade_file(self.fliename)
+        elif attribute:
+            self.attribute = attribute
+            self.trans = {}
+        else:
+            raise ValueError("Must provide a dictionary of clades, a filename or an attribute.")
 
     def process_tree(self, t):
-        if self.filename:
-            self.collapse_from_file(t)
+        if self.trans:
+            self.collapse_by_dict(t)
         else:
             self.collapse_by_attribute(t)
         return t
@@ -49,18 +50,18 @@ class Collapse(PhyltrCommand):
         """Read a file of names and clade definitions and return a dictionary of
         this data."""
 
-        self.trans = []
+        self.trans = {}
         fp = open(filename, "r")
         for line in fp:
             name, clade = line.strip().split(":")
             clade = clade.strip().split(",")
-            self.trans.append((clade, name))
+            self.trans[clade] = name
         fp.close()
 
-    def collapse_from_file(self, t):
+    def collapse_by_dict(self, t):
         cache = t.get_cached_content()
         tree_leaves = cache[t]
-        for clade, name in self.trans:
+        for name, clade in self.trans.items():
             # Get a list of leaves in this tree
             clade_leaves = [l for l in tree_leaves if l.name in clade]
             if not clade_leaves:
@@ -108,5 +109,5 @@ def run():
                 help='Specifies the translation file.',default=None)
     options, files = parser.parse_args()
 
-    collapse = Collapse(options.translate, options.attribute)
+    collapse = Collapse({}, options.translate, options.attribute)
     plumb(collapse, files)
