@@ -29,7 +29,7 @@ from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Support(PhyltrCommand):
    
-    def __init__(self, frequency, ages=False, sort=False, filename=None):
+    def __init__(self, frequency=0.0, ages=False, sort=False, filename=None):
         self.frequency = frequency
         self.ages = ages
         self.sort = sort
