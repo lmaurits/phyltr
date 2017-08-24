@@ -11,14 +11,13 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.generic import PhyltrCommand, plumb_strings
 import phyltr.utils.phyoptparse as optparse
 
 class Height(PhyltrCommand):
 
     def process_tree(self, t):
-        print(t.get_farthest_leaf()[1])
-        return None
+        return t.get_farthest_leaf()[1]
 
 def run():
 
@@ -26,4 +25,4 @@ def run():
     options, files = parser.parse_args()
 
     height = Height()
-    plumb(height, files)
+    plumb_strings(height, files)

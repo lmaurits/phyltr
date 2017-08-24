@@ -1,6 +1,7 @@
 import fileinput
 import re
 import sys
+import types
 
 import ete2
 
@@ -189,8 +190,30 @@ class NewickFormatter:
             self.out.write(t.write(features=[],format_root_node=True))
             self.out.write("\n")
 
+class StringFormatter:
+
+    def __init__(self, out):
+        self.out = out
+
+    def consume(self, stream):
+        for x in stream:
+            if isinstance(x, types.StringTypes):                self.our.write(x)
+            else:
+                try:
+                    self.out.write("\n".join((str(element) for element in x)))
+                except TypeError:
+                    self.out.write(str(x))
+            self.out.write("\n")
+
+
 def plumb(command, files="-"):
     source = fileinput.input(files)
     trees_from_stdin = NewickParser().consume(source)
     output_trees = command.consume(trees_from_stdin)
     NewickFormatter(sys.stdout).consume(output_trees)
+
+def plumb_strings(command, files="-"):
+    source = fileinput.input(files)
+    trees_from_stdin = NewickParser().consume(source)
+    output_trees = command.consume(trees_from_stdin)
+    StringFormatter(sys.stdout).consume(output_trees)
