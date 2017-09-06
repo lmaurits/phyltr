@@ -12,12 +12,10 @@ The available phyltr commands are:
     consensus   Build majority rules consensus tree
     dedupe      Remove duplicate taxa (by name)
     height      Print the height of each tree in a tree stream
-    nexus       Convert tree stream to NEXUS file
     plot        Plot tree using ETE interactive viewer, or to file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
-    rogue       Remove rogue taxon or taxons
     scale       Scale branch lengths of a set of trees
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
@@ -45,12 +43,10 @@ _COMMANDS = (
         "consensus",
         "dedupe",
         "height",
-        "nexus",
         "plot",
         "pretty",
         "prune",
         "rename",
-        "rogue",
         "scale",
         "stat",
         "support",
