@@ -11,8 +11,11 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
+import fileinput
+
+from phyltr.commands.generic import PhyltrCommand, NewickParser
 import phyltr.utils.phyoptparse as optparse
+from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
 
@@ -20,39 +23,43 @@ class Stat(PhyltrCommand):
 
         self.tree_count = 0
         self.taxa_count = 0
-        self.ultrametric = False
+        self.ultrametric = True
         self.topologically_unique_trees = []
         self.tree_ages = []
         self.firsttree = True
 
+    def consume(self, stream):
+        for tree in stream:
+            self.process_tree(tree)
+        self.postprocess()
+
     def process_tree(self, t):
-        cache = t.get_cached_content()
-        tree_leaves = cache[t]
+        # Stuff we do to every tree...
         self.tree_count += 1
-        if self.firsttree:
-            self.taxa_count = len(tree_leaves)
-            self.taxa_names = [l.name for l in tree_leaves]
-            self.topologically_unique_trees.append(t)
-            leave_ages = [t.get_distance(l) for l in tree_leaves]
-            if abs(max(leave_ages) - min(leave_ages)) < max(leave_ages)/1000.0:
-                self.ultrametric = True
-            self.firsttree = False
+        leaves = t.get_leaves()
+        leave_ages = [t.get_distance(l) for l in leaves]
         self.tree_ages.append(t.get_farthest_leaf()[1])
-        unique = True
-        for u in self.topologically_unique_trees:
-            if u.robinson_foulds(t)[0] == 0.0:
-                unique = False
-                break
-        if unique:
+        if abs(max(leave_ages) - min(leave_ages)) > max(leave_ages)/1000.0:
+            self.ultrametric = False
+        # Stuff we only do to the first tree...
+        if self.firsttree:
+            self.firsttree = False
+            self.taxa_count = len(leaves)
             self.topologically_unique_trees.append(t)
+        # Stuff we only do to trees *other* than the first...
+        else:
+            for u in self.topologically_unique_trees:
+                if are_same_topology(t, u):
+                    break
+            else:
+                self.topologically_unique_trees.append(t)
         return None
 
     def postprocess(self):
-        print "Total taxa: %d" % self.taxa_count
-        print "Total trees: %d" % self.tree_count
-        print "Unique topologies: %d" % len(self.topologically_unique_trees)
-        print "Are trees ultrametric? ", str(self.ultrametric)
-        print "Mean tree age: %f" % (sum(self.tree_ages) / self.tree_count)
+        self.topology_count = len(self.topologically_unique_trees)
+        self.min_tree_height = min(self.tree_ages)
+        self.max_tree_height = max(self.tree_ages)
+        self.mean_tree_height = sum(self.tree_ages) / self.tree_count
         return []
 
 def run():
@@ -61,4 +68,14 @@ def run():
     parser = optparse.OptionParser(__doc__)
     options, files = parser.parse_args()
     stat = Stat()
-    plumb(stat, files)
+    source = fileinput.input(files)
+    trees_from_stdin = NewickParser().consume(source)
+    stat.consume(trees_from_stdin)
+    
+    print "Total taxa: %d" % stat.taxa_count
+    print "Total trees: %d" % stat.tree_count
+    print "Unique topologies: %d" % stat.topology_count
+    print "Are trees ultrametric? ", str(stat.ultrametric)
+    print "Mean tree height: %f" % stat.mean_tree_height
+    print "Min tree height: %f" % stat.min_tree_height
+    print "Max tree height: %f" % stat.max_tree_height
