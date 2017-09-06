@@ -126,5 +126,5 @@ def run():
     options, files = parser.parse_args()
 
     consensus = Consensus(options.frequency)
-    plumb(consensus, file)
+    plumb(consensus, files)
 
