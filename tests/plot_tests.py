@@ -8,6 +8,7 @@ from phyltr.commands.plot import Plot
 def test_plot():
     if os.environ.get("TRAVIS"):
         assert True
+        return
 
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
