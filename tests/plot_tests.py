@@ -1,6 +1,6 @@
 import fileinput
 import tempfile
-import os.environ
+import os
 
 from phyltr.commands.generic import NewickParser
 from phyltr.commands.plot import Plot
