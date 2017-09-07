@@ -1,10 +1,14 @@
 import fileinput
 import tempfile
+import os.environ
 
 from phyltr.commands.generic import NewickParser
 from phyltr.commands.plot import Plot
 
 def test_plot():
+    if os.environ.get("TRAVIS"):
+        assert True
+
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
     with tempfile.NamedTemporaryFile() as fp:
