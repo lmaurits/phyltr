@@ -21,6 +21,7 @@ class PhyltrCommand:
                 if res:
                     yield res
             except StopIteration:
+                stream.close()
                 break
         for tree in self.postprocess():
             yield tree
