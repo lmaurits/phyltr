@@ -20,6 +20,7 @@ OPTIONS:
 import itertools
 
 import phyltr.utils.phyoptparse as optparse
+from phyltr.utils.topouniq import are_same_topology
 from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Uniq(PhyltrCommand):
@@ -33,7 +34,7 @@ class Uniq(PhyltrCommand):
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         for exemplar in self.topologies:
-            if t.robinson_foulds(exemplar)[0] == 0.0:
+            if are_same_topology(t, exemplar):
                 self.topologies[exemplar].append(t)
                 break
         else:
