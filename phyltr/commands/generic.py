@@ -34,22 +34,10 @@ class PhyltrCommand:
 
 class ComplexNewickParser:
 
-    def __init__(self, stream):
-        self.stream = stream
+    def consume(self, stream):
 
-    def consume(self):
-        # Parse options
-        parser = optparse.OptionParser(__doc__)
-        parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
-        parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
-        parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
-        options, files = parser.parse_args()
-        if not files:
-            files = ["-"]
-
-        tree_strings = []
         firstline = True
-        for line in self.stream:
+        for line in stream:
             # Skip blank lines
             if not line:
                 continue
@@ -93,21 +81,15 @@ class ComplexNewickParser:
                 # Smells like a tree!
                 start = line.index("(")
                 end = line.rindex(";") + 1
-                tree_strings.append(line[start:end])
-
-        burnin = int(round((options.burnin/100.0)*len(tree_strings)))
-        tree_strings = tree_strings[burnin::options.subsample]
-
-        while tree_strings:
-            tree_string = tree_strings.pop(0)
-            t = get_tree(tree_string)
-            if not t:
-                continue
-            if isNexus and nexus_trans:
-                for node in t.traverse():
-                    if node.name and node.name in nexus_trans:
-                        node.name = nexus_trans[node.name]
-            yield t
+                tree_string = line[start:end]
+                t = get_tree(tree_string)
+                if not t:
+                    continue
+                if isNexus and nexus_trans:
+                    for node in t.traverse():
+                        if node.name and node.name in nexus_trans:
+                            node.name = nexus_trans[node.name]
+                yield t
 
 def get_tree(tree_string):
     # FIXME
@@ -218,6 +200,12 @@ class ListPerLineFormatter:
 def plumb(command, files="-"):
     source = fileinput.input(files)
     trees_from_stdin = NewickParser().consume(source)
+    output_trees = command.consume(trees_from_stdin)
+    NewickFormatter(sys.stdout).consume(output_trees)
+
+def complex_plumb(command, files="-"):
+    source = fileinput.input(files)
+    trees_from_stdin = ComplexNewickParser().consume(source)
     output_trees = command.consume(trees_from_stdin)
     NewickFormatter(sys.stdout).consume(output_trees)
 
