@@ -3,7 +3,7 @@ import re
 import sys
 import types
 
-import ete2
+import ete3
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -104,16 +104,16 @@ def get_tree(tree_string):
 
     # Try to parse tree as is
     try:
-        t = ete2.Tree(tree_string)
+        t = ete3.Tree(tree_string)
         return t
-    except (ValueError,ete2.parser.newick.NewickError):
+    except (ValueError,ete3.parser.newick.NewickError):
         pass
 
     # Try to parse tree with internal node labels
     try:
-        t = ete2.Tree(tree_string, format=1)
+        t = ete3.Tree(tree_string, format=1)
         return t
-    except (ValueError,ete2.parser.newick.NewickError):
+    except (ValueError,ete3.parser.newick.NewickError):
         # That didn't fix it.  Give up
         return None
 
@@ -149,17 +149,17 @@ class NewickParser:
         for tree_string in stream:
             # Try to parse tree as is
             try:
-                t = ete2.Tree(tree_string)
+                t = ete3.Tree(tree_string)
                 yield t
                 continue
-            except (ValueError,ete2.parser.newick.NewickError):
+            except (ValueError,ete3.parser.newick.NewickError):
                 pass
 
             # Try to parse tree with internal node labels
             try:
-                t = ete2.Tree(tree_string, format=1)
+                t = ete3.Tree(tree_string, format=1)
                 yield t
-            except (ValueError,ete2.parser.newick.NewickError):
+            except (ValueError,ete3.parser.newick.NewickError):
                 # That didn't fix it.  Give up
                 continue
 

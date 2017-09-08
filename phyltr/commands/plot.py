@@ -16,7 +16,7 @@ OPTIONS:
 
 import os.path
 
-import ete2
+import ete3
 
 from phyltr.commands.generic import PhyltrCommand, plumb_strings
 import phyltr.utils.phyoptparse as optparse
@@ -50,7 +50,7 @@ class Plot(PhyltrCommand):
         self.n = 0
 
         # Setup TreeStyle
-        self.ts = ete2.TreeStyle()
+        self.ts = ete3.TreeStyle()
         self.ts.show_scale = False
         self.ts.show_branch_support = True
 
@@ -63,11 +63,11 @@ class Plot(PhyltrCommand):
             colour_map = dict(zip(values, colours))
             for l in t.iter_leaves():
                 mycolour = colour_map[getattr(l,self.attribute)]
-                l.add_face(ete2.CircleFace(radius=10,color=mycolour, style="sphere"), 0)
+                l.add_face(ete3.CircleFace(radius=10,color=mycolour, style="sphere"), 0)
 
         # Apply labels
         for l in t.iter_leaves():
-            l.add_face(ete2.TextFace(getattr(l, self.label)), 1)
+            l.add_face(ete3.TextFace(getattr(l, self.label)), 1)
 
         # Plot or save
         if self.output:

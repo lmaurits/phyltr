@@ -18,7 +18,7 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import ete2
+import ete3
 
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.generic import PhyltrCommand, complex_plumb

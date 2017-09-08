@@ -14,7 +14,7 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import ete2
+import ete3
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
@@ -50,7 +50,7 @@ class Consensus(PhyltrCommand):
         clades.reverse()
 
         # Start out with a tree in which all leaves are joined in one big polytomy
-        t = ete2.Tree()
+        t = ete3.Tree()
         for l in all_leaves:
             t.add_child(name=l)
 
