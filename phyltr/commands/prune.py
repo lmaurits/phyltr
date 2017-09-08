@@ -36,7 +36,7 @@ class Prune(PhyltrCommand):
         if taxa:
             self.taxa = taxa
         elif filename:
-            with open(options.filename, "r") as fp:
+            with open(self.filename, "r") as fp:
                 self.taxa = [t.strip() for t in fp.readlines()]
             if not self.taxa:
                 raise ValueError("Empty file!")
