@@ -206,6 +206,14 @@ class StringFormatter:
                     self.out.write(str(x))
             self.out.write("\n")
 
+class ListPerLineFormatter:
+
+    def __init__(self, out):
+        self.out = out
+
+    def consume(self, stream):
+        for lst in stream:
+            print("\n".join(lst))
 
 def plumb(command, files="-"):
     source = fileinput.input(files)
@@ -218,3 +226,9 @@ def plumb_strings(command, files="-"):
     trees_from_stdin = NewickParser().consume(source)
     output_trees = command.consume(trees_from_stdin)
     StringFormatter(sys.stdout).consume(output_trees)
+
+def plumb_list(command, files="-"):
+    source = fileinput.input(files)
+    trees_from_stdin = NewickParser().consume(source)
+    output_lists = command.consume(trees_from_stdin)
+    ListPerLineFormatter(sys.stdout).consume(output_lists)

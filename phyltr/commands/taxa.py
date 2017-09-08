@@ -11,16 +11,21 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.generic import PhyltrCommand, plumb_list
 import phyltr.utils.phyoptparse as optparse
 
 class Taxa(PhyltrCommand):
 
+    def __init__(self):
+        self.done = False
+
     def process_tree(self, t):
-        names = [n.name for n in t.traverse() if n.name]
-        for n in sorted(names):
-            print(n)
-        raise StopIteration
+        if self.done:
+            raise StopIteration
+        else:
+            names = [n.name for n in t.traverse() if n.name]
+            self.done = True
+            return sorted(names)
 
 def run():
 
@@ -29,4 +34,4 @@ def run():
     options, files = parser.parse_args()
     
     taxa = Taxa()
-    plumb(taxa, files)
+    plumb_list(taxa, files)
