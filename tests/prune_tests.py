@@ -36,6 +36,5 @@ def test_annotation_prune():
     annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(trees)
     pruned = Prune(attribute="f1", value="0").consume(annotated)
     for t in pruned:
-        print(t.write())
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
