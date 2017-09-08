@@ -27,7 +27,7 @@ from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Clades(PhyltrCommand):
     
-    def __init__(self, frequency=1.0, ages=False):
+    def __init__(self, frequency=0.0, ages=False):
         self.frequency = frequency
         self.ages = ages
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
