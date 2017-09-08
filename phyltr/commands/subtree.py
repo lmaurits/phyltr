@@ -31,7 +31,7 @@ class Subtree(PhyltrCommand):
         if taxa:
             self.taxa = taxa
         elif filename:
-            with open(options.filename, "r") as fp:
+            with open(self.filename, "r") as fp:
                 self.taxa = [t.strip() for t in fp.readlines()]
             if not self.taxa:
                 raise ValueError("Empty file!")
@@ -47,8 +47,8 @@ class Subtree(PhyltrCommand):
             mrca = leaves[0].get_common_ancestor(leaves[1:])
             t = mrca
         else:
-            mrca = list(t.get_monophyletic([self.value], self.attribute))[0]
-            assert mrca != t
+            taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) == self.value]
+            mrca = taxa[0].get_common_ancestor(taxa[1:])
             t = mrca
         return t
 
