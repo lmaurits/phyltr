@@ -14,7 +14,7 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.generic import PhyltrCommand, plumb_strings
 
 import phyltr.utils.phyoptparse as optparse
 
@@ -42,7 +42,7 @@ class Pretty(PhyltrCommand):
                     node.name = "(%.2f) %s" % (n.support, "+".join(sorted([l.name for l in node.get_leaves()])))
                     for child in node.get_children():
                         child.detach()
-        print t.get_ascii()
+        return t.get_ascii()
 
 def run():
     # Parse options
@@ -51,4 +51,4 @@ def run():
     options, files = parser.parse_args()
     
     pretty = Pretty(compress=options.compress)
-    plumb(pretty, files)
+    plumb_strings(pretty, files)
