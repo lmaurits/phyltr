@@ -12,7 +12,7 @@ class OptionParser(StdOptionParser):
     def parse_args(self, *args, **kwargs):
         options, files = StdOptionParser.parse_args(self, *args, **kwargs)
         if options.help:
-            print self.help_msg
+            print(self.help_msg)
             sys.exit(0)
 
         return options, files

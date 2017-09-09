@@ -18,10 +18,16 @@ OPTIONS:
 """
 
 import itertools
+import sys
 
 import phyltr.utils.phyoptparse as optparse
 from phyltr.utils.topouniq import are_same_topology
 from phyltr.commands.generic import PhyltrCommand, plumb
+
+if sys.version_info.major == 2:
+    izip = itertools.izip
+else:
+    izip = zip
 
 class Uniq(PhyltrCommand):
 
@@ -44,7 +50,7 @@ class Uniq(PhyltrCommand):
        
     def postprocess(self):
         for equ_class in self.topologies.values():
-            for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
+            for nodes in izip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
                     dist = max(dists)
@@ -54,9 +60,9 @@ class Uniq(PhyltrCommand):
                     dists.sort()
                     l = len(dists)
                     if l % 2 == 0:
-                        dist = 0.5*(dists[l/2]+dists[l/2-1])
+                        dist = 0.5*(dists[l//2]+dists[l//2-1])
                     else:
-                        dist = dists[l/2]
+                        dist = dists[l//2]
                 elif self.lengths == "min":
                     dist = min(dists)
                 nodes[0].dist = dist

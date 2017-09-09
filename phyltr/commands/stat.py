@@ -72,10 +72,10 @@ def run():
     trees_from_stdin = NewickParser().consume(source)
     stat.consume(trees_from_stdin)
     
-    print "Total taxa: %d" % stat.taxa_count
-    print "Total trees: %d" % stat.tree_count
-    print "Unique topologies: %d" % stat.topology_count
-    print "Are trees ultrametric? ", str(stat.ultrametric)
-    print "Mean tree height: %f" % stat.mean_tree_height
-    print "Min tree height: %f" % stat.min_tree_height
-    print "Max tree height: %f" % stat.max_tree_height
+    print("Total taxa: %d" % stat.taxa_count)
+    print("Total trees: %d" % stat.tree_count)
+    print("Unique topologies: %d" % stat.topology_count)
+    print("Are trees ultrametric? ", str(stat.ultrametric))
+    print("Mean tree height: %f" % stat.mean_tree_height)
+    print("Min tree height: %f" % stat.min_tree_height)
+    print("Max tree height: %f" % stat.max_tree_height)

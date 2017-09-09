@@ -69,7 +69,7 @@ class Consensus(PhyltrCommand):
                 leaf, age = c.get_farthest_leaf()
                 c.dist = mean - age
             ages.sort()
-            lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
+            lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
             clade.add_feature("age_mean", mean)
             clade.add_feature("age_median", median)
             clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
@@ -78,7 +78,7 @@ class Consensus(PhyltrCommand):
                 values = self.cp.clade_attributes[f][clade_key]
                 mean = sum(values)/len(values)
                 values.sort()
-                lower, median, upper = [values[int(x*len(values))] for x in 0.025,0.5,0.975]
+                lower, median, upper = [values[int(x*len(values))] for x in (0.025,0.5,0.975)]
                 clade.add_feature("%s_mean" % f, mean)
                 clade.add_feature("%s_median" % f, median)
                 clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
