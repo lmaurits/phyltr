@@ -39,7 +39,7 @@ class Pretty(PhyltrCommand):
                 desc.append(node)
                 if all([n.support >=0.9 for n in desc]):
                     dead_nodes.extend(desc)
-                    node.name = "(%.2f) %s" % (n.support, "+".join(sorted([l.name for l in node.get_leaves()])))
+                    node.name = "(%.2f) %s" % (node.support, "+".join(sorted([l.name for l in node.get_leaves()])))
                     for child in node.get_children():
                         child.detach()
         return t.get_ascii()
