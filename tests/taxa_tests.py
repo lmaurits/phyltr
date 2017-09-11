@@ -1,7 +1,7 @@
 import fileinput
 import tempfile
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.taxa import Taxa
 
 def test_taxa():

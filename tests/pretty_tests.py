@@ -1,7 +1,7 @@
 import fileinput
 import tempfile
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.pretty import Pretty
 
 def test_pretty():

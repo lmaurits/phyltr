@@ -21,8 +21,9 @@ import itertools
 import sys
 
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 from phyltr.utils.topouniq import are_same_topology
-from phyltr.commands.generic import PhyltrCommand, plumb
 
 if sys.version_info.major == 2:
     izip = itertools.izip
@@ -75,4 +76,4 @@ def run():
     options, files = parser.parse_args()
 
     uniq = Uniq(options.lengths)
-    plumb(uniq, files)
+    plumb_stdin(uniq, files)

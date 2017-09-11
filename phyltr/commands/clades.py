@@ -23,7 +23,8 @@ OPTIONS:
 
 import phyltr.utils.phyoptparse as optparse
 import phyltr.utils.cladeprob
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Clades(PhyltrCommand):
     
@@ -50,5 +51,5 @@ def run():
     options, files = parser.parse_args()
 
     clades = Clades(options.frequency, options.age)
-    plumb(clades, files)
+    plumb_stdin(clades, files)
 

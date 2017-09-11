@@ -13,8 +13,9 @@ OPTIONS:
 
 import fileinput
 
-from phyltr.commands.generic import PhyltrCommand, NewickParser
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_null
 from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
@@ -27,11 +28,6 @@ class Stat(PhyltrCommand):
         self.topologically_unique_trees = []
         self.tree_ages = []
         self.firsttree = True
-
-    def consume(self, stream):
-        for tree in stream:
-            self.process_tree(tree)
-        self.postprocess()
 
     def process_tree(self, t):
         # Stuff we do to every tree...
@@ -53,7 +49,7 @@ class Stat(PhyltrCommand):
                     break
             else:
                 self.topologically_unique_trees.append(t)
-        return None
+        return t
 
     def postprocess(self):
         self.topology_count = len(self.topologically_unique_trees)
@@ -68,9 +64,7 @@ def run():
     parser = optparse.OptionParser(__doc__)
     options, files = parser.parse_args()
     stat = Stat()
-    source = fileinput.input(files)
-    trees_from_stdin = NewickParser().consume(source)
-    stat.consume(trees_from_stdin)
+    plumb_null(stat, files)
     
     print("Total taxa: %d" % stat.taxa_count)
     print("Total trees: %d" % stat.tree_count)

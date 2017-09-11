@@ -20,8 +20,9 @@ OPTIONS:
 
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Prune(PhyltrCommand):
 
@@ -83,4 +84,4 @@ def run():
             sys.exit(1)
 
     prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
-    plumb(prune, files)
+    plumb_stdin(prune, files)

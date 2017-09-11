@@ -22,9 +22,9 @@ OPTIONS:
 
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
-
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Rename(PhyltrCommand):
     
@@ -83,5 +83,5 @@ def run():
     options, files = parser.parse_args()
 
     rename = Rename(filename=options.filename, remove=options.remove)
-    plumb(rename, files)
+    plumb_stdin(rename, files)
 

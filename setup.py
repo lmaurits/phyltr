@@ -18,7 +18,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
     scripts=['bin/phyltr',],
-    packages = ['phyltr','phyltr/commands', 'phyltr/utils'],
+    packages = ['phyltr','phyltr/commands', 'phyltr/plumbing', 'phyltr/utils'],
     requires=['ete3'],
     install_requires=['ete3']
 

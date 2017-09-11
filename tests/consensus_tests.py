@@ -2,7 +2,7 @@ from __future__ import division
 
 import fileinput
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.consensus import Consensus
 
 def test_consensus():

@@ -16,8 +16,9 @@ OPTIONS:
 
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Subtree(PhyltrCommand):
 
@@ -73,4 +74,4 @@ def run():
             sys.exit(1)
 
     subtree = Subtree(taxa, options.filename, options.attribute, options.value)
-    plumb(subtree, files)
+    plumb_stdin(subtree, files)

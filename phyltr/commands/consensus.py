@@ -17,8 +17,9 @@ OPTIONS:
 import ete3
 
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 import phyltr.utils.cladeprob
-from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Consensus(PhyltrCommand):
 
@@ -126,5 +127,5 @@ def run():
     options, files = parser.parse_args()
 
     consensus = Consensus(options.frequency)
-    plumb(consensus, files)
+    plumb_stdin(consensus, files)
 

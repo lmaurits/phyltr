@@ -11,8 +11,9 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb_strings
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_strings
 
 class Height(PhyltrCommand):
 

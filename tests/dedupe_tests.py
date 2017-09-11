@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.dedupe import Dedupe
 
 def test_dedupe():

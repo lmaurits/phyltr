@@ -14,8 +14,9 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Scale(PhyltrCommand):
 
@@ -36,4 +37,4 @@ def run():
     options, files = parser.parse_args()
 
     scale = Scale(options.scale)
-    plumb(scale, files)
+    plumb_stdin(scale, files)

@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.stat import Stat
 
 def test_stat():

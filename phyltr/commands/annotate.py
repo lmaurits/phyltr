@@ -17,8 +17,9 @@ OPTIONS:
 import csv
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Annotate(PhyltrCommand):
 
@@ -118,5 +119,5 @@ def run():
     options, files = parser.parse_args()
 
     annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
-    plumb(annotate, files)
+    plumb_stdin(annotate, files)
 

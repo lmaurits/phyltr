@@ -16,8 +16,9 @@ import random
 import sys
 
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Dedupe(PhyltrCommand):
 
@@ -53,5 +54,5 @@ def run():
     options, files = parser.parse_args()
 
     dedupe = Dedupe()
-    plumb(dedupe, files)
+    plumb_stdin(dedupe, files)
 

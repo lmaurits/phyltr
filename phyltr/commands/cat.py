@@ -21,7 +21,8 @@ OPTIONS:
 import ete3
 
 import phyltr.utils.phyoptparse as optparse
-from phyltr.commands.generic import PhyltrCommand, complex_plumb
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import complex_plumb
 
 class Cat(PhyltrCommand):
 

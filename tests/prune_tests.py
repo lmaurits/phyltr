@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.prune import Prune
 from phyltr.commands.annotate import Annotate
 

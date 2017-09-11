@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.commands.generic import NewickParser, ComplexNewickParser
+from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
 from phyltr.commands.cat import Cat
 
 def test_basic_cat():

@@ -21,8 +21,9 @@ OPTIONS:
 
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
 import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
 
 class Collapse(PhyltrCommand):
 
@@ -110,4 +111,4 @@ def run():
     options, files = parser.parse_args()
 
     collapse = Collapse({}, options.translate, options.attribute)
-    plumb(collapse, files)
+    plumb_stdin(collapse, files)

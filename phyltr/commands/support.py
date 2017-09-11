@@ -23,9 +23,10 @@ OPTIONS:
 """
 
 
-import phyltr.utils.cladeprob
 import phyltr.utils.phyoptparse as optparse
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.helpers import plumb_stdin
+import phyltr.utils.cladeprob
 
 class Support(PhyltrCommand):
    
@@ -77,4 +78,4 @@ def run():
     options, files = parser.parse_args()
 
     support = Support(options.frequency, options.age, options.sort, options.filename)
-    plumb(support, files)
+    plumb_stdin(support, files)

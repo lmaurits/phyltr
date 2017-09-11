@@ -2,7 +2,7 @@ import fileinput
 import tempfile
 import os
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.plot import Plot
 
 def test_plot():

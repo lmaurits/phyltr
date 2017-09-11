@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.commands.generic import NewickParser
+from phyltr.plumbing.sources import NewickParser
 
 def test_parsing():
     lines = fileinput.input("tests/treefiles/basic.trees")
