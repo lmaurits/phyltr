@@ -53,15 +53,15 @@ class Subtree(PhyltrCommand):
             t = mrca
         return t
 
-def run():
 
+def init_from_args(argv=sys.argv):
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
     parser.add_option('-f', '--file', dest="filename",
             help='Specifies a file from which to read taxa')
     parser.add_option('-v', '--value', default=None)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
 
     if (options.attribute and options.value) or options.filename:
         taxa = []
@@ -74,4 +74,8 @@ def run():
             sys.exit(1)
 
     subtree = Subtree(taxa, options.filename, options.attribute, options.value)
+    return subtree, files
+
+def run():
+    subtree, files = init_from_args()
     plumb_stdin(subtree, files)

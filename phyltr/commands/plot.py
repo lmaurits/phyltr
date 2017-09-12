@@ -15,6 +15,7 @@ OPTIONS:
 """
 
 import os.path
+import sys
 
 import ete3
 
@@ -94,8 +95,7 @@ class Plot(PhyltrCommand):
         else:
             raise StopIteration
 
-def run():
-    
+def init_from_args(argv=sys.argv):
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-d', '--dpi', type="int", default=None)
@@ -105,7 +105,11 @@ def run():
     parser.add_option('-o', '--output', default=None)
     parser.add_option('-u', '--units', default="px")
     parser.add_option('-w', '--width', type="int", dest="w", default=None)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
 
     plot = Plot(options.label, options.attribute, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
+    return plot, files
+
+def run():
+    plot, files = init_from_args()
     plumb_strings(plot, files)

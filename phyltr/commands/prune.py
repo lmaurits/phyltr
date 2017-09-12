@@ -63,7 +63,8 @@ class Prune(PhyltrCommand):
         t.prune(pruning_taxa)
         return t
 
-def run():
+
+def init_from_args(argv=sys.argv):
 
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
@@ -71,7 +72,7 @@ def run():
             help='Specifies a file from which to read taxa')
     parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
     parser.add_option('-v', '--value', default=None)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
 
     if (options.attribute and options.value) or options.filename:
         taxa = []
@@ -84,4 +85,8 @@ def run():
             sys.exit(1)
 
     prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
+    return prune, files
+
+def run():
+    plumb, files = init_from_args()
     plumb_stdin(prune, files)

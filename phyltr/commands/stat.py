@@ -11,7 +11,7 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import fileinput
+import sys
 
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
@@ -58,18 +58,23 @@ class Stat(PhyltrCommand):
         self.mean_tree_height = sum(self.tree_ages) / self.tree_count
         return []
 
-def run():
 
+def init_from_args(argv=sys.argv):
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
     stat = Stat()
+    return stat, files
+
+def run():
+
+    stat, files = init_from_args()
     plumb_null(stat, files)
     
     print("Total taxa: %d" % stat.taxa_count)
     print("Total trees: %d" % stat.tree_count)
     print("Unique topologies: %d" % stat.topology_count)
-    print("Are trees ultrametric? ", str(stat.ultrametric))
+    print("Are trees ultrametric? %s", str(stat.ultrametric))
     print("Mean tree height: %f" % stat.mean_tree_height)
     print("Min tree height: %f" % stat.min_tree_height)
     print("Max tree height: %f" % stat.max_tree_height)

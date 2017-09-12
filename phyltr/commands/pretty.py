@@ -14,6 +14,8 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import sys
+
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_strings
@@ -44,11 +46,15 @@ class Pretty(PhyltrCommand):
                         child.detach()
         return t.get_ascii()
 
-def run():
+def init_from_args(argv=sys.argv):
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
     
     pretty = Pretty(compress=options.compress)
+    return pretty, files
+
+def run():
+    pretty, files = init_from_args()
     plumb_strings(pretty, files)

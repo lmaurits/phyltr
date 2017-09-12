@@ -68,12 +68,16 @@ class Uniq(PhyltrCommand):
                     dist = min(dists)
                 nodes[0].dist = dist
             yield equ_class[0]
-def run():
 
+def init_from_args(argv=sys.argv):
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
-    options, files = parser.parse_args()
-
+    options, files = parser.parse_args(argv)
+    
     uniq = Uniq(options.lengths)
+    return uniq, files
+
+def run():
+    uniq, files = init_from_args()
     plumb_stdin(uniq, files)

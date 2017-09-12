@@ -118,13 +118,17 @@ class Collapse(PhyltrCommand):
         for child in mrca.get_children():
             child.detach()
 
-def run():
 
+def init_from_args(argv=sys.argv):
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-t', '--translate',
                 help='Specifies the translation file.',default=None)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
 
     collapse = Collapse({}, options.translate, options.attribute)
+    return collapse, files
+
+def run():
+    collapse, files = init_from_args()
     plumb_stdin(collapse, files)

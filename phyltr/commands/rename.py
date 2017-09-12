@@ -72,16 +72,19 @@ class Rename(PhyltrCommand):
 
         return t
 
-def run():
+def init_from_args(argv=sys.argv):
 
-    # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-f', '--file', dest="filename",
                 help='Specifies the translation file.')
     parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
                 help='Remove untranslated taxa.')
-    options, files = parser.parse_args()
-
+    options, files = parser.parse_args(argv)
+    
     rename = Rename(filename=options.filename, remove=options.remove)
+    return rename, files
+
+def run():
+    rename, files = init_from_args()
     plumb_stdin(rename, files)
 

@@ -48,11 +48,15 @@ class Dedupe(PhyltrCommand):
 #                    v.detach()
         return t
 
-def run():
 
+def init_from_args(argv=sys.argv):
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
 
     dedupe = Dedupe()
+    return dedupe, files
+
+def run():
+    dedupe, files = init_from_args()
     plumb_stdin(dedupe, files)
 

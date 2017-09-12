@@ -11,6 +11,8 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import sys
+
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_list
@@ -28,11 +30,15 @@ class Taxa(PhyltrCommand):
             self.done = True
             return sorted(names)
 
-def run():
+def init_from_args(argv=sys.argv):
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args()
+    options, files = parser.parse_args(argv)
     
     taxa = Taxa()
+    return taxa, files
+
+def run():
+    taxa, files = init_from_args()
     plumb_list(taxa, files)
