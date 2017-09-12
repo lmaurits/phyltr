@@ -15,3 +15,12 @@ def test_beast_nexus_output_cat():
     trees = Cat().consume(trees)
     for t in trees:
         assert len(t.get_leaves()) == 26
+
+def test_beast_annotated_nexus_output_cat():
+    lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
+    trees = ComplexNewickParser().consume(lines)
+    trees = Cat().consume(trees)
+    for t in trees:
+        for n in t.traverse():
+            assert hasattr(n, "rate")
+        assert len(t.get_leaves()) == 26
