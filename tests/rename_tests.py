@@ -13,6 +13,16 @@ def test_rename():
         assert "X" in leaves
         assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
 
+def test_rename_from_file():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = NewickParser().consume(lines)
+    renamed = Rename(filename="tests/argfiles/rename.txt").consume(trees)
+    for t in renamed:
+        leaves = t.get_leaf_names()
+        assert "A" not in leaves
+        assert "X" in leaves
+        assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
+
 def test_rename_with_remove():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
