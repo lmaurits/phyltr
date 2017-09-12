@@ -1,3 +1,5 @@
+import types
+
 class NewickFormatter:
 
     def __init__(self, out):
