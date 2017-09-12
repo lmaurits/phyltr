@@ -19,11 +19,11 @@ import sys
 
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
+from phyltr.plumbing.helpers import plumb_stdin, plumb_null
 
 class Annotate(PhyltrCommand):
 
-    def __init__(self, filename, key, extract=False, multiple=False):
+    def __init__(self, filename, key=None, extract=False, multiple=False):
         self.filename = filename
         self.key = key
         self.extract = extract
@@ -41,12 +41,9 @@ class Annotate(PhyltrCommand):
                 if self.n > 0:
                     raise StopIteration
             self.extract_annotations(t)
-            if self.filename == "-":
-                # Don't emit trees if using stdout for extracted data
-                return None
         else:
-           self.annotate_tree(t)
-
+            self.annotate_tree(t)
+        self.n += 1
         return t
 
     def read_annotation_file(self):
@@ -100,8 +97,8 @@ class Annotate(PhyltrCommand):
                 else:
                     fix_root_name = False
                 rowdict = {f:getattr(node, f, "?") for f in fieldnames}
-                if tree_no:
-                    rowdict["tree_number"] = tree_no
+                if self.n:
+                    rowdict["tree_number"] = self.n
                 writer.writerow(rowdict)
                 if fix_root_name:
                     node.name = None
@@ -119,5 +116,11 @@ def run():
     options, files = parser.parse_args()
 
     annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
-    plumb_stdin(annotate, files)
+    if options.extract and options.filename == "-":
+        # If we're writing an extracted CSV to stdin, we don't want to also
+        # serialise the trees, so plumb to null
+        plumb_null(annotate, files)
+    else:
+        # Otherwise we do
+        plumb_stdin(annotate, files)
 
