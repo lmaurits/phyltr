@@ -4,9 +4,11 @@ from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 
 def test_pipeline():
+    """Silly long pipeline to stress test build_pipeline."""
+
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    output = build_pipeline("rename -f tests/argfiles/rename.txt | prune X,B", source=trees)
+    output = build_pipeline("cat -s 2 | rename -f tests/argfiles/rename.txt | prune X,B | support --sort | uniq | stat", source=trees)
     for t in output:
         print(t.write())
         leaves = t.get_leaf_names()
