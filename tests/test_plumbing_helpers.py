@@ -13,7 +13,7 @@ def test_plumb_strings():
     helpers.plumb_strings(Height(), "tests/treefiles/basic.trees")
 
 def test_plumb_list():
-    helpers.plumb_strings(Taxa(), "tests/treefiles/basic.trees")
+    helpers.plumb_list(Taxa(), "tests/treefiles/basic.trees")
 
 def test_plumb_null():
     helpers.plumb_null(Cat(), "tests/treefiles/basic.trees")
