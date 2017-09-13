@@ -17,7 +17,8 @@ class StringFormatter:
 
     def consume(self, stream):
         for x in stream:
-            if isinstance(x, types.StringTypes):                self.our.write(x)
+            if isinstance(x, types.StringTypes):
+                self.out.write(x)
             else:
                 try:
                     self.out.write("\n".join((str(element) for element in x)))
