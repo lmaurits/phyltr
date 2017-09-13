@@ -12,7 +12,6 @@ def build_pipeline(string, source):
         args = shlex.split(args)
         command = args[0]
         command_module = importlib.import_module("phyltr.commands."+command)
-        print("Building this: ", args)
         command_obj, files = command_module.init_from_args(args[1:])
         if hasattr(command_obj, "taxa"):
             print(command_obj.taxa)
