@@ -88,5 +88,5 @@ def init_from_args(argv=sys.argv):
     return prune, files
 
 def run():
-    plumb, files = init_from_args()
+    prune, files = init_from_args()
     plumb_stdin(prune, files)
