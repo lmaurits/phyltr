@@ -11,8 +11,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_null
@@ -59,10 +57,10 @@ class Stat(PhyltrCommand):
         return []
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
     stat = Stat()
     return stat, files
 

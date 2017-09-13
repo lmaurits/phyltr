@@ -64,7 +64,7 @@ class Prune(PhyltrCommand):
         return t
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
 
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
@@ -72,7 +72,7 @@ def init_from_args(argv=sys.argv):
             help='Specifies a file from which to read taxa')
     parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
     parser.add_option('-v', '--value', default=None)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     if (options.attribute and options.value) or options.filename:
         taxa = []

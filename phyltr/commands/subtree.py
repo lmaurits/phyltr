@@ -54,14 +54,14 @@ class Subtree(PhyltrCommand):
         return t
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', default=None)
     parser.add_option('-f', '--file', dest="filename",
             help='Specifies a file from which to read taxa')
     parser.add_option('-v', '--value', default=None)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     if (options.attribute and options.value) or options.filename:
         taxa = []

@@ -22,8 +22,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_stdin
@@ -67,7 +65,7 @@ class Support(PhyltrCommand):
             yield t
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
@@ -76,7 +74,7 @@ def init_from_args(argv=sys.argv):
     parser.add_option("-o", "--output", action="store", dest="filename",
         help="save clades to FILE", metavar="FILE")
     parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     support = Support(options.frequency, options.age, options.sort, options.filename)
     return support, files

@@ -11,8 +11,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_strings
@@ -23,10 +21,10 @@ class Length(PhyltrCommand):
         return sum([n.dist for n in t.traverse()])
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
 
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     length = Length()
     return length, files

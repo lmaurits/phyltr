@@ -20,8 +20,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_stdin
@@ -72,14 +70,14 @@ class Rename(PhyltrCommand):
 
         return t
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
 
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-f', '--file', dest="filename",
                 help='Specifies the translation file.')
     parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
                 help='Remove untranslated taxa.')
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
     
     rename = Rename(filename=options.filename, remove=options.remove)
     return rename, files

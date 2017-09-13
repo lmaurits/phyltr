@@ -119,12 +119,12 @@ class Collapse(PhyltrCommand):
             child.detach()
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-t', '--translate',
                 help='Specifies the translation file.',default=None)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     collapse = Collapse({}, options.translate, options.attribute)
     return collapse, files

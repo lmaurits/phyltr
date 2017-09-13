@@ -30,11 +30,11 @@ class Taxa(PhyltrCommand):
             self.done = True
             return sorted(names)
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
     
     taxa = Taxa()
     return taxa, files

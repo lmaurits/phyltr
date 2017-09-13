@@ -14,8 +14,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import ete3
 
 import phyltr.utils.phyoptparse as optparse
@@ -123,10 +121,10 @@ def recursive_builder(t, clades):
     return t
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     consensus = Consensus(options.frequency)
     return consensus, files

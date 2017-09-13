@@ -13,8 +13,6 @@ OPTIONS:
 """
 
 import random
-import sys
-
 
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
@@ -49,9 +47,9 @@ class Dedupe(PhyltrCommand):
         return t
 
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
     parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     dedupe = Dedupe()
     return dedupe, files

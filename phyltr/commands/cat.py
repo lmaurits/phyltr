@@ -18,8 +18,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
-
 import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import complex_plumb
@@ -41,14 +39,14 @@ class Cat(PhyltrCommand):
         for t in self.trees:
             yield t
 
-def init_from_args(argv=sys.argv):
+def init_from_args(*args):
 
     # Parse options
     parser = optparse.OptionParser(__doc__)
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
     parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
-    options, files = parser.parse_args(argv)
+    options, files = parser.parse_args(*args)
 
     cat = Cat(options.burnin, options.subsample, not options.no_annotations)
     return cat, files
