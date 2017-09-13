@@ -32,4 +32,5 @@ def init_from_args(argv=sys.argv):
     return length, files
 
 def run():
+    length, files = init_from_args()
     plumb_strings(length, files)
