@@ -29,15 +29,35 @@ class Cat(PhyltrCommand):
         self.subsample = subsample
         self.annotations = annotations
         self.trees = []
+        self.n = 0
 
     def process_tree(self, t):
-        self.trees.append(t)
+        if self.burnin:
+            # If we're discarding a fixed percentage as burn-in, we need to
+            # know the total number of trees.  So for now, just dump 'em in
+            # a list, consume ALL the memory...
+            self.trees.append(t)
+            return None
+        else:
+            # Otherwise, we can subsample as we go
+            if self.n % self.subsample == 0:
+                self.n += 1
+                return t
+            else:
+                self.n += 1 # Would be nice to avoid duplicating this
+                return None
 
     def postprocess(self):
-        burnin = int(round((self.burnin/100.0)*len(self.trees)))
-        self.trees = self.trees[burnin::self.subsample]
-        for t in self.trees:
-            yield t
+        if self.burnin:
+            # If there's a burn-in, we now have all trees sitting in a list,
+            # so dump 'em all now
+            burnin = int(round((self.burnin/100.0)*len(self.trees)))
+            self.trees = self.trees[burnin::self.subsample]
+            for t in self.trees:
+                yield t
+        else:
+            # If there's no burn-in, we've already done everything
+            raise StopIteration
 
 def init_from_args(*args):
 
