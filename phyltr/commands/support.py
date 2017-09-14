@@ -5,6 +5,10 @@ Annotate a treestream with clade support probabilities, and optionally save clad
 
 OPTIONS:
 
+    -a, --ages
+        Whether or not to include clade age information (mean and 95% HPD
+        interval in output)
+
     -s, --sort
         Reorder tree stream to print trees in order from highest to lowest
         product of clade credibilities.

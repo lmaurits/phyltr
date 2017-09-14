@@ -1,12 +1,21 @@
 """Usage:
-    phyltr subtree taxa [<options>] [<files>]
+    phyltr subtree [taxa] [<options>] [<files>]
 
 Replace each tree with the minimal subtree containing the specified taxa.
+Unlike an inverse prune, this may change the height of the tree.
 
 OPTIONS:
 
     taxa
         A comma-separated list of leaf taxa to keep in the tree
+
+    -a, --attribute
+        An attribute to inspect to decide which leaves to keep.  Must be used
+        in conjunction with --value.
+
+    -v, --value
+        The value of the attribute specified with --attribute which specifies
+        which taxa to keep.
 
     files
         A whitespace-separated list of filenames to read treestreams from.

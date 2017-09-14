@@ -5,8 +5,22 @@ Annotate a the trees in a tree stream with information from a file
 
 OPTIONS:
 
+    -e, --extract
+        Build a CSV file of information from a treestream, i.e. reverse the
+        standard behaviour
+
     -f, --file
         File to read annotations from
+
+    -k, --key
+        Fieldname which corresponds to tree taxon names, used to link lines
+        of the csv file to tree nodes.
+
+    -m, --multiple
+        If set, when --extract is used, information from each tree in the
+        treestream will be added to the file, with a `tree_number` column
+        used to disambiguate.  When not set, information is extracted only
+        from the first tree in the treestream.
 
     files
         A whitespace-separated list of filenames to read treestreams from.

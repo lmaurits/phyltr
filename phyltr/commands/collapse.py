@@ -6,6 +6,11 @@ and giving the newly formed leaf a specified label.
 
 OPTIONS:
 
+    -a, --attribute
+        Specify an attribute by which to collapse clades instead of a
+        translation file.  Clades will only be collapsed for attribute values
+        which are monophyletic.
+
     -t, --translate
         The filename of the translate file.  Each line of the translate file
         should be of the format:

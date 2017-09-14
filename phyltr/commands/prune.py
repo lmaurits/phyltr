@@ -1,16 +1,28 @@
 """Usage:
-    phyltr prune taxa [<options>] [<files>]
+    phyltr prune [taxa] [<options>] [<files>]
 
 Delete a specified set of nodes from the tree.
 
 OPTIONS:
 
     taxa
-        A comma-separated list of leaf taxon to delete from the tree
+        A comma-separated list of leaf taxa to delete from the tree
+
+    -a, --attribute
+        An attribute to inspect to decide which leaves to prune.  Must be used
+        in conjunction with --value.
+
+    -f, --file
+        A file specifying which leaf taxa to delete from the tree.  One taxon
+        name per line.
 
     -i, --inverse
         Specify an "inverse prune": delete all taxa *except* those given in
-        the taxa option.
+        the taxa option (or all *except* those with the given attribute value).
+
+    -v, --value
+        The value of the attribute specified with --attribute which specifies
+        which taxa to prune.
 
     files
         A whitespace-separated list of filenames to read treestreams from.
