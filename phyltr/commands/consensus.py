@@ -47,7 +47,11 @@ class Consensus(PhyltrCommand):
                 clade = clade.split(",")
                 clades.append((len(clade), p, set(clade)))
         clades.sort()
-        junk, trash, all_leaves = clades.pop()
+        # Pop the clade with highest probability, which *should* be the clade
+        # with support 1.0 containing all leaves
+        taxon_count, prob, all_leaves = clades.pop()
+        assert prob == 1.0
+        assert all((taxon_count > count for count, p, clade in clades))
         clades.reverse()
 
         # Start out with a tree in which all leaves are joined in one big polytomy
@@ -61,19 +65,18 @@ class Consensus(PhyltrCommand):
 
         # Add age annotations
         for clade in t.traverse("postorder"):
-            if clade.is_leaf():
-                continue
             clade_key = ",".join(sorted([l.name for l in cache[clade]]))
-            ages = self.cp.clade_ages[clade_key]
-            mean = sum(ages)/len(ages)
-            for c in clade.get_children():
-                leaf, age = c.get_farthest_leaf()
-                c.dist = mean - age
-            ages.sort()
-            lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
-            clade.add_feature("age_mean", mean)
-            clade.add_feature("age_median", median)
-            clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
+            if not clade.is_leaf(): # all leaves have age zero, so don't bother
+                ages = self.cp.clade_ages[clade_key]
+                mean = sum(ages)/len(ages)
+                for c in clade.get_children():
+                    leaf, age = c.get_farthest_leaf()
+                    c.dist = mean - age
+                ages.sort()
+                lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
+                clade.add_feature("age_mean", mean)
+                clade.add_feature("age_median", median)
+                clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
 
             for f in self.cp.clade_attributes:
                 values = self.cp.clade_attributes[f][clade_key]

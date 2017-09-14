@@ -20,16 +20,17 @@ class CladeProbabilities:
         self.tree_count += 1
         for subtree in tree.traverse():
             leaves = [leaf.name for leaf in cache[subtree]]
-            if len(leaves) == 1:
-                continue
             clade = ",".join(sorted(leaves))
-            self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
-            leaf, age = subtree.get_farthest_leaf()
-            if clade in self.clade_ages:
-                self.clade_ages[clade].append(age)
-            else:
-                self.clade_ages[clade] = [age]
+            # Record ages of non-leaf clades
+            if len(leaves) > 1:
+                self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
+                leaf, age = subtree.get_farthest_leaf()
+                if clade in self.clade_ages:
+                    self.clade_ages[clade].append(age)
+                else:
+                    self.clade_ages[clade] = [age]
             extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
+            # Record annotations for all clades, even leaves
             for f in extra_features:
                 value = getattr(subtree, f)
                 try:
