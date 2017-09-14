@@ -8,6 +8,31 @@ OPTIONS:
     -a, --attribute
         Specify the name of an attribute to colour leaves by
 
+    -d, --dpi
+        Paper resolution (dots per square inch) to use if saving to a file,
+        with height and/or width specified in non-pixel units
+
+    -H, --height
+        Height of image if saving to a file.  Units set by -u.
+
+    -l, --label
+        Specify the name of an attribute with which to label leaves
+
+    -m, --multiple
+        If specified, each tree in the treestream will be plotted, otherwise
+        only the first will be.
+
+    -o, --output
+        Filename to save plot to.  If not specified, ETE's interactive viewer
+        will be launched.
+
+    -u, --units
+        Units for --height and/or --width settings.  Should be "px" for pixels
+        (the default), "mm" for milimetres or "in" for inches.
+
+    -w, --width
+        Width of image if saving to a file.  Units set by -u.
+
     files
         A whitespace-separated list of filenames to read treestreams from.
         Use a filename of "-" to read from stdin.  If no filenames are
