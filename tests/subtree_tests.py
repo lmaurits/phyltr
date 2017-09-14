@@ -1,8 +1,8 @@
 import fileinput
 
 from phyltr.plumbing.sources import NewickParser
+from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.subtree import Subtree
-from phyltr.commands.annotate import Annotate
 
 def test_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")
@@ -23,8 +23,7 @@ def test_file_subtree():
 def test_annotation_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(trees)
-    subtrees = Subtree(attribute="f1", value="0").consume(annotated)
+    subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --value 0", trees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         print(t.write())
