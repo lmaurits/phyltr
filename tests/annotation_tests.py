@@ -3,6 +3,7 @@ import fileinput
 import tempfile
 
 from phyltr.plumbing.sources import NewickParser
+from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import Annotate
 
 def test_annotate():
@@ -18,13 +19,14 @@ def test_annotate():
 
 def test_extract_annotations():
     lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    annotated = Annotate("tests/argfiles/annotation.csv", "taxon").consume(trees)
+    trees = list(NewickParser().consume(lines))
+    lines.close()
     with tempfile.NamedTemporaryFile() as fp:
-        tempfilename = fp.name
-        extracted = Annotate(tempfilename, extract=True).consume(annotated)
-        list(extracted)
-        lines.close()
+        for t in build_pipeline(
+                "annotate -f tests/argfiles/annotation.csv -k taxon |
+                 annotate --extract -f %s" % fp.name,
+                 trees):
+            pass
         fp.seek(0)
         reader = csv.DictReader(fp)
         assert all((field in reader.fieldnames for field in ("f1","f2","f3")))
