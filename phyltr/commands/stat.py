@@ -72,7 +72,7 @@ def run():
     print("Total taxa: %d" % stat.taxa_count)
     print("Total trees: %d" % stat.tree_count)
     print("Unique topologies: %d" % stat.topology_count)
-    print("Are trees ultrametric? %s", str(stat.ultrametric))
+    print("Are trees ultrametric? %s" % str(stat.ultrametric))
     print("Mean tree height: %f" % stat.mean_tree_height)
     print("Min tree height: %f" % stat.min_tree_height)
     print("Max tree height: %f" % stat.max_tree_height)
