@@ -23,8 +23,8 @@ def test_extract_annotations():
     lines.close()
     with tempfile.NamedTemporaryFile() as fp:
         for t in build_pipeline(
-                "annotate -f tests/argfiles/annotation.csv -k taxon |
-                 annotate --extract -f %s" % fp.name,
+                """annotate -f tests/argfiles/annotation.csv -k taxon |
+                 annotate --extract -f %s""" % fp.name,
                  trees):
             pass
         fp.seek(0)
