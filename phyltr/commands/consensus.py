@@ -129,7 +129,7 @@ def init_from_args(*args):
     consensus = Consensus(options.frequency)
     return consensus, files
 
-def run():
+def run():  # pragma: no cover
     consensus, files = init_from_args()
     plumb_stdin(consensus, files)
 

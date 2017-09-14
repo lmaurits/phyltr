@@ -134,6 +134,6 @@ def init_from_args(*args):
     plot = Plot(options.label, options.attribute, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
     return plot, files
 
-def run():
+def run():  # pragma: no cover
     plot, files = init_from_args()
     plumb_strings(plot, files)

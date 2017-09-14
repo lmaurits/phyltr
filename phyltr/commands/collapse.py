@@ -134,6 +134,6 @@ def init_from_args(*args):
     collapse = Collapse({}, options.translate, options.attribute)
     return collapse, files
 
-def run():
+def run():  # pragma: no cover
     collapse, files = init_from_args()
     plumb_stdin(collapse, files)

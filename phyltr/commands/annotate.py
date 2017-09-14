@@ -132,8 +132,7 @@ def init_from_args(*args):
     annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
     return annotate, files
 
-def run():
-
+def run():  # pragma: no cover
     annotate, files = init_from_args()
     if annotate.extract and annotate.filename == "-":
         # If we're writing an extracted CSV to stdin, we don't want to also

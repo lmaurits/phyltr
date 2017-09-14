@@ -63,6 +63,6 @@ def init_from_args(*args):
     pretty = Pretty(label=options.label, compress=options.compress)
     return pretty, files
 
-def run():
+def run():  # pragma: no cover
     pretty, files = init_from_args()
     plumb_strings(pretty, files)

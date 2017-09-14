@@ -78,6 +78,6 @@ def init_from_args(*args):
     uniq = Uniq(options.lengths)
     return uniq, files
 
-def run():
+def run():  # pragma: no cover
     uniq, files = init_from_args()
     plumb_stdin(uniq, files)

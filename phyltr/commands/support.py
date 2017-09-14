@@ -83,6 +83,6 @@ def init_from_args(*args):
     support = Support(options.frequency, options.age, options.sort, options.filename)
     return support, files
 
-def run():
+def run():  # pragma: no cover
     support, files = init_from_args()
     plumb_stdin(support, files)

@@ -28,6 +28,6 @@ def init_from_args(*args):
     height = Height()
     return height, files
 
-def run():
+def run():  # pragma: no cover
     height, files = init_from_args()
     plumb_strings(height, files)

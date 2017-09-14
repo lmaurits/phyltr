@@ -82,7 +82,7 @@ def init_from_args(*args):
     rename = Rename(filename=options.filename, remove=options.remove)
     return rename, files
 
-def run():
+def run():  # pragma: no cover
     rename, files = init_from_args()
     plumb_stdin(rename, files)
 

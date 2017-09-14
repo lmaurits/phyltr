@@ -39,6 +39,6 @@ def init_from_args(*args):
     scale = Scale(options.scale)
     return scale, files
 
-def run():
+def run():  # pragma: no cover
     scale, files = init_from_args()
     plumb_stdin(scale, files)

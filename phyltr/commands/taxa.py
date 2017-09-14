@@ -39,6 +39,6 @@ def init_from_args(*args):
     taxa = Taxa()
     return taxa, files
 
-def run():
+def run():  # pragma: no cover
     taxa, files = init_from_args()
     plumb_list(taxa, files)

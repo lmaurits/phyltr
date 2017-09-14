@@ -62,7 +62,6 @@ class Subtree(PhyltrCommand):
             t = mrca
         return t
 
-
 def init_from_args(*args):
     # Parse options
     parser = optparse.OptionParser(__doc__)
@@ -85,6 +84,6 @@ def init_from_args(*args):
     subtree = Subtree(taxa, options.filename, options.attribute, options.value)
     return subtree, files
 
-def run():
+def run():  # pragma: no cover
     subtree, files = init_from_args()
     plumb_stdin(subtree, files)

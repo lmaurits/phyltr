@@ -71,6 +71,6 @@ def init_from_args(*args):
     cat = Cat(options.burnin, options.subsample, not options.no_annotations)
     return cat, files
 
-def run():
+def run():  # pragma: no cover
     cat, files = init_from_args()
     complex_plumb(cat, files)

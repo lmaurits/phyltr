@@ -54,7 +54,7 @@ def init_from_args(*args):
     dedupe = Dedupe()
     return dedupe, files
 
-def run():
+def run():  # pragma: no cover
     dedupe, files = init_from_args()
     plumb_stdin(dedupe, files)
 

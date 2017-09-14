@@ -29,6 +29,6 @@ def init_from_args(*args):
     length = Length()
     return length, files
 
-def run():
+def run():  # pragma: no cover
     length, files = init_from_args()
     plumb_strings(length, files)

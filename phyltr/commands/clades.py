@@ -52,7 +52,7 @@ def init_from_args(*args):
     clades = Clades(options.frequency, options.age)
     return clades, files
 
-def run():
+def run():  # pragma: no cover
     clades, files = init_from_args()
     plumb_stdin(clades, files)
 

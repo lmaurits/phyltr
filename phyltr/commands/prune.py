@@ -72,7 +72,7 @@ class Prune(PhyltrCommand):
             else:
                 pruning_taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) != self.value]
         # Do the deed
-        t.prune(pruning_taxa)
+        t.prune(pruning_taxa, preserve_branch_length=True)
         return t
 
 
@@ -99,6 +99,6 @@ def init_from_args(*args):
     prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
     return prune, files
 
-def run():
+def run():  # pragma: no cover
     prune, files = init_from_args()
     plumb_stdin(prune, files)
