@@ -4,6 +4,7 @@ import shlex
 from nose.tools import raises
 
 from phyltr.plumbing.sources import NewickParser
+from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import Annotate
 from phyltr.commands.collapse import Collapse, init_from_args
 
@@ -44,6 +45,13 @@ def test_attribute_collapse():
     # These groups are monophyletic in the first 5 of the 6 basic trees, so...
     for n, t in enumerate(collapsed):
         assert len(t.get_leaves()) == (2 if n < 5 else 6)
+
+def test_attribute_singleton_collapse():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = list(NewickParser().consume(lines))
+    collapsed = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | collapse --attribute f3", trees)
+    for t in collapsed:
+        assert len(t.get_leaves()) == 6
 
 def test_non_collapse():
     lines = fileinput.input("tests/treefiles/basic.trees")
