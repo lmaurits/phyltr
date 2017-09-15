@@ -1,0 +1,12 @@
+This is not a treefile.
+It should definitely yield zero trees.
+No matter how you parse it.
+
+¯\_(ツ)_/¯ 
+
+abcdefghijklmnopqrstuvwxyz0123456789
+ABCDEFGHIJKLMNOPQRSTUVWXYZ)!@#$%^&*(
+int main() {
+	return 0;
+}
+(((,,,)));
