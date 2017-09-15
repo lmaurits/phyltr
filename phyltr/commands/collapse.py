@@ -103,7 +103,6 @@ class Collapse(PhyltrCommand):
             except MonophylyFailure:
                 # Clade is not monophyletic.  We can't collapse it.
                 sys.stderr.write("Monophyly failure for attribute value: %s=%s\n" % (self.attribute, value))
-                return 1
 
     def test_monophyly_and_collapse(self, t, cache, clade, clade_leaves):
         # Check monophyly
