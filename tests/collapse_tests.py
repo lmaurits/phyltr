@@ -54,7 +54,7 @@ def test_non_collapse():
     for t1, t2 in zip(trees, collapsed):
         assert t1.write() == t2.write()
 
-def test_attribute_collapse():
+def test_attribute_non_collapse():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = list(NewickParser().consume(lines))
     collapsed = Collapse(attribute="foo").consume(trees)
