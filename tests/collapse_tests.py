@@ -43,8 +43,6 @@ def test_attribute_collapse():
     collapsed = Collapse(attribute="f1").consume(annotated)
     # These groups are monophyletic in the first 5 of the 6 basic trees, so...
     for n, t in enumerate(collapsed):
-        print(t.write(features=[]))
-        print(len(t.get_leaves()))
         assert len(t.get_leaves()) == (2 if n < 5 else 6)
 
 def test_non_collapse():
