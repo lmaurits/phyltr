@@ -64,3 +64,13 @@ def test_annotation_prune():
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
 
+def test_inverse_annotation_prune():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = NewickParser().consume(lines)
+    annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(trees)
+    pruned = Prune(attribute="f1", value="0", inverse=True).consume(annotated)
+    for t in pruned:
+        leaves = t.get_leaf_names()
+        assert all((x in leaves for x in ("A", "B", "C")))
+        assert not any ((x in leaves for x in ("D", "E", "F")))
+
