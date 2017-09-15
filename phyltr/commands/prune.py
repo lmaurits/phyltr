@@ -50,7 +50,7 @@ class Prune(PhyltrCommand):
             self.taxa = taxa
         elif filename:
             with open(self.filename, "r") as fp:
-                self.taxa = [t.strip() for t in fp.readlines()]
+                self.taxa = set([t.strip() for t in fp.readlines()])
             if not self.taxa:
                 raise ValueError("Empty file!")
         elif self.attribute and self.value:
