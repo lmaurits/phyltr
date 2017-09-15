@@ -80,7 +80,7 @@ class Annotate(PhyltrCommand):
 
     def extract_annotations(self, t):
         if self.filename == "-" or not self.filename:
-            fp = sys.stdout
+            fp = sys.stdout # pragma: no cover
         else:
             if self.n > 0:
                 fp = open(self.filename, "a")
