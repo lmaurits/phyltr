@@ -47,3 +47,16 @@ def test_attribute_collapse():
         print(len(t.get_leaves()))
         assert len(t.get_leaves()) == (2 if n < 5 else 6)
 
+def test_non_collapse():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = list(NewickParser().consume(lines))
+    collapsed = Collapse({"non-existent":("X","Y","Z")}).consume(trees)
+    for t1, t2 in zip(trees, collapsed):
+        assert t1.write() == t2.write()
+
+def test_attribute_collapse():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = list(NewickParser().consume(lines))
+    collapsed = Collapse(attribute="foo").consume(trees)
+    for t1, t2 in zip(trees, collapsed):
+        assert t1.write() == t2.write()
