@@ -3,7 +3,7 @@ import fileinput
 import shlex
 import tempfile
 
-from phyltr.plumbing.sources import NewickParser
+from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import init_from_args, Annotate
 
@@ -79,3 +79,19 @@ def test_extract_multiple_annotations():
                 assert row["f1"] == "0"
                 assert row["f2"] == "1"
                 assert row["f3"] == "1"
+
+def test_extract_with_annotations_on_root():
+    lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
+    trees = ComplexNewickParser().consume(lines)
+    with tempfile.NamedTemporaryFile() as fp:
+        for t in Annotate(extract=True, multiple=True, filename=fp.name).consume(trees):
+            pass
+        fp.seek(0)
+        fp.seek(0)
+
+        reader = csv.DictReader(fp)
+        for row in reader:
+            if row["name"] == "root":
+                break
+        else:
+            assert False
