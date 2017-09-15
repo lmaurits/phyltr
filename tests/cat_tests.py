@@ -1,7 +1,27 @@
 import fileinput
+import shlex
 
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
-from phyltr.commands.cat import Cat
+from phyltr.commands.cat import Cat, init_from_args
+
+def test_init_from_args():
+    # Test defaults
+    cat, files = init_from_args([])
+    assert cat.burnin == 0
+    assert cat.subsample == 1
+    assert cat.annotations == True
+
+    # Test burnin
+    cat, files = init_from_args(shlex.split("--burnin 10"))
+    assert cat.burnin == 10
+
+    # Test subsample
+    cat, files = init_from_args(shlex.split("--subsample 10"))
+    assert cat.subsample == 10
+
+    # Test no annotations
+    cat, files = init_from_args(shlex.split("--no-annotations"))
+    assert cat.annotations == False
 
 def test_basic_cat():
     lines = fileinput.input("tests/treefiles/basic.trees")

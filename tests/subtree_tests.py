@@ -1,8 +1,20 @@
 import fileinput
+import shlex
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.subtree import Subtree
+from phyltr.commands.subtree import Subtree, init_from_args
+
+def test_init_from_args():
+    subtree, files = init_from_args(shlex.split("--file tests/argfiles/taxa_abc.txt"))
+    assert subtree.attribute == None
+    assert subtree.filename == "tests/argfiles/taxa_abc.txt"
+    assert subtree.value == None
+
+    subtree, files = init_from_args(shlex.split("--attribute foo --value bar"))
+    assert subtree.attribute == "foo"
+    assert subtree.filename == None
+    assert subtree.value == "bar"
 
 def test_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")

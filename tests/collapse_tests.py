@@ -1,8 +1,16 @@
 import fileinput
+import shlex
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.annotate import Annotate
-from phyltr.commands.collapse import Collapse
+from phyltr.commands.collapse import Collapse, init_from_args
+
+def test_init_from_args():
+    collapse, files = init_from_args(shlex.split("--translate tests/argfiles/collapse.txt"))
+    assert collapse.filename == "tests/argfiles/collapse.txt"
+
+    collapse, files = init_from_args(shlex.split("--attribute collapsibility"))
+    assert collapse.attribute == "collapsibility"
 
 def test_collapse():
     lines = fileinput.input("tests/treefiles/basic.trees")

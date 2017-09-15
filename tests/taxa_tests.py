@@ -2,7 +2,10 @@ import fileinput
 import tempfile
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.commands.taxa import Taxa
+from phyltr.commands.taxa import Taxa, init_from_args
+
+def test_init_from_args():
+    taxa, files = init_from_args([])
 
 def test_taxa():
     lines = fileinput.input("tests/treefiles/basic.trees")

@@ -1,10 +1,30 @@
 import csv
 import fileinput
+import shlex
 import tempfile
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.annotate import Annotate
+from phyltr.commands.annotate import init_from_args, Annotate
+
+def test_init_from_args():
+    annotate, files = init_from_args(shlex.split("-f tests/argfiles/annotation.csv -k taxon"))
+    # Test defaults
+    print(annotate.extract)
+    assert annotate.extract == False
+    assert annotate.multiple == False
+    # Test file was parsed
+    assert annotate.annotations
+
+    # Test extract flag
+    annotate, files = init_from_args(shlex.split("--extract"))
+    assert annotate.extract == True
+    assert annotate.multiple == False
+
+    # Test multiple flag
+    annotate, files = init_from_args(shlex.split("--extract --multiple"))
+    assert annotate.extract == True
+    assert annotate.multiple == True
 
 def test_annotate():
     lines = fileinput.input("tests/treefiles/basic.trees")

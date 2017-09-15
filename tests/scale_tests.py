@@ -1,10 +1,18 @@
 import fileinput
+import shlex
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.height import Height
 from phyltr.commands.length import Length
-from phyltr.commands.scale import Scale
+from phyltr.commands.scale import Scale, init_from_args
+
+def test_init_from_args():
+    scale, files = init_from_args([])
+    assert scale.scalefactor == 1.0
+
+    scale, files = init_from_args(shlex.split("--scale 4.2"))
+    assert scale.scalefactor == 4.2
 
 def test_scale():
     scale_factor = 0.42

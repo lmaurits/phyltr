@@ -1,8 +1,17 @@
 import fileinput
+import shlex
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.commands.uniq import Uniq
+from phyltr.commands.uniq import Uniq, init_from_args
 from phyltr.commands.length import Length
+
+def test_init_from_args():
+    uniq, files = init_from_args([])
+    assert uniq.lengths == "mean"
+
+    for lengths in ("min", "max", "median"):
+        uniq, files = init_from_args(shlex.split("--lengths %s" % lengths))
+        assert uniq.lengths == lengths
 
 def test_uniq():
     lines = fileinput.input("tests/treefiles/basic.trees")
