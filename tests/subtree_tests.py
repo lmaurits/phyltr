@@ -35,9 +35,10 @@ def test_bad_init_empty_file():
     Subtree(filename="tests/argfiles/empty.txt")
 
 def test_subtree():
-    lines = fileinput.input("tests/treefiles/basic.trees")
+    subtree, files = init_from_args(shlex.split("A,B,C tests/treefiles/basic.trees"))
+    lines = fileinput.input(files)
     trees = NewickParser().consume(lines)
-    subtrees = Subtree(["A","B","C"]).consume(trees)
+    subtrees = subtree.consume(trees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
