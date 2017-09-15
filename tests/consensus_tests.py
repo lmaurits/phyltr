@@ -4,7 +4,7 @@ import shlex
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.commands.consensus import Consensus, init_from_args
 
-def init_from_args():
+def test_init_from_args():
     consensus, files = init_from_args([])
     assert consensus.frequency == 0.5
 
