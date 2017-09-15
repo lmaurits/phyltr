@@ -4,12 +4,18 @@ import shlex
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.rename import Rename, init_from_args
 
+from nose.tools import raises
+
 def test_init_from_args():
     rename, files = init_from_args(shlex.split("--file tests/argfiles/rename.txt"))
     assert rename.remove == False
 
     rename, files = init_from_args(shlex.split("--file tests/argfiles/rename.txt --remove-missing"))
     assert rename.remove == True
+
+@raises(ValueError)
+def test_bad_init_no_args():
+    Rename()
 
 def test_rename():
     lines = fileinput.input("tests/treefiles/basic.trees")

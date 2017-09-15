@@ -1,6 +1,8 @@
 import fileinput
 import shlex
 
+from nose.tools import raises
+
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.subtree import Subtree, init_from_args
@@ -15,6 +17,22 @@ def test_init_from_args():
     assert subtree.attribute == "foo"
     assert subtree.filename == None
     assert subtree.value == "bar"
+
+@raises(ValueError)
+def test_bad_init_no_args():
+    Subtree()
+
+@raises(ValueError)
+def test_bad_init_no_attribute_only():
+    Subtree(attribute="foo")
+
+@raises(ValueError)
+def test_bad_init_no_value_only():
+    Subtree(value="bar")
+
+@raises(ValueError)
+def test_bad_init_empty_file():
+    Subtree(filename="tests/argfiles/empty.txt")
 
 def test_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")

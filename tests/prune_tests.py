@@ -1,6 +1,8 @@
 import fileinput
 import shlex
 
+from nose.tools import raises
+
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.prune import Prune, init_from_args
 from phyltr.commands.annotate import Annotate
@@ -28,6 +30,22 @@ def test_init_from_args():
     assert prune.filename == None
     assert prune.attribute == "foo"
     assert prune.value == "bar"
+
+@raises(ValueError)
+def test_bad_init_no_args():
+    Prune()
+
+@raises(ValueError)
+def test_bad_init_no_attribute_only():
+    Prune(attribute="foo")
+
+@raises(ValueError)
+def test_bad_init_no_value_only():
+    Prune(value="bar")
+
+@raises(ValueError)
+def test_bad_init_empty_file():
+    Prune(filename="tests/argfiles/empty.txt")
 
 def test_prune():
     lines = fileinput.input("tests/treefiles/basic.trees")
