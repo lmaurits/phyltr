@@ -13,7 +13,7 @@ class PhyltrCommand:
             yield tree
 
     def process_tree(self, t):
-        return t
+        return t    # pragma: no cover
 
     def postprocess(self):
         return []
