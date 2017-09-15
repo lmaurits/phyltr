@@ -3,6 +3,7 @@ import fileinput
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.prune import Prune
 from phyltr.commands.annotate import Annotate
+from phyltr.commands.height import Height
 
 def test_prune():
     lines = fileinput.input("tests/treefiles/basic.trees")
@@ -38,3 +39,4 @@ def test_annotation_prune():
     for t in pruned:
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
+
