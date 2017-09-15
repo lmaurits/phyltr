@@ -1,0 +1,6 @@
+(((A,B)clade1,C)clade2,(D,(E,F)clade3)clade4)root;
+(((A,C)clade1,B)clade2,(D,(E,F)clade3)clade4)root;
+(((A,B)clade1,C)clade2,(E,(D,F)clade3)clade4)root;
+(((A,B)clade1,C)clade2,(D,(E,F)clade3)clade4)root;
+(((A,C)clade1,B)clade2,(F,(E,D)clade3)clade4)root;
+(((A,B)clade1,F)clade2,(D,(E,C)clade3)clade4)root;
