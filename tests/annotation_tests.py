@@ -41,7 +41,7 @@ def test_extract_annotations():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = list(NewickParser().consume(lines))
     lines.close()
-    with tempfile.NamedTemporaryFile() as fp:
+    with tempfile.NamedTemporaryFile(mode="r") as fp:
         for t in build_pipeline(
                 """annotate -f tests/argfiles/annotation.csv -k taxon |
                  annotate --extract -f %s""" % fp.name,
@@ -61,7 +61,7 @@ def test_extract_multiple_annotations():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = list(NewickParser().consume(lines))
     lines.close()
-    with tempfile.NamedTemporaryFile() as fp:
+    with tempfile.NamedTemporaryFile(mode="r") as fp:
         for t in build_pipeline(
                 """annotate -f tests/argfiles/annotation.csv -k taxon |
                  annotate --extract --multiple -f %s""" % fp.name,
@@ -83,7 +83,7 @@ def test_extract_multiple_annotations():
 def test_extract_with_annotations_on_root():
     lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
     trees = ComplexNewickParser().consume(lines)
-    with tempfile.NamedTemporaryFile() as fp:
+    with tempfile.NamedTemporaryFile(mode="r") as fp:
         for t in Annotate(extract=True, multiple=True, filename=fp.name).consume(trees):
             pass
         fp.seek(0)
