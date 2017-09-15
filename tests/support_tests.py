@@ -24,7 +24,7 @@ def test_init_from_args():
 def test_clades():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    supported = Support().consume(trees)
+    supported = Support(filename="/dev/null").consume(trees)
     for t in supported:
         for n in t.traverse():
             assert hasattr(n, "support")
