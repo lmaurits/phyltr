@@ -68,11 +68,9 @@ def test_extract_multiple_annotations():
                  trees):
             pass
         fp.seek(0)
-        print(fp.read())
         fp.seek(0)
 
         reader = csv.DictReader(fp)
-        print(reader.fieldnames)
         assert all((field in reader.fieldnames for field in ("f1","f2","f3")))
         assert "tree_number" in reader.fieldnames
         for row in reader:
