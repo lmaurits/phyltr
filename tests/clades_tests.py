@@ -8,7 +8,7 @@ from phyltr.commands.clades import Clades
 def test_clades():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    clades = Clades()
+    clades = Clades(ages=True)
     # Spin through all trees
     for t in clades.consume(trees):
         pass
