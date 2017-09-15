@@ -41,12 +41,11 @@ def test_rename_with_remove():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
     renamed = Rename({
-        "A":"U",
-        "B":"V",
-        "D":"X",
-        "E":"Y" }, remove=True).consume(trees)
+        "A":"X",
+        "B":"Y",
+        "C":"Z" }, remove=True).consume(trees)
     for t in renamed:
         leaves = t.get_leaf_names()
-        assert all((x in leaves for x in ("U", "V", "X", "Y")))
+        assert all((x in leaves for x in ("X", "Y", "Z")))
         assert not any((x in leaves for x in ("A", "B", "C", "D", "E", "F")))
 
