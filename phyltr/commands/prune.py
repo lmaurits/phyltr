@@ -92,9 +92,6 @@ def init_from_args(*args):
         if files:
             taxa = set(files[0].split(","))
             files = files[1:]
-        else:
-            sys.stderr.write("Must specify either a list of taxa, a file of taxa, or an attribute and value.\n")
-            sys.exit(1)
 
     prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
     return prune, files
