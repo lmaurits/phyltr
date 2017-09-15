@@ -51,7 +51,7 @@ class Support(PhyltrCommand):
 
         # Save clade probabilities
         if self.filename:
-            cp.save_clade_report(self.filename, self.frequency, self.age)
+            self.cp.save_clade_report(self.filename, self.frequency, self.ages)
 
         # Annotate trees
         for t in self.trees:
