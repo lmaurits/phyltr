@@ -82,7 +82,7 @@ class Annotate(PhyltrCommand):
         if self.filename == "-" or not self.filename:
             fp = sys.stdout
         else:
-            if self.n > 1:
+            if self.n > 0:
                 fp = open(self.filename, "a")
             else:
                 fp = open(self.filename, "w")
@@ -111,7 +111,7 @@ class Annotate(PhyltrCommand):
                 else:
                     fix_root_name = False
                 rowdict = {f:getattr(node, f, "?") for f in fieldnames}
-                if self.n:
+                if self.multiple:
                     rowdict["tree_number"] = self.n
                 writer.writerow(rowdict)
                 if fix_root_name:
