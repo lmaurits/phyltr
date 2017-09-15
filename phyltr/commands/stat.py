@@ -64,7 +64,7 @@ def init_from_args(*args):
     stat = Stat()
     return stat, files
 
-def run():
+def run():  # pragma: no cover
 
     stat, files = init_from_args()
     plumb_null(stat, files)
