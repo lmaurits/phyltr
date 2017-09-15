@@ -16,3 +16,14 @@ def test_dedupe():
         leaves = t.get_leaf_names()
         assert len(leaves) == 5
         assert all((leaves.count(x) == 1  for x in ("A", "B", "C", "E", "F")))
+
+def test_monophyletic_dedupe():
+    lines = fileinput.input("tests/treefiles/monophyletic_dupe_taxa.trees")
+    trees = list(NewickParser().consume(lines))
+    for t in trees:
+        leaves = t.get_leaf_names()
+        assert not all((leaves.count(x) == 1  for x in ("A", "B", "C", "E", "F")))
+    deduped = Dedupe().consume(trees)
+    for t in deduped:
+        leaves = t.get_leaf_names()
+        assert all((leaves.count(x) == 1  for x in ("A", "B", "C", "E", "F")))
