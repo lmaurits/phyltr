@@ -76,6 +76,7 @@ def init_from_args(*args):
     parser.add_option('-f', '--file', dest="filename",
                 help='Specifies the translation file.')
     parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
+            default=False,
                 help='Remove untranslated taxa.')
     options, files = parser.parse_args(*args)
     
