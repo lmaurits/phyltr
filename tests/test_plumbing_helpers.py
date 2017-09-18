@@ -1,6 +1,7 @@
 import phyltr.plumbing.helpers as helpers
 from phyltr.commands.cat import Cat
 from phyltr.commands.height import Height
+from phyltr.commands.pretty import Pretty
 from phyltr.commands.taxa import Taxa
 
 def test_plumb_stdin():
@@ -11,6 +12,7 @@ def test_complex_plumb():
 
 def test_plumb_strings():
     helpers.plumb_strings(Height(), "tests/treefiles/basic.trees")
+    helpers.plumb_strings(Pretty(), "tests/treefiles/basic.trees")
 
 def test_plumb_list():
     helpers.plumb_list(Taxa(), "tests/treefiles/basic.trees")
