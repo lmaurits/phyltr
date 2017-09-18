@@ -25,11 +25,6 @@ from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.helpers import plumb_stdin
 from phyltr.utils.topouniq import are_same_topology
 
-if sys.version_info.major == 2:
-    izip = itertools.izip
-else:
-    izip = zip
-
 class Uniq(PhyltrCommand):
 
     def __init__(self, lengths="mean"):
@@ -51,7 +46,7 @@ class Uniq(PhyltrCommand):
        
     def postprocess(self):
         for equ_class in self.topologies.values():
-            for nodes in izip(*[t.traverse() for t in equ_class]):
+            for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
                     dist = max(dists)
