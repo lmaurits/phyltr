@@ -97,8 +97,6 @@ def recursive_builder(t, clades):
         matched = False
         # ...find the largest clade which is a subset of my children
         for length, p, clade in clades:
-            if len(clade) == 1:
-                continue
             if clade.issubset(children):
                 matched = True
                 break
