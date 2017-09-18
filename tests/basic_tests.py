@@ -20,5 +20,4 @@ def test_complex_parser_on_non_newick():
 def test_complex_parser_on_non_tree():
     lines = fileinput.input("tests/treefiles/not_trees.trees")
     trees = ComplexNewickParser().consume(lines)
-    print(list(trees))
     assert sum((1 for t in trees)) == 0
