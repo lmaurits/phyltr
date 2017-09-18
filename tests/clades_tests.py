@@ -4,6 +4,7 @@ import fileinput
 import shlex
 
 from phyltr.plumbing.sources import NewickParser
+from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.clades import Clades, init_from_args
 
 def test_init_from_args():
@@ -36,3 +37,11 @@ def test_clades():
     assert clades.cp.clade_probs["C,E"] == 1.0 / 6.0
     assert clades.cp.clade_probs["D,E,F"] == 5.0 / 6.0
     assert clades.cp.clade_probs["A,B,C,D,E,F"] == 6.0 / 6.0
+
+def test_categorical_annotation():
+    # This is just to make sure the clade probability calculator doesnt't
+    # erroneously try to calculate means etc. of categorical annotations
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = NewickParser().consume(lines)
+    for t in build_pipeline("annotate -f tests/argfiles/categorical_annotation.csv -k taxon | clades", trees):
+        pass
