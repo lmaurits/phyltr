@@ -14,7 +14,7 @@ class ComplexNewickParser:
         firstline = True
         for line in stream:
             # Skip blank lines
-            if not line:
+            if not line.strip():
                 continue
             
             # Detect Nexus file format by checking first line
