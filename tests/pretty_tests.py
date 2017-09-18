@@ -26,3 +26,9 @@ def test_pretty_compressed():
     trees = NewickParser().consume(lines)
     for x in Pretty(compress=True).consume(trees):
         assert type(x) == str
+
+def test_pretty_compressed_low_signal():
+    lines = fileinput.input("tests/treefiles/low_signal.trees")
+    trees = NewickParser().consume(lines)
+    for x in Pretty(compress=True).consume(trees):
+        assert type(x) == str
