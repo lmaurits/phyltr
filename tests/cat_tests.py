@@ -50,3 +50,11 @@ def test_beast_annotated_nexus_output_cat():
         for n in t.traverse():
             assert hasattr(n, "rate")
         assert len(t.get_leaves()) == 26
+
+def test_beast_vector_annotated_nexus_output_cat():
+    lines = fileinput.input("tests/treefiles/beast_output_geo_annotations.nex")
+    trees = ComplexNewickParser().consume(lines)
+    trees = Cat().consume(trees)
+    for t in trees:
+        for n in t.traverse():
+            assert hasattr(n, "location")
