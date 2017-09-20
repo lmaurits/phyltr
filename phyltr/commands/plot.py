@@ -88,6 +88,13 @@ class Plot(PhyltrCommand):
         self.dpi = dpi
         self.n = 0
 
+        self.dummy = dummy
+
+        if not self.dummy:
+            # Setup TreeStyle
+            self.ts = ete3.TreeStyle()
+            self.ts.show_scale = False
+            self.ts.show_branch_support = True
 
     @classmethod
     def init_from_opts(cls, options, files):
@@ -122,9 +129,11 @@ class Plot(PhyltrCommand):
                 filename = base + ("_%06d" % (n+1)) + ext
             else:
                 filename = self.output
-            t.render(filename, ultrametric, tree_style=self.ts, **kw)
+            if not self.dummy:
+                t.render(filename, ultrametric, tree_style=self.ts, **kw)
         else:
-            t.show(ultrametric, tree_style=self.ts)
+            if not self.dummy:
+                t.show(ultrametric, tree_style=self.ts)
 
         self.n += 1
 
