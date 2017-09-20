@@ -69,14 +69,14 @@ class Plot(PhyltrCommand):
     parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-d', '--dpi', type="int", default=None)
-    parser.add_option('-H', '--height', type="int", dest="h", default=None)
+    parser.add_option('-H', '--height', type="int", dest="height", default=None)
     parser.add_option('-l', '--label', default="name")
     parser.add_option('-m', '--multiple', default=False, action="store_true")
     parser.add_option('-o', '--output', default=None)
     parser.add_option('-u', '--units', default="px")
-    parser.add_option('-w', '--width', type="int", dest="w", default=None)
+    parser.add_option('-w', '--width', type="int", dest="width", default=None)
 
-    def __init__(self, label="name", attribute=None, output=None, multiple=False, width=None, height=None, units="px", dpi=None, dummy=False):
+    def __init__(self, label="name", attribute=None, output=None, multiple=False, width=None, height=None, units="px", dpi=300, dummy=False):
 
         self.label = label
         self.attribute = attribute
@@ -126,14 +126,14 @@ class Plot(PhyltrCommand):
                 kw["dpi"] = self.dpi
             if self.multiple:
                 base, ext = os.path.splitext(self.output)
-                filename = base + ("_%06d" % (n+1)) + ext
+                filename = base + ("_%06d" % (self.n+1)) + ext
             else:
                 filename = self.output
             if not self.dummy:
                 t.render(filename, ultrametric, tree_style=self.ts, **kw)
         else:
             if not self.dummy:
-                t.show(ultrametric, tree_style=self.ts)
+                t.show(ultrametric, tree_style=self.ts) # pragma: no cover
 
         self.n += 1
 
