@@ -1,18 +1,17 @@
 import fileinput
-import shlex
 
 from nose.tools import raises
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import Annotate
-from phyltr.commands.collapse import Collapse, init_from_args
+from phyltr.commands.collapse import Collapse
 
-def test_init_from_args():
-    collapse, files = init_from_args(shlex.split("--translate tests/argfiles/collapse.txt"))
+def test_init():
+    collapse = Collapse.init_from_args("--translate tests/argfiles/collapse.txt")
     assert collapse.filename == "tests/argfiles/collapse.txt"
 
-    collapse, files = init_from_args(shlex.split("--attribute collapsibility"))
+    collapse = Collapse.init_from_args("--attribute collapsibility")
     assert collapse.attribute == "collapsibility"
 
 @raises(ValueError)

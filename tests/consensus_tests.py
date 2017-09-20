@@ -1,14 +1,13 @@
 import fileinput
-import shlex
 
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
-from phyltr.commands.consensus import Consensus, init_from_args
+from phyltr.commands.consensus import Consensus
 
 def test_init_from_args():
-    consensus, files = init_from_args([])
+    consensus = Consensus.init_from_args("")
     assert consensus.frequency == 0.5
 
-    consensus, files = init_from_args(shlex.split("-f 0.42"))
+    consensus = Consensus.init_from_args("-f 0.42")
     assert consensus.frequency == 0.42
 
 def test_consensus():

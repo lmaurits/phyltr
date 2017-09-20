@@ -1,19 +1,18 @@
 import fileinput
-import shlex
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.pretty import Pretty, init_from_args
+from phyltr.commands.pretty import Pretty
 
 def test_init_from_args():
-    pretty, files = init_from_args([])
+    pretty = Pretty.init_from_args("")
     assert pretty.compress == False
     assert pretty.label == "name"
 
-    pretty, files = init_from_args(shlex.split("--compress"))
+    pretty = Pretty.init_from_args("--compress")
     assert pretty.compress == True
 
-    pretty, files = init_from_args(shlex.split("--label foo"))
+    pretty = Pretty.init_from_args("--label foo")
     assert pretty.label == "foo"
 
 def test_pretty():

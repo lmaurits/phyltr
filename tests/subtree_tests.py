@@ -1,19 +1,18 @@
 import fileinput
-import shlex
 
 from nose.tools import raises
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.subtree import Subtree, init_from_args
+from phyltr.commands.subtree import Subtree
 
 def test_init_from_args():
-    subtree, files = init_from_args(shlex.split("--file tests/argfiles/taxa_abc.txt"))
+    subtree = Subtree.init_from_args("--file tests/argfiles/taxa_abc.txt")
     assert subtree.attribute == None
     assert subtree.filename == "tests/argfiles/taxa_abc.txt"
     assert subtree.value == None
 
-    subtree, files = init_from_args(shlex.split("--attribute foo --value bar"))
+    subtree = Subtree.init_from_args("--attribute foo --value bar")
     assert subtree.attribute == "foo"
     assert subtree.filename == None
     assert subtree.value == "bar"
@@ -35,8 +34,8 @@ def test_bad_init_empty_file():
     Subtree(filename="tests/argfiles/empty.txt")
 
 def test_subtree():
-    subtree, files = init_from_args(shlex.split("A,B,C tests/treefiles/basic.trees"))
-    lines = fileinput.input(files)
+    subtree = Subtree.init_from_args("A,B,C")
+    lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
     subtrees = subtree.consume(trees)
     expected_taxa = (3, 3, 3, 3, 3, 6)

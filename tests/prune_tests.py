@@ -1,31 +1,30 @@
 import fileinput
-import shlex
 
 from nose.tools import raises
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.commands.prune import Prune, init_from_args
+from phyltr.commands.prune import Prune
 from phyltr.commands.annotate import Annotate
 from phyltr.commands.height import Height
 
 def test_init_from_args():
-    prune, files = init_from_args(shlex.split("A,B,C"))
+    prune = Prune.init_from_args("A,B,C")
     assert prune.taxa == set(("A","B","C"))
     assert prune.filename == None
     assert prune.attribute == None
     assert prune.value == None
     assert prune.inverse == False
 
-    prune, files = init_from_args(shlex.split("A,B,C --inverse"))
+    prune = Prune.init_from_args("A,B,C --inverse")
     assert prune.inverse == True
 
-    prune, files = init_from_args(shlex.split("--file tests/argfiles/taxa_abc.txt"))
-    print(prune.taxa)
+    prune = Prune.init_from_args("--file tests/argfiles/taxa_abc.txt")
     assert prune.taxa == set(("A","B","C"))
     assert prune.filename == "tests/argfiles/taxa_abc.txt"
     assert prune.attribute == None
     assert prune.value == None
-    prune, files = init_from_args(shlex.split("--attribute foo --value bar"))
+
+    prune = Prune.init_from_args("--attribute foo --value bar")
     assert prune.taxa == []
     assert prune.filename == None
     assert prune.attribute == "foo"

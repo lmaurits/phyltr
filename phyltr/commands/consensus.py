@@ -14,18 +14,27 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import optparse
+
 import ete3
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 import phyltr.utils.cladeprob
 
 class Consensus(PhyltrCommand):
 
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
+
     def __init__(self, frequency=0.5):
         self.frequency = frequency
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    @classmethod 
+    def init_from_opts(cls, options, files=[]):
+        consensus = Consensus(options.frequency)
+        return consensus
 
     def process_tree(self, t):
         self.cp.add_tree(t)
@@ -120,17 +129,3 @@ def recursive_builder(t, clades):
     for child in t.get_children():
         recursive_builder(child, clades)
     return t
-
-
-def init_from_args(*args):
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
-    options, files = parser.parse_args(*args)
-
-    consensus = Consensus(options.frequency)
-    return consensus, files
-
-def run():  # pragma: no cover
-    consensus, files = init_from_args()
-    plumb_stdin(consensus, files)
-

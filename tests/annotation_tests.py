@@ -1,14 +1,13 @@
 import csv
 import fileinput
-import shlex
 import tempfile
 
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.annotate import init_from_args, Annotate
+from phyltr.commands.annotate import Annotate
 
-def test_init_from_args():
-    annotate, files = init_from_args(shlex.split("-f tests/argfiles/annotation.csv -k taxon"))
+def test_init():
+    annotate = Annotate.init_from_args("-f tests/argfiles/annotation.csv -k taxon")
     # Test defaults
     print(annotate.extract)
     assert annotate.extract == False
@@ -17,12 +16,12 @@ def test_init_from_args():
     assert annotate.annotations
 
     # Test extract flag
-    annotate, files = init_from_args(shlex.split("--extract"))
+    annotate = Annotate.init_from_args("--extract")
     assert annotate.extract == True
     assert annotate.multiple == False
 
     # Test multiple flag
-    annotate, files = init_from_args(shlex.split("--extract --multiple"))
+    annotate = Annotate.init_from_args("--extract --multiple")
     assert annotate.extract == True
     assert annotate.multiple == True
 

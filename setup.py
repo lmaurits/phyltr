@@ -17,8 +17,10 @@ setup(
         'Programming Language :: Python',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
-    scripts=['bin/phyltr',],
     packages = ['phyltr','phyltr/commands', 'phyltr/plumbing', 'phyltr/utils'],
+    entry_points = {
+        'console_scripts': ['phyltr=phyltr.heart:run_command'],
+    },
     requires=['ete3'],
     install_requires=['ete3']
 

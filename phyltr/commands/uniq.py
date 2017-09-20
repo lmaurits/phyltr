@@ -18,19 +18,26 @@ OPTIONS:
 """
 
 import itertools
-import sys
+import optparse
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 from phyltr.utils.topouniq import are_same_topology
 
 class Uniq(PhyltrCommand):
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
 
     def __init__(self, lengths="mean"):
         self.lengths = lengths
 
         self.topologies = {}
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        uniq = Uniq(options.lengths)
+        return uniq
 
     def process_tree(self, t):
         # Compare this tree to all topology exemplars.  If we find a match,
@@ -63,16 +70,3 @@ class Uniq(PhyltrCommand):
                     dist = min(dists)
                 nodes[0].dist = dist
             yield equ_class[0]
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
-    options, files = parser.parse_args(*args)
-    
-    uniq = Uniq(options.lengths)
-    return uniq, files
-
-def run():  # pragma: no cover
-    uniq, files = init_from_args()
-    plumb_stdin(uniq, files)

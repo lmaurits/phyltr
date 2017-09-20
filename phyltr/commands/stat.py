@@ -11,12 +11,15 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_null
 from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
 
     def __init__(self):
 
@@ -26,6 +29,11 @@ class Stat(PhyltrCommand):
         self.topologically_unique_trees = []
         self.tree_ages = []
         self.firsttree = True
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        stat = Stat()
+        return stat
 
     def process_tree(self, t):
         # Stuff we do to every tree...
@@ -56,18 +64,10 @@ class Stat(PhyltrCommand):
         self.mean_tree_height = sum(self.tree_ages) / self.tree_count
         return []
 
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(*args)
-    stat = Stat()
-    return stat, files
-
 def run():  # pragma: no cover
+    #FIXME Argh, how do we do this in the new framework_
 
     stat, files = init_from_args()
-    plumb_null(stat, files)
     
     print("Total taxa: %d" % stat.taxa_count)
     print("Total trees: %d" % stat.tree_count)

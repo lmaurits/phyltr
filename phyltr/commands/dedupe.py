@@ -12,13 +12,20 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import optparse
 import random
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 
 class Dedupe(PhyltrCommand):
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        dedupe = Dedupe()
+        return dedupe
 
     def process_tree(self, t):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
@@ -45,16 +52,3 @@ class Dedupe(PhyltrCommand):
 #                for v in victims:
 #                    v.detach()
         return t
-
-
-def init_from_args(*args):
-    parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(*args)
-
-    dedupe = Dedupe()
-    return dedupe, files
-
-def run():  # pragma: no cover
-    dedupe, files = init_from_args()
-    plumb_stdin(dedupe, files)
-

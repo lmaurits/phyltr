@@ -1,26 +1,25 @@
 import fileinput
-import shlex
 
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
-from phyltr.commands.cat import Cat, init_from_args
+from phyltr.commands.cat import Cat
 
-def test_init_from_args():
+def test_init():
     # Test defaults
-    cat, files = init_from_args([])
+    cat = Cat.init_from_args("")
     assert cat.burnin == 0
     assert cat.subsample == 1
     assert cat.annotations == True
 
     # Test burnin
-    cat, files = init_from_args(shlex.split("--burnin 10"))
+    cat = Cat.init_from_args("--burnin 10")
     assert cat.burnin == 10
 
     # Test subsample
-    cat, files = init_from_args(shlex.split("--subsample 10"))
+    cat = Cat.init_from_args("--subsample 10")
     assert cat.subsample == 10
 
     # Test no annotations
-    cat, files = init_from_args(shlex.split("--no-annotations"))
+    cat = Cat.init_from_args("--no-annotations")
     assert cat.annotations == False
 
 def test_basic_cat():

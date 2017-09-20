@@ -17,15 +17,29 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_strings
+from phyltr.plumbing.sinks import StringFormatter
 
 class Pretty(PhyltrCommand):
+
+    sink = StringFormatter
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
+    parser.add_option('-l', '--label', default="name")
 
     def __init__(self, label="name", compress=False):
         self.label = label
         self.compress = compress
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        pretty = Pretty(label=options.label, compress=options.compress)
+        return pretty
+    
 
     def process_tree(self, t):
         # Change node names to get the desired appearance
@@ -52,17 +66,3 @@ class Pretty(PhyltrCommand):
                         child.detach()
 
         return t.get_ascii()
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
-    parser.add_option('-l', '--label', default="name")
-    options, files = parser.parse_args(*args)
-    
-    pretty = Pretty(label=options.label, compress=options.compress)
-    return pretty, files
-
-def run():  # pragma: no cover
-    pretty, files = init_from_args()
-    plumb_strings(pretty, files)

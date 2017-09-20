@@ -21,17 +21,31 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
-import phyltr.utils.cladeprob
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
+from phyltr.plumbing.sinks import StringFormatter
+import phyltr.utils.cladeprob
 
 class Clades(PhyltrCommand):
-    
+
+    sink = StringFormatter
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-a', '--ages', action="store_true", dest="age", default=False, help="Include age information in report.")
+    parser.add_option('-f', '--frequency', type="float", dest="frequency",
+            default=0.0, help='Minimum clade frequency to report.')
+
     def __init__(self, frequency=0.0, ages=False):
         self.frequency = frequency
         self.ages = ages
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        clades = Clades(options.frequency, options.age)
+        return clades
 
     def process_tree(self, t):
         self.cp.add_tree(t)
@@ -40,19 +54,3 @@ class Clades(PhyltrCommand):
         self.cp.compute_probabilities()
         self.cp.save_clade_report("/dev/stdout", self.frequency, self.ages)
         return []
-
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--ages', action="store_true", dest="age", default=False, help="Include age information in report.")
-    parser.add_option('-f', '--frequency', type="float", dest="frequency",
-            default=0.0, help='Minimum clade frequency to report.')
-    options, files = parser.parse_args(*args)
-    clades = Clades(options.frequency, options.age)
-    return clades, files
-
-def run():  # pragma: no cover
-    clades, files = init_from_args()
-    plumb_stdin(clades, files)
-

@@ -24,16 +24,26 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import optparse
 import sys
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 
 class MonophylyFailure(Exception):
     """Raised when asked to collapse a non monophyletic taxon set."""
 
 class Collapse(PhyltrCommand):
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-a', '--attribute', dest="attribute", default=None)
+    parser.add_option('-t', '--translate',
+                help='Specifies the translation file.',default=None)
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        collapse = Collapse({}, options.translate, options.attribute)
+        return collapse
 
     def __init__(self, clades={}, filename=None, attribute=None):
         if clades:
@@ -121,18 +131,3 @@ class Collapse(PhyltrCommand):
         mrca.dist += dist
         for child in mrca.get_children():
             child.detach()
-
-
-def init_from_args(*args):
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--attribute', dest="attribute", default=None)
-    parser.add_option('-t', '--translate',
-                help='Specifies the translation file.',default=None)
-    options, files = parser.parse_args(*args)
-
-    collapse = Collapse({}, options.translate, options.attribute)
-    return collapse, files
-
-def run():  # pragma: no cover
-    collapse, files = init_from_args()
-    plumb_stdin(collapse, files)

@@ -30,13 +30,19 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
+import optparse
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 
 class Prune(PhyltrCommand):
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-a', '--attribute', default=None)
+    parser.add_option('-f', '--file', dest="filename",
+            help='Specifies a file from which to read taxa')
+    parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
+    parser.add_option('-v', '--value', default=None)
 
     def __init__(self, taxa=None, filename=None, attribute=None, value=None, inverse=False):
         self.attribute = attribute
@@ -58,6 +64,17 @@ class Prune(PhyltrCommand):
         else:
             raise ValueError("Incompatible arguments")
 
+    @classmethod 
+    def init_from_opts(cls, options, files=[]):
+        if files:
+            taxa = set(files[0].split(","))
+            files = files[1:]
+        else:
+            taxa = []
+
+        prune = cls(taxa, options.filename, options.attribute, options.value, options.inverse)
+        return prune
+
     def process_tree(self, t):
         if self.taxa:
             # Pruning by a list of taxa
@@ -74,28 +91,3 @@ class Prune(PhyltrCommand):
         # Do the deed
         t.prune(pruning_taxa, preserve_branch_length=True)
         return t
-
-
-def init_from_args(*args):
-
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--attribute', default=None)
-    parser.add_option('-f', '--file', dest="filename",
-            help='Specifies a file from which to read taxa')
-    parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
-    parser.add_option('-v', '--value', default=None)
-    options, files = parser.parse_args(*args)
-
-    if (options.attribute and options.value) or options.filename:
-        taxa = []
-    else:
-        if files:
-            taxa = set(files[0].split(","))
-            files = files[1:]
-
-    prune = Prune(taxa, options.filename, options.attribute, options.value, options.inverse)
-    return prune, files
-
-def run():  # pragma: no cover
-    prune, files = init_from_args()
-    plumb_stdin(prune, files)

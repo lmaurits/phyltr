@@ -1,21 +1,20 @@
 from __future__ import division
 
 import fileinput
-import shlex
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
-from phyltr.commands.clades import Clades, init_from_args
+from phyltr.commands.clades import Clades
 
 def test_init_from_args():
-    clades, file = init_from_args([])
+    clades = Clades.init_from_args("")
     assert clades.frequency == 0.0
     assert clades.ages == False
 
-    clades, file = init_from_args(shlex.split("--ages"))
+    clades = Clades.init_from_args("--ages")
     assert clades.ages == True
 
-    clades, file = init_from_args(shlex.split("-f 0.42"))
+    clades = Clades.init_from_args("-f 0.42")
     assert clades.frequency == 0.42
 
 def test_clades():

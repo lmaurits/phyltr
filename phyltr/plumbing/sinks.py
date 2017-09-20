@@ -10,6 +10,15 @@ class NewickFormatter:
             self.out.write(t.write(features=[],format_root_node=True))
             self.out.write("\n")
 
+class NullSink:
+
+    def __init__(self, out):
+        self.out = out
+
+    def consume(self, stream):
+        for t in stream:
+            pass
+
 class StringFormatter:
 
     def __init__(self, out):

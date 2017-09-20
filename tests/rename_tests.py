@@ -1,16 +1,15 @@
 import fileinput
-import shlex
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.commands.rename import Rename, init_from_args
+from phyltr.commands.rename import Rename
 
 from nose.tools import raises
 
-def test_init_from_args():
-    rename, files = init_from_args(shlex.split("--file tests/argfiles/rename.txt"))
+def test_init():
+    rename = Rename.init_from_args("--file tests/argfiles/rename.txt")
     assert rename.remove == False
 
-    rename, files = init_from_args(shlex.split("--file tests/argfiles/rename.txt --remove-missing"))
+    rename = Rename.init_from_args("--file tests/argfiles/rename.txt --remove-missing")
     assert rename.remove == True
 
 @raises(ValueError)

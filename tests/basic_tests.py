@@ -1,6 +1,25 @@
 import fileinput
 
+from phyltr.heart import run_command
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
+
+def test_no_command():
+    run_command("")
+
+def test_help():
+    run_command("--help")
+
+def test_bad_command():
+    run_command("kill_all_humans")
+
+def test_command():
+    run_command("cat tests/treefiles/basic.trees")
+
+def test_command_help():
+    run_command("cat --help")
+
+def test_command_bad_args():
+    run_command("prune")    # `prune` needs some args
 
 def test_parsing():
     lines = fileinput.input("tests/treefiles/basic.trees")

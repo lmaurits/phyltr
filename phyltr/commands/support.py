@@ -26,13 +26,22 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 import phyltr.utils.cladeprob
 
 class Support(PhyltrCommand):
    
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
+    parser.add_option('-f', '--frequency', type="float", dest="frequency",
+            default=0.0, help='Minimum clade frequency to report.')
+    parser.add_option("-o", "--output", action="store", dest="filename",
+        help="save clades to FILE", metavar="FILE")
+    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
+
     def __init__(self, frequency=0.0, ages=False, sort=False, filename=None):
         self.frequency = frequency
         self.ages = ages
@@ -40,6 +49,11 @@ class Support(PhyltrCommand):
         self.filename = filename
         self.trees = []
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        support = Support(options.frequency, options.age, options.sort, options.filename)
+        return support
 
     def process_tree(self, t):
         self.trees.append(t)
@@ -67,22 +81,3 @@ class Support(PhyltrCommand):
         # Output
         for t in self.trees:
             yield t
-
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
-    parser.add_option('-f', '--frequency', type="float", dest="frequency",
-            default=0.0, help='Minimum clade frequency to report.')
-    parser.add_option("-o", "--output", action="store", dest="filename",
-        help="save clades to FILE", metavar="FILE")
-    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
-    options, files = parser.parse_args(*args)
-
-    support = Support(options.frequency, options.age, options.sort, options.filename)
-    return support, files
-
-def run():  # pragma: no cover
-    support, files = init_from_args()
-    plumb_stdin(support, files)

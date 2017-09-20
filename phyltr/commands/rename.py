@@ -20,12 +20,19 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 
 class Rename(PhyltrCommand):
     
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-f', '--file', dest="filename",
+                help='Specifies the translation file.')
+    parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
+            default=False,
+                help='Remove untranslated taxa.')
+
     def __init__(self, rename=None, filename=None, remove=False):
         if rename:
             self.rename = rename
@@ -36,6 +43,11 @@ class Rename(PhyltrCommand):
         self.remove = remove
 
         self.first = True
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        rename = Rename(filename=options.filename, remove=options.remove)
+        return rename
 
     def read_rename_file(self, filename):
 
@@ -69,21 +81,3 @@ class Rename(PhyltrCommand):
             t.prune(keepers, preserve_branch_length=True)
 
         return t
-
-def init_from_args(*args):
-
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--file', dest="filename",
-                help='Specifies the translation file.')
-    parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
-            default=False,
-                help='Remove untranslated taxa.')
-    options, files = parser.parse_args(*args)
-    
-    rename = Rename(filename=options.filename, remove=options.remove)
-    return rename, files
-
-def run():  # pragma: no cover
-    rename, files = init_from_args()
-    plumb_stdin(rename, files)
-

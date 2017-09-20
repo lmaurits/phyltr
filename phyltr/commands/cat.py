@@ -18,11 +18,20 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import complex_plumb
+from phyltr.plumbing.sources import ComplexNewickParser
 
 class Cat(PhyltrCommand):
+
+    PhyltrCommand.source = ComplexNewickParser
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
+    parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
+    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
 
     def __init__(self, burnin=0, subsample=1, annotations=True):
         self.burnin = burnin
@@ -30,6 +39,11 @@ class Cat(PhyltrCommand):
         self.annotations = annotations
         self.trees = []
         self.n = 0
+
+    @classmethod 
+    def init_from_opts(cls, options, files=[]):
+        cat = Cat(options.burnin, options.subsample, not options.no_annotations)
+        return cat
 
     def process_tree(self, t):
         if self.burnin:
@@ -58,19 +72,3 @@ class Cat(PhyltrCommand):
         else:
             # If there's no burn-in, we've already done everything
             raise StopIteration
-
-def init_from_args(*args):
-
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
-    parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
-    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
-    options, files = parser.parse_args(*args)
-
-    cat = Cat(options.burnin, options.subsample, not options.no_annotations)
-    return cat, files
-
-def run():  # pragma: no cover
-    cat, files = init_from_args()
-    complex_plumb(cat, files)

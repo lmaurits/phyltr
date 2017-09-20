@@ -11,16 +11,25 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import sys
+import optparse
 
-import phyltr.utils.phyoptparse as optparse
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_list
+from phyltr.plumbing.sinks import ListPerLineFormatter
 
 class Taxa(PhyltrCommand):
 
+    sink = ListPerLineFormatter
+
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+
     def __init__(self):
         self.done = False
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        taxa = Taxa()
+        return taxa
 
     def process_tree(self, t):
         if self.done:
@@ -29,16 +38,3 @@ class Taxa(PhyltrCommand):
             names = [n.name for n in t.traverse() if n.name]
             self.done = True
             return sorted(names)
-
-def init_from_args(*args):
-
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args(*args)
-    
-    taxa = Taxa()
-    return taxa, files
-
-def run():  # pragma: no cover
-    taxa, files = init_from_args()
-    plumb_list(taxa, files)

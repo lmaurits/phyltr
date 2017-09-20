@@ -14,31 +14,26 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import phyltr.utils.phyoptparse as optparse
+import optparse
+
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.helpers import plumb_stdin
 
 class Scale(PhyltrCommand):
 
+    parser = optparse.OptionParser(add_help_option = False)
+    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser.add_option('-s', '--scale', type="float", default=1.0,
+                help='Scaling factor.')
+
     def __init__(self, scalefactor=1.0):
         self.scalefactor = scalefactor
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        scale = Scale(options.scale)
+        return scale
 
     def process_tree(self, t):
         for node in t.traverse():
             node.dist *= self.scalefactor
         return t
-
-
-def init_from_args(*args):
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-s', '--scale', type="float", default=1.0,
-                help='Scaling factor.')
-    options, files = parser.parse_args(*args)
-
-    scale = Scale(options.scale)
-    return scale, files
-
-def run():  # pragma: no cover
-    scale, files = init_from_args()
-    plumb_stdin(scale, files)
