@@ -16,7 +16,7 @@ class PhyltrCommand:
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     @classmethod 
     def run_as_script(cls):
