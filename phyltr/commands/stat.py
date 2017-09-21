@@ -14,9 +14,12 @@ OPTIONS:
 import optparse
 
 from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.sinks import NullSink
 from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
+
+    sink = NullSink
 
     parser = optparse.OptionParser(add_help_option = False)
     parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
@@ -64,15 +67,12 @@ class Stat(PhyltrCommand):
         self.mean_tree_height = sum(self.tree_ages) / self.tree_count
         return []
 
-def run():  # pragma: no cover
-    #FIXME Argh, how do we do this in the new framework_
+    def post_print(self):
 
-    stat, files = init_from_args()
-    
-    print("Total taxa: %d" % stat.taxa_count)
-    print("Total trees: %d" % stat.tree_count)
-    print("Unique topologies: %d" % stat.topology_count)
-    print("Are trees ultrametric? %s" % str(stat.ultrametric))
-    print("Mean tree height: %f" % stat.mean_tree_height)
-    print("Min tree height: %f" % stat.min_tree_height)
-    print("Max tree height: %f" % stat.max_tree_height)
+        print("Total taxa: %d" % self.taxa_count)
+        print("Total trees: %d" % self.tree_count)
+        print("Unique topologies: %d" % self.topology_count)
+        print("Are trees ultrametric? %s" % str(self.ultrametric))
+        print("Mean tree height: %f" % self.mean_tree_height)
+        print("Min tree height: %f" % self.min_tree_height)
+        print("Max tree height: %f" % self.max_tree_height)

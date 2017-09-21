@@ -39,11 +39,16 @@ class PhyltrCommand:
             print("Oh no!")
             return 1
 
+        obj.pre_print()
+
         raw_source = fileinput.input(files)
         in_trees = cls.source().consume(raw_source)
         out_trees = obj.consume(in_trees)
         cls.sink(sys.stdout).consume(out_trees)
         raw_source.close()
+
+        obj.post_print()
+
         return 0
 
     @classmethod 
@@ -52,6 +57,12 @@ class PhyltrCommand:
         options, files = cls.parser.parse_args(args)
         obj = cls.init_from_opts(options, files)
         return obj
+
+    def pre_print(self):
+        pass    # pragma: no cover
+
+    def post_print(self):
+        pass    # pragma: no cover
 
     # The conceptual heart of phyltr...
 
