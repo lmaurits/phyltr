@@ -18,6 +18,9 @@ def test_command():
 def test_command_2():
     run_command("stat tests/treefiles/basic.trees")
 
+def test_command_3():
+    run_command("pretty tests/treefiles/basic.trees")
+
 def test_command_help():
     run_command("cat --help")
 
