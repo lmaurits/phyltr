@@ -6,23 +6,23 @@ from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.plot import Plot
 
-def test_dummy_wrapper_for_travis(f):
+def dummy_wrapper_for_travis(f):
     if os.environ.get("TRAVIS"):
         dummy = True
     else:
         dummy = False
-    def wrapped():
+    def test_wrapped():
         return f(dummy)
-    return wrapped
+    return test_wrapped
 
-@test_dummy_wrapper_for_travis
+@dummy_wrapper_for_travis
 def test_init_from_args(dummy=False):
     if dummy:
         assert True
     else:
         plot = Plot.init_from_args("")
 
-@test_dummy_wrapper_for_travis
+@dummy_wrapper_for_travis
 def test_plot(dummy=False):
 
     lines = fileinput.input("tests/treefiles/basic.trees")
@@ -33,7 +33,7 @@ def test_plot(dummy=False):
             pass
     lines.close()
 
-@test_dummy_wrapper_for_travis
+@dummy_wrapper_for_travis
 def test_plot_multiple(dummy=False):
 
     lines = fileinput.input("tests/treefiles/basic.trees")
@@ -44,7 +44,7 @@ def test_plot_multiple(dummy=False):
             pass
     lines.close()
 
-@test_dummy_wrapper_for_travis
+@dummy_wrapper_for_travis
 def test_plot_annotated(dummy=False):
 
     lines = fileinput.input("tests/treefiles/basic.trees")
