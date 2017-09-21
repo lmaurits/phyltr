@@ -54,7 +54,7 @@ def get_colour_set(n):
     if n <= len(colours):
         return colours[0:n]
 
-def ultrametric(node):
+def ultrametric(node): # pragma: no cover
     node.img_style["vt_line_width"]=0
     if node.is_leaf():
         node.img_style["size"]=5

@@ -8,11 +8,6 @@ from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.plot import Plot, ultrametric
 
-def test_ultrametric_style_function():
-    node = ete3.TreeNode()
-    ultrametric(node)
-    assert node.img_style["vt_line_width"] == 0
-
 def dummy_wrapper_for_travis(f):
     if os.environ.get("TRAVIS"):
         dummy = True
