@@ -3,6 +3,7 @@ import fileinput
 import tempfile
 
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
+from phyltr.plumbing.sinks import NewickFormatter, NullSink
 from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import Annotate
 
@@ -16,9 +17,16 @@ def test_init():
     assert annotate.annotations
 
     # Test extract flag
+    annotate = Annotate.init_from_args("--extract -f my_output_file.csv")
+    assert annotate.extract == True
+    assert annotate.multiple == False
+    assert annotate.sink == NewickFormatter
+
+    # Test that extracting to stdin disables tree output
     annotate = Annotate.init_from_args("--extract")
     assert annotate.extract == True
     assert annotate.multiple == False
+    assert annotate.sink == NullSink
 
     # Test multiple flag
     annotate = Annotate.init_from_args("--extract --multiple")
