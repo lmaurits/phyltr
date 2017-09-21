@@ -110,11 +110,13 @@ class Plot(PhyltrCommand):
             colour_map = dict(zip(values, colours))
             for l in t.iter_leaves():
                 mycolour = colour_map[getattr(l,self.attribute)]
-                l.add_face(ete3.CircleFace(radius=10,color=mycolour, style="sphere"), 0)
+                if not self.dummy:
+                    l.add_face(ete3.CircleFace(radius=10,color=mycolour, style="sphere"), 0)
 
         # Apply labels
-        for l in t.iter_leaves():
-            l.add_face(ete3.TextFace(getattr(l, self.label)), 1)
+        if not self.dummy:
+            for l in t.iter_leaves():
+                l.add_face(ete3.TextFace(getattr(l, self.label)), 1)
 
         # Plot or save
         if self.output:
