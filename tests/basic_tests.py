@@ -21,6 +21,12 @@ def test_command_help():
 def test_command_bad_args():
     run_command("prune")    # `prune` needs some args
 
+def test_string_formatter_command():
+    run_command("height tests/treefiles/basic.trees")
+
+def test_list_formatter_command():
+    run_command("taxa tests/treefiles/basic.trees")
+
 def test_parsing():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
