@@ -15,6 +15,9 @@ def test_bad_command():
 def test_command():
     run_command("cat tests/treefiles/basic.trees")
 
+def test_command_2():
+    run_command("stat tests/treefiles/basic.trees")
+
 def test_command_help():
     run_command("cat --help")
 
