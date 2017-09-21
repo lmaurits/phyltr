@@ -19,7 +19,10 @@ def test_command_help():
     run_command("cat --help")
 
 def test_command_bad_args():
-    run_command("prune")    # `prune` needs some args
+    run_command("cat --foobar")
+
+def test_command_bad_args_2():
+    run_command("prune")    # `prune` has a compulsory arg which is missing here
 
 def test_string_formatter_command():
     run_command("height tests/treefiles/basic.trees")
