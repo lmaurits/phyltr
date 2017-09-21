@@ -58,7 +58,7 @@ class Annotate(PhyltrCommand):
     @classmethod 
     def init_from_opts(cls, options, files=[]):
         annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
-        if annotate.extract and annotate.filename == "-":
+        if annotate.extract and (annotate.filename == "-" or not annotate.filename):
             # If we're writing an extracted CSV to stdin, we don't want to also
             # serialise the trees, so plumb to null
             cls.sink = NullSink
