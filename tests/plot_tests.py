@@ -4,8 +4,8 @@ import os
 
 import ete3
 
+from phyltr.main import build_pipeline
 from phyltr.plumbing.sources import NewickParser
-from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.plot import Plot, ultrametric
 
 def dummy_wrapper_for_travis(f):

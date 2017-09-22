@@ -30,9 +30,11 @@ Command specific help is availble via "phyltr <command> --help".
 """
 
 import importlib
+import os.path
 import shlex
 from signal import signal, SIGPIPE, SIG_DFL
 import sys
+import types
 
 _COMMANDS = (
         "annotate",
@@ -55,7 +57,7 @@ _COMMANDS = (
         "uniq",
     )
 
-def split_string(spec_string):
+def _split_string(spec_string):
     spec_string = spec_string.strip()
     bits = spec_string.split(" ", 1)
     if len(bits) == 1:
@@ -64,7 +66,7 @@ def split_string(spec_string):
         command, args = bits
     return command, args
 
-def get_class(command):
+def _get_class(command):
     for match in _COMMANDS:
         if command in (match, match[0:3]):
             comm = importlib.import_module("phyltr.commands."+match)
@@ -73,9 +75,9 @@ def get_class(command):
 
     raise ValueError("Command not recognised")
 
-def get_obj(spec_string):
-    command, args = split_string(spec_string)
-    class_ = get_class(command)
+def _get_phyltr_obj(spec_string):
+    command, args = _split_string(spec_string)
+    class_ = _get_class(command)
     return class_.init_from_args(args)
 
 def run_command(command_string=None):
@@ -94,7 +96,7 @@ def run_command(command_string=None):
 
     # Check if the supplied command is one we know about
     try:
-        class_ = get_class(command)
+        class_ = _get_class(command)
     except ValueError:
         # If it wasn't a real command, maybe it was a request for help?
         if command in ("--help", "help", "--usage", "usage"):
@@ -107,3 +109,25 @@ def run_command(command_string=None):
 
     # If we've gotten this far, we're running a real command, so let's do it!
     return class_.run_as_script()
+
+def build_pipeline(string, source):
+    components = string.split("|")
+    for n, args in enumerate(components):
+        command_obj = _get_phyltr_obj(args)
+        if n==0:
+            if isinstance(source, types.StringTypes) and os.path.exists(source):
+                # If source is a filename, feed it to the command's default
+                # Source
+                fp = open(source, "r")
+                source = command_obj.source().consume(fp)
+                print(source)
+                print(source.next())
+            generator = command_obj.consume(source)
+        else:
+            # Subsequent components in the pipline should use their proceeding
+            # component as a source
+            generator = command_obj.consume(generator)
+    # We don't attach a sink as presumably in the use case for this function
+    # "the code is the sink"
+    return generator
+

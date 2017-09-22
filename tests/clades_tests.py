@@ -2,8 +2,8 @@ from __future__ import division
 
 import fileinput
 
+from phyltr.main import build_pipeline
 from phyltr.plumbing.sources import NewickParser
-from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.clades import Clades
 
 def test_init_from_args():

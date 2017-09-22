@@ -2,9 +2,9 @@ import csv
 import fileinput
 import tempfile
 
+from phyltr.main import build_pipeline
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.sinks import NewickFormatter, NullSink
-from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.annotate import Annotate
 
 def test_init():

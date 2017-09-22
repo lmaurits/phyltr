@@ -1,6 +1,6 @@
 import fileinput
 
-from phyltr.heart import run_command
+from phyltr.main import run_command
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
 
 def test_no_command():

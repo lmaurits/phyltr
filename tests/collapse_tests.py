@@ -3,7 +3,7 @@ import fileinput
 from nose.tools import raises
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.plumbing.helpers import build_pipeline
+from phyltr.main import build_pipeline
 from phyltr.commands.annotate import Annotate
 from phyltr.commands.collapse import Collapse
 

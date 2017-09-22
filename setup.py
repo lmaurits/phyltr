@@ -19,7 +19,7 @@ setup(
     ],
     packages = ['phyltr','phyltr/commands', 'phyltr/plumbing', 'phyltr/utils'],
     entry_points = {
-        'console_scripts': ['phyltr=phyltr.heart:run_command'],
+        'console_scripts': ['phyltr=phyltr.main:run_command'],
     },
     requires=['ete3'],
     install_requires=['ete3']

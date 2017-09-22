@@ -1,7 +1,7 @@
 import fileinput
 
+from phyltr.main import build_pipeline
 from phyltr.plumbing.sources import NewickParser
-from phyltr.plumbing.helpers import build_pipeline
 from phyltr.commands.height import Height
 from phyltr.commands.length import Length
 from phyltr.commands.scale import Scale

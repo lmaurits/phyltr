@@ -1,7 +1,7 @@
 import fileinput
 
 from phyltr.plumbing.sources import NewickParser
-from phyltr.plumbing.helpers import build_pipeline
+from phyltr.main import build_pipeline
 from phyltr.commands.pretty import Pretty
 
 def test_init_from_args():
