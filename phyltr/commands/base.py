@@ -20,23 +20,24 @@ class PhyltrCommand:
 
     @classmethod 
     def run_as_script(cls):
-        try:
-            options, files = cls.parser.parse_args()
-        except SystemExit:
-            # Bad commandline arguments (i.e. non-existent arg given)
-            print("Help!")
-            return 0
+        # Parse the arguments.
+        # If there's an error, optparse will brutally kill us here.
+        # That's not so bad here, as this codepath should only be followed
+        # when we are genuinely running from a shell.
+        # Things are different in init_from_args()...
+        options, files = cls.parser.parse_args()
 
+        # Explicit request for help
         if options.help:
-            # Explicit request for help
             print(cls.help_string)
             return 0
 
+        # Attempt to instantiate command object
         try:
             obj = cls.init_from_opts(options, files)
-        except:
+        except ValueError as e:
             # Bad arguments (e.g. incompatible or incomplete)
-            print("Oh no!")
+            sys.stderr.write(str(e))
             return 1
 
         obj.pre_print()
@@ -54,7 +55,16 @@ class PhyltrCommand:
     @classmethod 
     def init_from_args(cls, string):
         args = shlex.split(string)
-        options, files = cls.parser.parse_args(args)
+        try:
+            options, files = cls.parser.parse_args(args)
+        except SystemExit:
+            # optparse didn't like our args and tried to brutally kill us!
+            # But this code may be called from some non-shell context and we
+            # would rather just throw an exception than shut everything down.
+            # Ideally this exception would convey some useful information, but
+            # optparse is a little badly designed in this sense and all
+            # information is lost...
+            raise ValueError("Error parsing arguments.")
         obj = cls.init_from_opts(options, files)
         return obj
 
