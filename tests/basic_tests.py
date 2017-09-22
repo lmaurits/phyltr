@@ -1,5 +1,8 @@
 import fileinput
 
+from nose.tools import raises
+
+from phyltr.commands.cat import Cat
 from phyltr.main import run_command
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
 
@@ -24,8 +27,9 @@ def test_command_3():
 def test_command_help():
     run_command("cat --help")
 
+@raises(ValueError)
 def test_command_bad_args():
-    run_command("cat --foobar")
+    cat = Cat.init_from_args("cat --foobar")
 
 def test_command_bad_args_2():
     run_command("prune")    # `prune` has a compulsory arg which is missing here
