@@ -120,8 +120,6 @@ def build_pipeline(string, source):
                 # Source
                 fp = open(source, "r")
                 source = command_obj.source().consume(fp)
-                print(source)
-                print(source.next())
             generator = command_obj.consume(source)
         else:
             # Subsequent components in the pipline should use their proceeding
