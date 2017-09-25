@@ -6,7 +6,7 @@ Produce a majority rules consensus tree for the tree stream.
 OPTIONS:
 
     -f, --frequency
-        Minimum clade frequency to include in the consensus tree (default 0.t)
+        Minimum clade frequency to include in the consensus tree (default 0.5)
 
     files
         A whitespace-separated list of filenames to read treestreams from.
@@ -14,17 +14,25 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import ete2
+import ete3
 
-import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
-from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Consensus(PhyltrCommand):
+
+    parser = OptionParser(__doc__, prog="phyltr consensus")
+    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
 
     def __init__(self, frequency=0.5):
         self.frequency = frequency
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    @classmethod 
+    def init_from_opts(cls, options, files=[]):
+        consensus = Consensus(options.frequency)
+        return consensus
 
     def process_tree(self, t):
         self.cp.add_tree(t)
@@ -46,11 +54,15 @@ class Consensus(PhyltrCommand):
                 clade = clade.split(",")
                 clades.append((len(clade), p, set(clade)))
         clades.sort()
-        junk, trash, all_leaves = clades.pop()
+        # Pop the clade with highest probability, which *should* be the clade
+        # with support 1.0 containing all leaves
+        taxon_count, prob, all_leaves = clades.pop()
+        assert prob == 1.0
+        assert all((taxon_count > count for count, p, clade in clades))
         clades.reverse()
 
         # Start out with a tree in which all leaves are joined in one big polytomy
-        t = ete2.Tree()
+        t = ete3.Tree()
         for l in all_leaves:
             t.add_child(name=l)
 
@@ -60,25 +72,24 @@ class Consensus(PhyltrCommand):
 
         # Add age annotations
         for clade in t.traverse("postorder"):
-            if clade.is_leaf():
-                continue
             clade_key = ",".join(sorted([l.name for l in cache[clade]]))
-            ages = self.cp.clade_ages[clade_key]
-            mean = sum(ages)/len(ages)
-            for c in clade.get_children():
-                leaf, age = c.get_farthest_leaf()
-                c.dist = mean - age
-            ages.sort()
-            lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
-            clade.add_feature("age_mean", mean)
-            clade.add_feature("age_median", median)
-            clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
+            if not clade.is_leaf(): # all leaves have age zero, so don't bother
+                ages = self.cp.clade_ages[clade_key]
+                mean = sum(ages)/len(ages)
+                for c in clade.get_children():
+                    leaf, age = c.get_farthest_leaf()
+                    c.dist = mean - age
+                ages.sort()
+                lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
+                clade.add_feature("age_mean", mean)
+                clade.add_feature("age_median", median)
+                clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
 
             for f in self.cp.clade_attributes:
                 values = self.cp.clade_attributes[f][clade_key]
                 mean = sum(values)/len(values)
                 values.sort()
-                lower, median, upper = [values[int(x*len(values))] for x in 0.025,0.5,0.975]
+                lower, median, upper = [values[int(x*len(values))] for x in (0.025,0.5,0.975)]
                 clade.add_feature("%s_mean" % f, mean)
                 clade.add_feature("%s_median" % f, median)
                 clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
@@ -93,8 +104,6 @@ def recursive_builder(t, clades):
         matched = False
         # ...find the largest clade which is a subset of my children
         for length, p, clade in clades:
-            if len(clade) == 1:
-                continue
             if clade.issubset(children):
                 matched = True
                 break
@@ -118,13 +127,3 @@ def recursive_builder(t, clades):
     for child in t.get_children():
         recursive_builder(child, clades)
     return t
-
-def run():
-
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
-    options, files = parser.parse_args()
-
-    consensus = Consensus(options.frequency)
-    plumb(consensus, file)
-

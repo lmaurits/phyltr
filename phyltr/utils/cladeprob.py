@@ -20,16 +20,17 @@ class CladeProbabilities:
         self.tree_count += 1
         for subtree in tree.traverse():
             leaves = [leaf.name for leaf in cache[subtree]]
-            if len(leaves) == 1:
-                continue
             clade = ",".join(sorted(leaves))
-            self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
-            leaf, age = subtree.get_farthest_leaf()
-            if clade in self.clade_ages:
-                self.clade_ages[clade].append(age)
-            else:
-                self.clade_ages[clade] = [age]
+            # Record ages of non-leaf clades
+            if len(leaves) > 1:
+                self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
+                leaf, age = subtree.get_farthest_leaf()
+                if clade in self.clade_ages:
+                    self.clade_ages[clade].append(age)
+                else:
+                    self.clade_ages[clade] = [age]
             extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
+            # Record annotations for all clades, even leaves
             for f in extra_features:
                 value = getattr(subtree, f)
                 try:
@@ -86,8 +87,8 @@ class CladeProbabilities:
         clade_probs = [(self.clade_probs[c], c) for c in self.clade_probs]
         if threshold < 1.0:
             clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
-        # Sort by clade string, ignoring case...
-        clade_probs.sort(key=lambda x:x[1].lower())
+        # Sort by clade size and then case-insensitive alpha...
+        clade_probs.sort(key=lambda x:(x[1].count(","),x[1].lower()),reverse=True)
         # ...then by clade probability
         # (this results in a list sorted by probability and then name)
         clade_probs.sort(key=lambda x:x[0],reverse=True)
@@ -98,7 +99,7 @@ class CladeProbabilities:
                 ages = self.clade_ages[c]
                 mean = sum(ages)/len(ages)
                 ages.sort()
-                lower, median, upper = [ages[int(x*len(ages))] for x in 0.05,0.5,0.95]
+                lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
                 line = "%.4f, %.2f (%.2f-%.2f) [%s]\n" % (p, mean, lower, upper, c)
             else:
                 line = "%.4f, [%s]\n" % (p, c)

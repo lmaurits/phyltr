@@ -6,6 +6,11 @@ and giving the newly formed leaf a specified label.
 
 OPTIONS:
 
+    -a, --attribute
+        Specify an attribute by which to collapse clades instead of a
+        translation file.  Clades will only be collapsed for attribute values
+        which are monophyletic.
+
     -t, --translate
         The filename of the translate file.  Each line of the translate file
         should be of the format:
@@ -21,92 +26,107 @@ OPTIONS:
 
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
-import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
+
+class MonophylyFailure(Exception):
+    """Raised when asked to collapse a non monophyletic taxon set."""
 
 class Collapse(PhyltrCommand):
 
-    def __init__(self, filename=None, attribute=None):
-        self.filename = filename
-        self.attribute = attribute
+    parser = OptionParser(__doc__, prog="phyltr collapse")
+    parser.add_option('-a', '--attribute', dest="attribute", default=None)
+    parser.add_option('-t', '--translate',
+                help='Specifies the translation file.',default=None)
 
-        args = (filename, attribute)
-        if all(args) or not any(args):
-            raise ValueError("Provide a filename or an attribute, but not both.")
-        
-        if filename:
-            self.read_clade_file(self.fliename)
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        collapse = Collapse({}, options.translate, options.attribute)
+        return collapse
+
+    def __init__(self, clades={}, filename=None, attribute=None):
+        if clades:
+            self.trans = clades # trans = translation
+        elif filename:
+            self.filename = filename
+            self.read_clade_file(self.filename)
+        elif attribute:
+            self.attribute = attribute
+            self.trans = {}
+        else:
+            raise ValueError("Must provide a dictionary of clades, a filename or an attribute.")
 
     def process_tree(self, t):
-        if self.filename:
-            self.collapse_from_file(t)
+        if self.trans:
+            self.collapse_by_dict(t)
         else:
             self.collapse_by_attribute(t)
         return t
 
-    def read_clade_file(filename):
+    def read_clade_file(self, filename):
 
         """Read a file of names and clade definitions and return a dictionary of
         this data."""
 
-        self.trans = []
+        self.trans = {}
         fp = open(filename, "r")
         for line in fp:
             name, clade = line.strip().split(":")
             clade = clade.strip().split(",")
-            self.trans.append((clade, name))
+            self.trans[name] = clade
         fp.close()
 
-    def collapse_from_file(self, t):
+    def collapse_by_dict(self, t):
         cache = t.get_cached_content()
         tree_leaves = cache[t]
-        for clade, name in self.trans:
+        for name, clade in self.trans.items():
             # Get a list of leaves in this tree
             clade_leaves = [l for l in tree_leaves if l.name in clade]
             if not clade_leaves:
                 continue
-            # Check monophyly
-            if len(clade_leaves) == 1:
-                mrca = clade_leaves[0]  # .get_common_ancestor works oddly for singletons
-            else:
-                mrca = t.get_common_ancestor(clade_leaves)
-            mrca_leaves = cache[mrca]
-            if set(mrca_leaves) == set(clade_leaves):
-                # Clade is monophyletic, so rename and prune
-                # But don't mess up distances
-                mrca.name = name
-                leaf, dist = mrca.get_farthest_leaf()
-                mrca.dist += dist
-                for child in mrca.get_children():
-                    child.detach()
-            else:
+            try:
+                self.test_monophyly_and_collapse(t, cache, name, clade_leaves)
+            except MonophylyFailure:
                 # Clade is not monophyletic.  We can't collapse it.
                 sys.stderr.write("Monophyly failure for clade: %s\n" % name)
-                sys.stderr.write("Interlopers: %s\n" % ",".join([n.name for n in set(mrca_leaves) - set(clade_leaves)]))
+#                sys.stderr.write("Interlopers: %s\n" % ",".join([n.name for n in set(mrca_leaves) - set(clade_leaves)]))
                 return 1
 
     def collapse_by_attribute(self, t):
-        values = set([getattr(n,self.attribute) for n in t.traverse() if hasattr(n,self.attribute)])
-        if not t.check_monophyly(values, self.attribute, ignore_missing=True):
-            sys.stderr.write("Monophyly failure for attribute: %s" % self.attribute)
-            return 1
+        cache = t.get_cached_content()
+        tree_leaves = cache[t]
+        # Build a dictionary mapping attribute values to lists of leaves
+        values = {}
+        for leaf in tree_leaves:
+            if not hasattr(leaf, self.attribute):
+                continue
+            value = getattr(leaf, self.attribute)
+            if value not in values:
+                values[value] = [leaf,]
+            else:
+                values[value].append(leaf)
+        # Do monophyly tests
+        for value, clade_leaves in values.items():
+            try:
+                self.test_monophyly_and_collapse(t, cache, value, clade_leaves)
+            except MonophylyFailure:
+                # Clade is not monophyletic.  We can't collapse it.
+                sys.stderr.write("Monophyly failure for attribute value: %s=%s\n" % (self.attribute, value))
 
-        for v in values:
-            mrca = list(t.get_monophyletic([v], self.attribute))[0]
-            mrca.name = v
-            mrca.add_feature(self.attribute, v)
-            leaf, dist = mrca.get_farthest_leaf()
-            mrca.dist += dist
-            for child in mrca.get_children():
-                child.detach()
+    def test_monophyly_and_collapse(self, t, cache, clade, clade_leaves):
+        # Check monophyly
+        if len(clade_leaves) == 1:
+            mrca = clade_leaves[0]  # .get_common_ancestor works oddly for singletons
+        else:
+            mrca = t.get_common_ancestor(clade_leaves)
+        mrca_leaves = cache[mrca]
+        if set(mrca_leaves) != set(clade_leaves):
+            raise MonophylyFailure
 
-def run():
-
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--attribute', dest="attribute", default=None)
-    parser.add_option('-t', '--translate',
-                help='Specifies the translation file.',default=None)
-    options, files = parser.parse_args()
-
-    collapse = Collapse(options.translate, options.attribute)
-    plumb(collapse, files)
+        # Clade is monophyletic, so rename and prune
+        # But don't mess up distances
+        mrca.name = clade
+        leaf, dist = mrca.get_farthest_leaf()
+        mrca.dist += dist
+        for child in mrca.get_children():
+            child.detach()

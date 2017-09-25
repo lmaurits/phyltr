@@ -13,13 +13,18 @@ OPTIONS:
 """
 
 import random
-import sys
 
-
-from phyltr.commands.generic import PhyltrCommand, plumb
-import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Dedupe(PhyltrCommand):
+
+    parser = OptionParser(__doc__, prog="phyltr dedupe")
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        dedupe = Dedupe()
+        return dedupe
 
     def process_tree(self, t):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
@@ -27,6 +32,7 @@ class Dedupe(PhyltrCommand):
         if not dupes:
             return t
         # Remove dupes one at a time
+        victims = []
         for dupe in dupes:
             dupe_taxa = t.get_leaves_by_name(dupe)
             assert all([d.is_leaf() for d in dupe_taxa])
@@ -39,17 +45,9 @@ class Dedupe(PhyltrCommand):
                     child.detach()
             # If the dupe is non-monophyletic, kill at random
             else:
-                victims = random.sample(dupe_taxa,len(dupe_taxa)-1)
-                t.prune([l for l in t.get_leaves() if l not in victims])
+                victims.extend(random.sample(dupe_taxa,len(dupe_taxa)-1))
+        if victims:
+            t.prune([l for l in t.get_leaves() if l not in victims], preserve_branch_length=True)
 #                for v in victims:
 #                    v.detach()
         return t
-
-def run():
-
-    parser = optparse.OptionParser(__doc__)
-    options, files = parser.parse_args()
-
-    dedupe = Dedupe()
-    plumb(dedupe, files)
-

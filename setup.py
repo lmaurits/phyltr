@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='phyltr',
-    version='0.3.0',
+    version='dev',
     description='Unix filters for manipulating and analysing (samples of) phylogenetic trees represented in the Newick format',
     author='Luke Maurits',
     author_email='luke@maurits.id.au',
@@ -17,9 +17,11 @@ setup(
         'Programming Language :: Python',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
-    scripts=['bin/phyltr',],
-    packages = ['phyltr','phyltr/commands', 'phyltr/utils'],
-    requires=['ete2'],
-    install_requires=['ete2']
+    packages = ['phyltr','phyltr/commands', 'phyltr/plumbing', 'phyltr/utils'],
+    entry_points = {
+        'console_scripts': ['phyltr=phyltr.main:run_command'],
+    },
+    requires=['ete3'],
+    install_requires=['ete3']
 
 )

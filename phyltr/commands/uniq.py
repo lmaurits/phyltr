@@ -19,21 +19,30 @@ OPTIONS:
 
 import itertools
 
-import phyltr.utils.phyoptparse as optparse
-from phyltr.commands.generic import PhyltrCommand, plumb
+from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
+from phyltr.utils.topouniq import are_same_topology
 
 class Uniq(PhyltrCommand):
 
-    def __init__(self, lengths):
+    parser = OptionParser(__doc__, prog="phyltr uniq")
+    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
+
+    def __init__(self, lengths="mean"):
         self.lengths = lengths
 
         self.topologies = {}
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        uniq = Uniq(options.lengths)
+        return uniq
 
     def process_tree(self, t):
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         for exemplar in self.topologies:
-            if t.robinson_foulds(exemplar)[0] == 0.0:
+            if are_same_topology(t, exemplar):
                 self.topologies[exemplar].append(t)
                 break
         else:
@@ -53,19 +62,10 @@ class Uniq(PhyltrCommand):
                     dists.sort()
                     l = len(dists)
                     if l % 2 == 0:
-                        dist = 0.5*(dists[l/2]+dists[l/2-1])
+                        dist = 0.5*(dists[l//2]+dists[l//2-1])
                     else:
-                        dist = dists[l/2]
+                        dist = dists[l//2]
                 elif self.lengths == "min":
                     dist = min(dists)
                 nodes[0].dist = dist
             yield equ_class[0]
-def run():
-
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
-    options, files = parser.parse_args()
-
-    uniq = Uniq(options.lengths)
-    plumb(uniq, files)

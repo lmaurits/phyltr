@@ -1,9 +1,14 @@
 """Usage:
     phyltr support [<options>] [<files>]
 
-Annotate a treestream with clade support probabilities, and optionally save clade support information to a file
+Annotate a treestream with clade support probabilities, and optionally save
+clade support information to a file
 
 OPTIONS:
+
+    -a, --ages
+        Whether or not to include clade age information (mean and 95% HPD
+        interval in output)
 
     -s, --sort
         Reorder tree stream to print trees in order from highest to lowest
@@ -22,20 +27,34 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
+import optparse
 
+from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
-import phyltr.utils.phyoptparse as optparse
-from phyltr.commands.generic import PhyltrCommand, plumb
 
 class Support(PhyltrCommand):
    
-    def __init__(self, frequency, ages=False, sort=False, filename=None):
+    parser = OptionParser(__doc__, prog="phyltr support")
+    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
+    parser.add_option('-f', '--frequency', type="float", dest="frequency",
+            default=0.0, help='Minimum clade frequency to report.')
+    parser.add_option("-o", "--output", action="store", dest="filename",
+        help="save clades to FILE", metavar="FILE")
+    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
+
+    def __init__(self, frequency=0.0, ages=False, sort=False, filename=None):
         self.frequency = frequency
         self.ages = ages
         self.sort = sort
         self.filename = filename
         self.trees = []
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
+
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        support = Support(options.frequency, options.age, options.sort, options.filename)
+        return support
 
     def process_tree(self, t):
         self.trees.append(t)
@@ -47,7 +66,7 @@ class Support(PhyltrCommand):
 
         # Save clade probabilities
         if self.filename:
-            cp.save_clade_report(self.filename, self.frequency, self.age)
+            self.cp.save_clade_report(self.filename, self.frequency, self.ages)
 
         # Annotate trees
         for t in self.trees:
@@ -63,18 +82,3 @@ class Support(PhyltrCommand):
         # Output
         for t in self.trees:
             yield t
-
-def run():
-
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
-    parser.add_option('-f', '--frequency', type="float", dest="frequency",
-            default=1.0, help='Minimum clade frequency to report.')
-    parser.add_option("-o", "--output", action="store", dest="filename",
-        help="save clades to FILE", metavar="FILE")
-    parser.add_option('-s', '--sort', action="store_true", dest="sort", default=False)
-    options, files = parser.parse_args()
-
-    support = Support(options.frequency, options.age, options.sort, options.filename)
-    plumb(support, files)

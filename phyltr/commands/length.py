@@ -1,7 +1,7 @@
 """Usage:
-    phyltr height [<files>]
+    phyltr length [<files>]
 
-Print the heights of each tree in a stream.
+Print the length of each tree in a stream.
 
 OPTIONS:
 
@@ -15,16 +15,16 @@ from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 from phyltr.utils.phyltroptparse import OptionParser
 
-class Height(PhyltrCommand):
+class Length(PhyltrCommand):
 
     sink = StringFormatter
 
-    parser = OptionParser(__doc__, prog="phyltr height")
+    parser = OptionParser(__doc__, prog="phyltr length")
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        height = Height()
-        return height
+        length = Length()
+        return length
 
     def process_tree(self, t):
-        return t.get_farthest_leaf()[1]
+        return sum([n.dist for n in t.traverse()])

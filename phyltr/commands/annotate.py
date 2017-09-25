@@ -5,8 +5,22 @@ Annotate a the trees in a tree stream with information from a file
 
 OPTIONS:
 
+    -e, --extract
+        Build a CSV file of information from a treestream, i.e. reverse the
+        standard behaviour
+
     -f, --file
         File to read annotations from
+
+    -k, --key
+        Fieldname which corresponds to tree taxon names, used to link lines
+        of the csv file to tree nodes.
+
+    -m, --multiple
+        If set, when --extract is used, information from each tree in the
+        treestream will be added to the file, with a `tree_number` column
+        used to disambiguate.  When not set, information is extracted only
+        from the first tree in the treestream.
 
     files
         A whitespace-separated list of filenames to read treestreams from.
@@ -17,12 +31,19 @@ OPTIONS:
 import csv
 import sys
 
-from phyltr.commands.generic import PhyltrCommand, plumb
-import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.sinks import NullSink
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Annotate(PhyltrCommand):
 
-    def __init__(self, filename, key, extract=False, multiple=False):
+    parser = OptionParser(__doc__, prog="phyltr annotate")
+    parser.add_option('-e', '--extract', default=False, action="store_true", help="Extract data from annotated tree to file.")
+    parser.add_option('-f', '--file', dest="filename", help="File to read/write annotation data from/to.")
+    parser.add_option('-k', '--key', dest="key", help="Name of column in annotation file to match against taxon names")
+    parser.add_option('-m', '--multiple', default=False, action="store_true")
+
+    def __init__(self, filename, key=None, extract=False, multiple=False):
         self.filename = filename
         self.key = key
         self.extract = extract
@@ -33,6 +54,16 @@ class Annotate(PhyltrCommand):
         if not self.extract:
             self.read_annotation_file()
 
+    @classmethod 
+    def init_from_opts(cls, options, files=[]):
+        annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
+        if annotate.extract and (annotate.filename == "-" or not annotate.filename):
+            # If we're writing an extracted CSV to stdin, we don't want to also
+            # serialise the trees, so plumb to null
+            cls.sink = NullSink
+
+        return annotate
+
     def process_tree(self, t):
         if self.extract:
             # Break out of consume if we've done one
@@ -40,12 +71,9 @@ class Annotate(PhyltrCommand):
                 if self.n > 0:
                     raise StopIteration
             self.extract_annotations(t)
-            if self.filename == "-":
-                # Don't emit trees if using stdout for extracted data
-                return None
         else:
-           self.annotate_tree(t)
-
+            self.annotate_tree(t)
+        self.n += 1
         return t
 
     def read_annotation_file(self):
@@ -68,9 +96,9 @@ class Annotate(PhyltrCommand):
 
     def extract_annotations(self, t):
         if self.filename == "-" or not self.filename:
-            fp = sys.stdout
+            fp = sys.stdout # pragma: no cover
         else:
-            if self.n > 1:
+            if self.n > 0:
                 fp = open(self.filename, "a")
             else:
                 fp = open(self.filename, "w")
@@ -99,24 +127,10 @@ class Annotate(PhyltrCommand):
                 else:
                     fix_root_name = False
                 rowdict = {f:getattr(node, f, "?") for f in fieldnames}
-                if tree_no:
-                    rowdict["tree_number"] = tree_no
+                if self.multiple:
+                    rowdict["tree_number"] = self.n
                 writer.writerow(rowdict)
                 if fix_root_name:
                     node.name = None
         if self.filename and self.filename != "-":
             fp.close()
-
-def run():
-
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-e', '--extract', action="store_true", help="Extract data from annotated tree to file.")
-    parser.add_option('-f', '--file', dest="filename", help="File to read/write annotation data from/to.")
-    parser.add_option('-k', '--key', dest="key", help="Name of column in annotation file to match against taxon names")
-    parser.add_option('-m', '--multiple', default=False, action="store_true")
-    options, files = parser.parse_args()
-
-    annotate = Annotate(options.filename, options.key, options.extract, options.multiple)
-    plumb(annotate, files)
-

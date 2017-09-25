@@ -8,25 +8,47 @@ OPTIONS:
     -c, --compress
         Compress highly supported clades to a single node
 
+    -l, --label
+        Specify the name of an attribute with which to label leaves
+
     files
         A whitespace-separated list of filenames to read treestreams from.
         Use a filename of "-" to read from stdin.  If no filenames are
         specified, the treestream will be read from stdin.
 """
 
-from phyltr.commands.generic import PhyltrCommand, plumb
+import optparse
 
-import phyltr.utils.phyoptparse as optparse
+from phyltr.commands.base import PhyltrCommand
+from phyltr.plumbing.sinks import StringFormatter
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Pretty(PhyltrCommand):
 
-    def __init__(self, compress=False):
+    sink = StringFormatter
+
+    parser = OptionParser(__doc__, prog="phyltr pretty")
+    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
+    parser.add_option('-l', '--label', default="name")
+
+    def __init__(self, label="name", compress=False):
+        self.label = label
         self.compress = compress
 
+    @classmethod 
+    def init_from_opts(cls, options, files):
+        pretty = Pretty(label=options.label, compress=options.compress)
+        return pretty
+    
+
     def process_tree(self, t):
-        # Add support to interior nodes
+        # Change node names to get the desired appearance
         for node in t.traverse():
-            if not node.is_leaf():
+            # Replace leaf node names with requested attribute
+            if node.is_leaf() and hasattr(node, self.label):
+                node.name = getattr(node, self.label)
+            # Add support to interior nodes
+            else:
                 node.name = "%.2f" % node.support
 
         # Collapse high probability clades
@@ -39,16 +61,8 @@ class Pretty(PhyltrCommand):
                 desc.append(node)
                 if all([n.support >=0.9 for n in desc]):
                     dead_nodes.extend(desc)
-                    node.name = "(%.2f) %s" % (n.support, "+".join(sorted([l.name for l in node.get_leaves()])))
+                    node.name = "(%.2f) %s" % (node.support, "+".join(sorted([l.name for l in node.get_leaves()])))
                     for child in node.get_children():
                         child.detach()
-        print t.get_ascii()
 
-def run():
-    # Parse options
-    parser = optparse.OptionParser(__doc__)
-    parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
-    options, files = parser.parse_args()
-    
-    pretty = Pretty(compress=options.compress)
-    plumb(pretty, files)
+        return t.get_ascii()
