@@ -9,8 +9,6 @@ def test_stat():
     stat = Stat()
     for t in stat.consume(trees):
         pass
-    print(stat.tree_count)
     assert stat.tree_count == 6
-    print(stat.taxa_count)
     assert stat.taxa_count == 6
     assert stat.topology_count <= stat.tree_count

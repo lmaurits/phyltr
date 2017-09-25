@@ -10,7 +10,6 @@ from phyltr.commands.annotate import Annotate
 def test_init():
     annotate = Annotate.init_from_args("-f tests/argfiles/annotation.csv -k taxon")
     # Test defaults
-    print(annotate.extract)
     assert annotate.extract == False
     assert annotate.multiple == False
     # Test file was parsed

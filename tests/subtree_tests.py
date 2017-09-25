@@ -56,5 +56,4 @@ def test_annotation_subtree():
     subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --value 0", trees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
-        print(t.write())
         assert len(t.get_leaves()) == n
