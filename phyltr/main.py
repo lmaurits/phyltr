@@ -11,7 +11,7 @@ The available phyltr commands are:
     consensus   Build majority rules consensus tree
     dedupe      Remove duplicate taxa (by name)
     height      Print the height of each tree in a tree stream
-    height      Print the length of each tree in a tree stream
+    length      Print the length of each tree in a tree stream
     plot        Plot tree using ETE interactive viewer, or to file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
