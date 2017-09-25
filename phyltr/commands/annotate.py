@@ -29,16 +29,15 @@ OPTIONS:
 """
 
 import csv
-import optparse
 import sys
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Annotate(PhyltrCommand):
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr annotate")
     parser.add_option('-e', '--extract', default=False, action="store_true", help="Extract data from annotated tree to file.")
     parser.add_option('-f', '--file', dest="filename", help="File to read/write annotation data from/to.")
     parser.add_option('-k', '--key', dest="key", help="Name of column in annotation file to match against taxon names")

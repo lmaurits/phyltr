@@ -14,14 +14,12 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Scale(PhyltrCommand):
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr scale")
     parser.add_option('-s', '--scale', type="float", default=1.0,
                 help='Scaling factor.')
 

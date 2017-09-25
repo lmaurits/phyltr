@@ -1,12 +1,15 @@
 """Usage:
     phyltr cat [<options>] [<files>]
 
-Extract phylogenetic trees from the specified files and print them as a treestream.  The trees may contain trees formatted as a phyltr treestream or a NEXUS file.
+Extract phylogenetic trees from the specified files and print them as a
+treestream.  The trees may contain trees formatted as a phyltr treestream or a
+NEXUS file.
 
 OPTIONS:
 
     -b, --burnin
-        Percentage of trees from each file to discard as "burnin".  Default is 0.
+        Percentage of trees from each file to discard as "burn in".  Default is
+        0, i.e. no burn in.
         
     -s, --subsample
         Frequency at which to subsample trees, i.e. "-s 10" will include
@@ -18,17 +21,15 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sources import ComplexNewickParser
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Cat(PhyltrCommand):
 
     PhyltrCommand.source = ComplexNewickParser
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr cat")
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
     parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)

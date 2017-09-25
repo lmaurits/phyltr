@@ -6,7 +6,7 @@ Produce a majority rules consensus tree for the tree stream.
 OPTIONS:
 
     -f, --frequency
-        Minimum clade frequency to include in the consensus tree (default 0.t)
+        Minimum clade frequency to include in the consensus tree (default 0.5)
 
     files
         A whitespace-separated list of filenames to read treestreams from.
@@ -14,17 +14,15 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 import ete3
 
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
 
 class Consensus(PhyltrCommand):
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr consensus")
     parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
 
     def __init__(self, frequency=0.5):

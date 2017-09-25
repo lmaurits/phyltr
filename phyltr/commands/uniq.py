@@ -18,15 +18,14 @@ OPTIONS:
 """
 
 import itertools
-import optparse
 
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 from phyltr.utils.topouniq import are_same_topology
 
 class Uniq(PhyltrCommand):
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr uniq")
     parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
 
     def __init__(self, lengths="mean"):

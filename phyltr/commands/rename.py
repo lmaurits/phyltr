@@ -1,7 +1,8 @@
 """Usage:
     phyltr rename [<options>] [<files>]
 
-Rename the nodes in a treestream.  The mapping from old to new names is read from a file.
+Rename the nodes in a treestream.  The mapping from old to new names is read
+from a file.
 
 OPTIONS:
 
@@ -20,13 +21,12 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Rename(PhyltrCommand):
     
-    parser = optparse.OptionParser(add_help_option = False)
+    parser = OptionParser(__doc__, prog="phyltr rename")
     parser.add_option('-f', '--file', dest="filename",
                 help='Specifies the translation file.')
     parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",

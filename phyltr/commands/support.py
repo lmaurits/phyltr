@@ -1,7 +1,8 @@
 """Usage:
     phyltr support [<options>] [<files>]
 
-Annotate a treestream with clade support probabilities, and optionally save clade support information to a file
+Annotate a treestream with clade support probabilities, and optionally save
+clade support information to a file
 
 OPTIONS:
 
@@ -29,12 +30,12 @@ OPTIONS:
 import optparse
 
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
 
 class Support(PhyltrCommand):
    
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr support")
     parser.add_option('-a', '--age', action="store_true", dest="age", default=False, help="Include age information in report.")
     parser.add_option('-f', '--frequency', type="float", dest="frequency",
             default=0.0, help='Minimum clade frequency to report.')

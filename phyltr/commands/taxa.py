@@ -11,17 +11,15 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import ListPerLineFormatter
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Taxa(PhyltrCommand):
 
     sink = ListPerLineFormatter
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr taxa")
 
     def __init__(self):
         self.done = False

@@ -21,18 +21,16 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
+from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
 
 class Clades(PhyltrCommand):
 
     sink = StringFormatter
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr clades")
     parser.add_option('-a', '--ages', action="store_true", dest="age", default=False, help="Include age information in report.")
     parser.add_option('-f', '--frequency', type="float", dest="frequency",
             default=0.0, help='Minimum clade frequency to report.')

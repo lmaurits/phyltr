@@ -39,13 +39,13 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
 import os.path
 
 import ete3
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
+from phyltr.utils.phyltroptparse import OptionParser
 
 colours = ((240,163,255),(0,117,220),(153,63,0),(76,0,92),(25,25,25),(0,92,49),(43,206,72),(255,204,153),(128,128,128),(148,255,181),(143,124,0),(157,204,0),(194,0,136),(0,51,128),(255,164,5),(255,168,187),(66,102,0),(255,0,16),(94,241,242),(0,153,143),(224,255,102),(116,10,255),(153,0,0),(255,255,128),(255,255,0),(255,80,5),(0,255,255))
 colours = ['#%02x%02x%02x' % c for c in colours]
@@ -65,8 +65,7 @@ class Plot(PhyltrCommand):
 
     sink = NullSink
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr plot")
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-d', '--dpi', type="int", default=None)
     parser.add_option('-H', '--height', type="int", dest="height", default=None)
@@ -133,9 +132,9 @@ class Plot(PhyltrCommand):
                 filename = self.output
             if not self.dummy:
                 t.render(filename, ultrametric, tree_style=self.ts, **kw)
-        else:
+        else: # pragma: no cover
             if not self.dummy:
-                t.show(ultrametric, tree_style=self.ts) # pragma: no cover
+                t.show(ultrametric, tree_style=self.ts)
 
         self.n += 1
 

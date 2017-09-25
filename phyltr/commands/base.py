@@ -1,16 +1,14 @@
 import fileinput
-import optparse
 import shlex
 import sys
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.sinks import NewickFormatter
+from phyltr.utils.phyltroptparse import OptionParser
 
 class PhyltrCommand:
 
-    help_string = "Halp"
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser("Halp!")
     source = NewickParser
     sink = NewickFormatter
 
@@ -21,16 +19,10 @@ class PhyltrCommand:
     @classmethod 
     def run_as_script(cls):
         # Parse the arguments.
-        # If there's an error, optparse will brutally kill us here.
-        # That's not so bad here, as this codepath should only be followed
-        # when we are genuinely running from a shell.
-        # Things are different in init_from_args()...
-        options, files = cls.parser.parse_args()
-
-        # Explicit request for help
-        if options.help:
-            print(cls.help_string)
-            return 0
+        # If there's an error, let optparse kill the process in its usual
+        # fashion, as we should only be in run_as_script if we're genuinely
+        # running from an interactive shell.
+        options, files = cls.parser.parse_args(exit_on_error=True)
 
         # Attempt to instantiate command object
         try:
@@ -55,16 +47,11 @@ class PhyltrCommand:
     @classmethod 
     def init_from_args(cls, string):
         args = shlex.split(string)
-        try:
-            options, files = cls.parser.parse_args(args)
-        except SystemExit:
-            # optparse didn't like our args and tried to brutally kill us!
-            # But this code may be called from some non-shell context and we
-            # would rather just throw an exception than shut everything down.
-            # Ideally this exception would convey some useful information, but
-            # optparse is a little badly designed in this sense and all
-            # information is lost...
-            raise ValueError("Error parsing arguments.")
+        # Parse the arguments.
+        # If there is an error, do not kill the process!  Rather, raise a
+        # ValueError with some helpful message and let it bubble up to the
+        # caller.
+        options, files = cls.parser.parse_args(args, exit_on_error=False)
         obj = cls.init_from_opts(options, files)
         return obj
 

@@ -21,13 +21,13 @@ import optparse
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
+from phyltr.utils.phyltroptparse import OptionParser
 
 class Pretty(PhyltrCommand):
 
     sink = StringFormatter
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr pretty")
     parser.add_option('-c', '--compress', action="store_true", dest="compress", default=False)
     parser.add_option('-l', '--label', default="name")
 

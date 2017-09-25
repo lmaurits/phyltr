@@ -24,9 +24,6 @@ def test_command_2():
 def test_command_3():
     run_command("pretty tests/treefiles/basic.trees")
 
-def test_command_help():
-    run_command("cat --help")
-
 @raises(ValueError)
 def test_command_bad_args():
     cat = Cat.init_from_args("cat --foobar")

@@ -24,18 +24,17 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
 import sys
 
 from phyltr.commands.base import PhyltrCommand
+from phyltr.utils.phyltroptparse import OptionParser
 
 class MonophylyFailure(Exception):
     """Raised when asked to collapse a non monophyletic taxon set."""
 
 class Collapse(PhyltrCommand):
 
-    parser = optparse.OptionParser(add_help_option = False)
-    parser.add_option('-h', '--help', action="store_true", dest="help", default=False)
+    parser = OptionParser(__doc__, prog="phyltr collapse")
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
     parser.add_option('-t', '--translate',
                 help='Specifies the translation file.',default=None)
