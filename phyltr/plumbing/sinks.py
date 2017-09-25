@@ -42,6 +42,6 @@ class ListPerLineFormatter:
 
     def consume(self, stream):
         for lst in stream:
-            print("\n".join(lst))
+            self.out.write("\n".join(lst))
 
 
