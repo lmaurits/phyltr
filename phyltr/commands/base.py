@@ -35,9 +35,9 @@ class PhyltrCommand:
         obj.pre_print()
 
         raw_source = fileinput.input(files)
-        in_trees = cls.source().consume(raw_source)
+        in_trees = cls.init_source(options).consume(raw_source)
         out_trees = obj.consume(in_trees)
-        cls.sink(sys.stdout).consume(out_trees)
+        cls.init_sink(options, sys.stdout).consume(out_trees)
         raw_source.close()
 
         obj.post_print()
@@ -55,6 +55,14 @@ class PhyltrCommand:
         obj = cls.init_from_opts(options, files)
         return obj
 
+    @classmethod
+    def init_source(cls, options):
+        return cls.source()
+
+    @classmethod
+    def init_sink(cls, options, stream):
+        return cls.sink(stream)
+
     def pre_print(self):
         pass    # pragma: no cover
 
@@ -64,16 +72,21 @@ class PhyltrCommand:
     # The conceptual heart of phyltr...
 
     def consume(self, stream):
-        for tree in stream:
+        self.stream = stream
+        self.preprocess()
+        for tree in self.stream:
             try:
                 res = self.process_tree(tree)
                 if res:
                     yield res
             except StopIteration:
-                stream.close()
+                self.stream.close()
                 break
         for tree in self.postprocess():
             yield tree
+
+    def preprocess(self):
+        pass
 
     def process_tree(self, t):
         return t    # pragma: no cover
