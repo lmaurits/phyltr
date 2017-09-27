@@ -72,14 +72,13 @@ class PhyltrCommand:
     # The conceptual heart of phyltr...
 
     def consume(self, stream):
-        self.stream = stream
-        for tree in self.stream:
+        for tree in stream:
             try:
                 res = self.process_tree(tree)
                 if res:
                     yield res
             except StopIteration:
-                self.stream.close()
+                stream.close()
                 break
         for tree in self.postprocess():
             yield tree
