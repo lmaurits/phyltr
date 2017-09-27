@@ -10,6 +10,9 @@ _BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)
 regex1 = re.compile(_BEAST_ANNOTATION_REGEX)
 regex2 = re.compile(_BEAST_ANNOTATION_REGEX_2)
 
+#FIXME We should be deleting and starting a new temp file for each tree file
+# otherwise we're going to have problems if file 2 is shorter than file 1
+
 class ComplexNewickParser:
 
     def __init__(self, burnin=0, subsample=1):
@@ -17,68 +20,34 @@ class ComplexNewickParser:
         self.subsample = subsample
         self.n = 0
        
-        self.first_file = True
         if self.burnin:
             self.fp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
 
     def consume(self, stream):
 
-        firstline = False
-        self.isNexus = False
+        self.firstline = False   # Actually tracks whether a line is the first NON-BLANK line in a file
         for line in stream:
             if fileinput.isfirstline():
-                firstline = True
-                self.isNexus = False
+                self.firstline = True
                 # If this is the first line of a file, and we've already seen trees.
                 # then this is the second or subsequent file.  Before proceeding,
                 # we should handle the temp file full of tree strings read from
                 # the first file
                 if self.burnin and self.n > 0:
-                    for t in self.dump_from_backlog():
+                    for t in self.yield_from_tempfile():
                         yield t
 
             # Skip blank lines
             if not line.strip():
                 continue
-            
-            # Detect Nexus file format by checking first line
-            if firstline:
-                if line.strip() == "#NEXUS":
-                    self.isNexus = True
-                    inTranslate = False
-                    self.nexus_trans = {}
-                else:
-                    self.isNexus = False
-                firstline = False
-
-            # Detect beginning of Nexus translate block
-            if self.isNexus and "translate" in line.lower():
-                inTranslate = True
-                continue
-
-            # Handle Nexus translate block
-            if self.isNexus and inTranslate:
-                # Detect ending of translate block...
-                if line.strip() == ";":
-                    inTranslate = False
-                # ...or handle a line of translate block
-                else:
-                    if line.strip().endswith(";"):
-                        line = line[:-1]
-                        inTranslate = False
-                    index, name = line.strip().split()
-                    if name.endswith(","):
-                        name = name[:-1]
-                    self.nexus_trans[index] = name
+           
+            # Handle Nexus stuff
+            cont = self.handle_nexus_stuff(line)
+            if cont:
                 continue
 
             # Try to find a likely tree on this line and extract it
-            if (self.isNexus and line.strip().startswith("tree") or 
-               (
-                    ")" in line and
-                    ";" in line and
-                    line.count("(") == line.count(")")
-               )):
+            if self.detect_tree(line):
                 # Smells like a tree!
                 start = line.index("(")
                 end = line.rindex(";") + 1
@@ -89,20 +58,78 @@ class ComplexNewickParser:
                 elif self.n % self.subsample == 0:
                     # Yield now
                     t = get_tree(tree_string)
-                    if self.isNexus and self.nexus_trans:
-                        for node in t.traverse():
-                            if node.name and node.name in self.nexus_trans:
-                                node.name = self.nexus_trans[node.name]
+                    self.nexify_tree(t)
                     yield t
                 self.n += 1
 
         if self.burnin:
-            for t in self.dump_from_backlog():
+            for t in self.yield_from_tempfile():
                 yield t
             self.fp.close()
             os.unlink(self.fp.name)
 
-    def dump_from_backlog(self):
+    def handle_nexus_stuff(self, line):
+        """
+        Return value is whether or not this line needs to be processed further.
+        """
+        # Detect Nexus file format by checking first line
+        if self.firstline:
+            self.firstline = False
+            if line.strip() == "#NEXUS":
+                self.isNexus = True
+                self.inTranslate = False
+                self.nexus_trans = {}
+                return True
+            else:
+                self.isNexus = False
+                return False
+
+        if not self.isNexus:
+            return False
+
+        # Detect beginning of Nexus translate block
+        if "translate" in line.lower():
+            self.inTranslate = True
+            return True
+
+        # Handle Nexus translate block
+        if self.inTranslate:
+            # Detect ending of translate block...
+            if line.strip() == ";":
+                self.inTranslate = False
+            # ...or handle a line of translate block
+            else:
+                if line.strip().endswith(";"):
+                    line = line[:-1]
+                    self.inTranslate = False
+                index, name = line.strip().split()
+                if name.endswith(","):
+                    name = name[:-1]
+                self.nexus_trans[index] = name
+            return True
+
+        return False
+
+    def nexify_tree(self, t):
+        # FIXME: usually only leaves are handled
+        # Actually, read the NEXUS specs, maybe it's ALWAYs only trees?
+        # Anyway, this can be sped up by doing a leaves-first traversal of the tree
+        if self.isNexus and self.nexus_trans:
+            for node in t.traverse():
+                if node.name and node.name in self.nexus_trans:
+                    node.name = self.nexus_trans[node.name]
+        return t
+
+    def detect_tree(self, line):
+        if self.isNexus:
+            return line.strip().startswith("tree")
+        else:
+            return (    ")" in line and
+                        ";" in line and
+                        line.count("(") == line.count(")")
+                )
+
+    def yield_from_tempfile(self):
 
         trees_to_skip = int(round((self.burnin/100.0)*self.n))
         self.n = 0
@@ -114,11 +141,8 @@ class ComplexNewickParser:
                 continue
             if (n-trees_to_skip) % self.subsample == 0:
                 t = get_tree(tree_string)
+                self.nexify_tree(t)
                 n += 1
-                if self.isNexus and self.nexus_trans:
-                    for node in t.traverse():
-                        if node.name and node.name in self.nexus_trans:
-                            node.name = self.nexus_trans[node.name]
                 yield t
             else:
                 n += 1
