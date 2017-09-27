@@ -25,14 +25,8 @@ def test_init():
 def test_basic_cat():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    subsampled = Cat(subsample=2).consume(trees)
-    assert sum((1 for t in subsampled)) == 3
-
-def test_burnin():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    burntin = Cat(burnin=50).consume(trees)
-    assert sum((1 for t in burntin)) == 3
+    trees = Cat().consume(trees)
+    assert sum((1 for t in trees)) == 6
 
 def test_beast_nexus_output_cat():
     lines = fileinput.input("tests/treefiles/beast_output.nex")

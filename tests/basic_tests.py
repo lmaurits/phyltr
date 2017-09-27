@@ -55,4 +55,35 @@ def test_complex_parser_on_non_newick():
 def test_complex_parser_on_non_tree():
     lines = fileinput.input("tests/treefiles/not_trees.trees")
     trees = ComplexNewickParser().consume(lines)
+    print(list(trees))
     assert sum((1 for t in trees)) == 0
+
+def test_beast_nexus_output():
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser().consume(lines)
+    assert sum([1 for t in trees]) == 10
+
+def test_beast_nexus_burnin():
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(burnin=10).consume(lines)
+    assert sum([1 for t in trees]) == 9
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(burnin=20).consume(lines)
+    assert sum([1 for t in trees]) == 8
+
+def test_beast_nexus_subsample():
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(subsample=2).consume(lines)
+    assert sum([1 for t in trees]) == 5
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(subsample=5).consume(lines)
+    assert sum([1 for t in trees]) == 2
+
+def test_beast_nexus_burnin_and_subsample():
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(burnin=20, subsample=2).consume(lines)
+    assert sum([1 for t in trees]) == 4
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(burnin=50, subsample=5).consume(lines)
+    assert sum([1 for t in trees]) == 1
+
