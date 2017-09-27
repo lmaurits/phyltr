@@ -6,17 +6,7 @@ from phyltr.commands.cat import Cat
 def test_init():
     # Test defaults
     cat = Cat.init_from_args("")
-    assert cat.burnin == 0
-    assert cat.subsample == 1
     assert cat.annotations == True
-
-    # Test burnin
-    cat = Cat.init_from_args("--burnin 10")
-    assert cat.burnin == 10
-
-    # Test subsample
-    cat = Cat.init_from_args("--subsample 10")
-    assert cat.subsample == 10
 
     # Test no annotations
     cat = Cat.init_from_args("--no-annotations")
