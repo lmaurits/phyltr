@@ -73,7 +73,6 @@ class PhyltrCommand:
 
     def consume(self, stream):
         self.stream = stream
-        self.preprocess()
         for tree in self.stream:
             try:
                 res = self.process_tree(tree)
@@ -84,9 +83,6 @@ class PhyltrCommand:
                 break
         for tree in self.postprocess():
             yield tree
-
-    def preprocess(self):
-        pass
 
     def process_tree(self, t):
         return t    # pragma: no cover
