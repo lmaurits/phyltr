@@ -35,9 +35,9 @@ class PhyltrCommand:
         obj.pre_print()
 
         raw_source = fileinput.input(files)
-        in_trees = cls.init_source(options).consume(raw_source)
+        in_trees = obj.init_source().consume(raw_source)
         out_trees = obj.consume(in_trees)
-        cls.init_sink(options, sys.stdout).consume(out_trees)
+        obj.init_sink(sys.stdout).consume(out_trees)
         raw_source.close()
 
         obj.post_print()
@@ -55,12 +55,10 @@ class PhyltrCommand:
         obj = cls.init_from_opts(options, files)
         return obj
 
-    @classmethod
-    def init_source(cls, options):
+    def init_source(cls):
         return cls.source()
 
-    @classmethod
-    def init_sink(cls, options, stream):
+    def init_sink(cls, stream):
         return cls.sink(stream)
 
     def pre_print(self):

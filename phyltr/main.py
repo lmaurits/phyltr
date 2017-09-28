@@ -119,7 +119,7 @@ def build_pipeline(string, source):
                 # If source is a filename, feed it to the command's default
                 # Source
                 fp = open(source, "r")
-                source = command_obj.source().consume(fp)
+                source = command_obj.init_source().consume(fp)
             generator = command_obj.consume(source)
         else:
             # Subsequent components in the pipline should use their proceeding

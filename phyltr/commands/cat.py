@@ -36,17 +36,21 @@ class Cat(PhyltrCommand):
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
     parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
 
+    def __init__(self, burnin=0, subsample=1, annotations=True):
+        self.burnin = burnin
+        self.subsample = subsample
+        self.annotations = annotations
+
     @classmethod 
     def init_from_opts(cls, options, files=[]):
-        cat = Cat()
+        cat = Cat(options.burnin, options.subsample, annotations = not options.no_annotations)
         return cat
 
-    @classmethod
-    def init_source(cls, options):
-        return ComplexNewickParser(options.burnin, options.subsample)
+    def init_source(self):
+        return ComplexNewickParser(self.burnin, self.subsample)
 
-    @classmethod
-    def init_sink(cls, options, stream):
-        return NewickFormatter(stream, annotations = not options.no_annotations)
+    def init_sink(self, stream):
+        return NewickFormatter(stream, annotations = self.annotations)
+
     def process_tree(self, t):
         return t
