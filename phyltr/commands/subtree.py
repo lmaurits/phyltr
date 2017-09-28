@@ -56,8 +56,7 @@ class Subtree(PhyltrCommand):
     @classmethod 
     def init_from_opts(cls, options, files):
         if files:
-            taxa = set(files[0].split(","))
-            files = files[1:]
+            taxa = set(files.pop(0).split(","))
         else:
             taxa = []
         subtree = Subtree(taxa, options.filename, options.attribute, options.value)
