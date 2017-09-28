@@ -58,6 +58,8 @@ class ComplexNewickParser:
                 elif self.n % self.subsample == 0:
                     # Yield now
                     t = get_tree(tree_string)
+                    if not t:
+                        continue
                     self.nexify_tree(t)
                     yield t
                 self.n += 1
