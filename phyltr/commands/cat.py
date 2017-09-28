@@ -25,7 +25,8 @@ import os
 import tempfile
 
 from phyltr.commands.base import PhyltrCommand
-from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
+from phyltr.plumbing.sources import ComplexNewickParser
+from phyltr.plumbing.sinks import NewickFormatter
 from phyltr.utils.phyltroptparse import OptionParser
 
 class Cat(PhyltrCommand):
@@ -33,19 +34,19 @@ class Cat(PhyltrCommand):
     parser = OptionParser(__doc__, prog="phyltr cat")
     parser.add_option('-b', '--burnin', action="store", dest="burnin", type="int", default=0)
     parser.add_option('-s', '--subsample', action="store", dest="subsample", type="int", default=1)
-    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False) # FIXME this does nothing!
-
-    def __init__(self, burnin=0, subsample=1, annotations=True):
-        self.annotations = annotations
+    parser.add_option('--no-annotations', action="store_true", dest="no_annotations", default=False)
 
     @classmethod 
     def init_from_opts(cls, options, files=[]):
-        cat = Cat(options.burnin, options.subsample, not options.no_annotations)
+        cat = Cat()
         return cat
 
     @classmethod
     def init_source(cls, options):
         return ComplexNewickParser(options.burnin, options.subsample)
 
+    @classmethod
+    def init_sink(cls, options, stream):
+        return NewickFormatter(stream, annotations = not options.no_annotations)
     def process_tree(self, t):
         return t

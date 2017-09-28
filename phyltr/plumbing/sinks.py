@@ -1,18 +1,23 @@
+import sys
 import types
 
 class NewickFormatter:
 
-    def __init__(self, out):
+    def __init__(self, out=sys.stdout, annotations=True):
         self.out = out
+        self.annotations = annotations
 
     def consume(self, stream):
         for t in stream:
-            self.out.write(t.write(features=[],format_root_node=True))
+            if self.annotations:
+                self.out.write(t.write(features=[],format_root_node=True))
+            else:
+                self.out.write(t.write())
             self.out.write("\n")
 
 class NullSink:
 
-    def __init__(self, out):
+    def __init__(self, out=sys.stdout):
         self.out = out
 
     def consume(self, stream):
@@ -21,7 +26,7 @@ class NullSink:
 
 class StringFormatter:
 
-    def __init__(self, out):
+    def __init__(self, out=sys.stdout):
         self.out = out
 
     def consume(self, stream):
@@ -37,7 +42,7 @@ class StringFormatter:
 
 class ListPerLineFormatter:
 
-    def __init__(self, out):
+    def __init__(self, out=sys.stdout):
         self.out = out
 
     def consume(self, stream):

@@ -3,15 +3,6 @@ import fileinput
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
 from phyltr.commands.cat import Cat
 
-def test_init():
-    # Test defaults
-    cat = Cat.init_from_args("")
-    assert cat.annotations == True
-
-    # Test no annotations
-    cat = Cat.init_from_args("--no-annotations")
-    assert cat.annotations == False
-
 def test_basic_cat():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
