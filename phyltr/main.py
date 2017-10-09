@@ -17,6 +17,7 @@ The available phyltr commands are:
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
     scale       Scale branch lengths of a set of trees
+    sibling    Print the sibling of a named taxon for each tree in a stream
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
     subtree     Extract minimal subtrees containing specified taxa
@@ -50,6 +51,7 @@ _COMMANDS = (
         "prune",
         "rename",
         "scale",
+        "sibling",
         "stat",
         "support",
         "subtree",
