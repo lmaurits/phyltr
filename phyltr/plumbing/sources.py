@@ -25,6 +25,7 @@ class ComplexNewickParser:
 
     def consume(self, stream):
 
+        self.isNexus = False
         self.firstline = False   # Actually tracks whether a line is the first NON-BLANK line in a file
         for line in stream:
             if fileinput.isfirstline():
