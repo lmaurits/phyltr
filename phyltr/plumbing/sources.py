@@ -113,13 +113,17 @@ class ComplexNewickParser:
         return False
 
     def nexify_tree(self, t):
-        # FIXME: usually only leaves are handled
-        # Actually, read the NEXUS specs, maybe it's ALWAYs only trees?
-        # Anyway, this can be sped up by doing a leaves-first traversal of the tree
+        # Apply translations from leaves up, since usually only leaves are
+        # labelled so checking nodes near the root is a waste of time.
         if self.isNexus and self.nexus_trans:
-            for node in t.traverse():
+            translated = 0
+            to_translate = len(self.nexus_trans)
+            for node in t.traverse("postorder"):
                 if node.name and node.name in self.nexus_trans:
                     node.name = self.nexus_trans[node.name]
+                    translated += 1
+                    if translated == to_translate:
+                        break
         return t
 
     def detect_tree(self, line):
