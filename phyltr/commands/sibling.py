@@ -24,7 +24,7 @@ class Sibling(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr sibling")
 
-    def __init__(self, taxon=None, inverse=False):
+    def __init__(self, taxon=None):
         if not taxon:
             raise ValueError("Taxon required!")
         self.taxon = taxon
