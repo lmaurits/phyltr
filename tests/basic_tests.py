@@ -31,6 +31,10 @@ def test_command_bad_args():
 def test_command_bad_args_2():
     run_command("prune")    # `prune` has a compulsory arg which is missing here
 
+@raises(ValueError)
+def test_command_bad_args_3():
+    run_command("sibling")    # `sibling` has a compulsory arg which is missing here
+
 def test_string_formatter_command():
     run_command("height tests/treefiles/basic.trees")
 
