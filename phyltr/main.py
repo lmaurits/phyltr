@@ -44,6 +44,7 @@ _COMMANDS = (
         "collapse",
         "consensus",
         "dedupe",
+        "grep",
         "height",
         "length",
         "plot",
