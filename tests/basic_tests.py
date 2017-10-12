@@ -24,16 +24,15 @@ def test_command_2():
 def test_command_3():
     run_command("pretty tests/treefiles/basic.trees")
 
+def test_command_4():
+    run_command("prune")
+
+def test_command__5():
+    run_command("sibling")
+
 @raises(ValueError)
 def test_command_bad_args():
     cat = Cat.init_from_args("cat --foobar")
-
-def test_command_bad_args_2():
-    run_command("prune")    # `prune` has a compulsory arg which is missing here
-
-@raises(ValueError)
-def test_command_bad_args_3():
-    run_command("sibling")    # `sibling` has a compulsory arg which is missing here
 
 def test_string_formatter_command():
     run_command("height tests/treefiles/basic.trees")
