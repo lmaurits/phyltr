@@ -8,9 +8,17 @@ class NewickFormatter:
         self.annotations = annotations
 
     def consume(self, stream):
+        first = True
         for t in stream:
+            if first:
+                first = False
+                feature_names = set()
+                for n in t.traverse():
+                    feature_names |= n.features
+                for standard_feature in ("dist", "name", "support"):
+                    feature_names.remove(standard_feature)
             if self.annotations:
-                self.out.write(t.write(features=[],format_root_node=True))
+                self.out.write(t.write(features=feature_names,format_root_node=True))
             else:
                 self.out.write(t.write())
             self.out.write("\n")
