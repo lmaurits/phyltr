@@ -148,6 +148,8 @@ class ComplexNewickParser:
                 continue
             if (n-trees_to_skip) % self.subsample == 0:
                 t = get_tree(tree_string)
+                if not t:
+                    continue
                 self.nexify_tree(t)
                 n += 1
                 yield t
