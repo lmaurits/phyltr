@@ -33,6 +33,10 @@ class CladeProbabilities:
             # Record annotations for all clades, even leaves
             for f in extra_features:
                 value = getattr(subtree, f)
+                # Some BEAST classess wrap numeric annotations in quotation marks
+                while ((value.startswith('"') and value.endswith('"')) or
+                        (value.startswith("'") and value.endswith("'"))):
+                    value = value[1:-1]
                 try:
                     value = float(value)
                     if f not in self.clade_attributes:
