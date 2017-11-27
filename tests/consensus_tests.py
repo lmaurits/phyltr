@@ -2,6 +2,7 @@ import fileinput
 
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.commands.consensus import Consensus
+from phyltr.commands.length import Length
 
 def test_init_from_args():
     consensus = Consensus.init_from_args("")
@@ -23,3 +24,19 @@ def test_annotation_consensus():
     for n in consensus.traverse():
         for attr in ("rate_mean", "rate_median", "rate_HPD"):
             assert hasattr(n, attr)
+
+def test_min_med_max_consensus():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = list(NewickParser().consume(lines))
+
+    min_uniq = Consensus(lengths="min").consume(trees)
+    min_lengths = Length().consume(min_uniq)
+
+    med_uniq = Consensus(lengths="median").consume(trees)
+    med_lengths = Length().consume(med_uniq)
+
+    max_uniq = Consensus(lengths="max").consume(trees)
+    max_lengths = Length().consume(max_uniq)
+
+    for l, m, L in zip(min_lengths, med_lengths, max_lengths):
+        assert l <= m <= L

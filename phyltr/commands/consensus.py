@@ -8,6 +8,11 @@ OPTIONS:
     -f, --frequency
         Minimum clade frequency to include in the consensus tree (default 0.5)
 
+    -l, --length
+        Specifies the method used to compute branch lengths for the consensus
+        tree.  Must be one of: "max", "mean", "median", or "min".  Default is
+        mean.
+
     files
         A whitespace-separated list of filenames to read treestreams from.
         Use a filename of "-" to read from stdin.  If no filenames are
@@ -24,14 +29,19 @@ class Consensus(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr consensus")
     parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
+    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
 
-    def __init__(self, frequency=0.5):
+    def __init__(self, frequency=0.5, lengths="mean"):
         self.frequency = frequency
+        if lengths in ("max", "mean", "median", "min"):
+            self.lengths = lengths
+        else:
+            raise ValueError("--lengths option must be one of max, mean, median or min!")
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
     @classmethod 
     def init_from_opts(cls, options, files=[]):
-        consensus = Consensus(options.frequency)
+        consensus = Consensus(options.frequency, options.lengths)
         return consensus
 
     def process_tree(self, t):
@@ -74,16 +84,27 @@ class Consensus(PhyltrCommand):
         for clade in t.traverse("postorder"):
             clade_key = ",".join(sorted([l.name for l in cache[clade]]))
             if not clade.is_leaf(): # all leaves have age zero, so don't bother
+                # Compute age statistics and annotate tree
                 ages = self.cp.clade_ages[clade_key]
-                mean = sum(ages)/len(ages)
-                for c in clade.get_children():
-                    leaf, age = c.get_farthest_leaf()
-                    c.dist = mean - age
                 ages.sort()
+                mean = sum(ages)/len(ages)
                 lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
                 clade.add_feature("age_mean", mean)
                 clade.add_feature("age_median", median)
                 clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
+                # Choose the canonical age for this clade
+                if self.lengths == "max":
+                    age = max(ages)
+                elif self.lengths == "mean":
+                    age = sum(ages) / len(ages)
+                elif self.lengths == "median":
+                    age = median
+                elif self.lengths == "min":
+                    age = min(ages)
+                # Set branch lengths accordingly
+                for c in clade.get_children():
+                    leaf, age = c.get_farthest_leaf()
+                    c.dist = mean - age
 
             for f in self.cp.clade_attributes:
                 values = self.cp.clade_attributes[f][clade_key]
