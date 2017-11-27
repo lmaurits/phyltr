@@ -29,7 +29,10 @@ class Uniq(PhyltrCommand):
     parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
 
     def __init__(self, lengths="mean"):
-        self.lengths = lengths
+        if lengths in ("max", "mean", "median", "min"):
+            self.lengths = lengths
+        else:
+            raise ValueError("--lengths option must be one of max, mean, median or min!")
 
         self.topologies = {}
 
