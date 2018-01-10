@@ -25,10 +25,26 @@ class ComplexNewickParser:
 
     def consume(self, stream):
 
+        _first = True
         self.isNexus = False
         self.firstline = False   # Actually tracks whether a line is the first NON-BLANK line in a file
         for line in stream:
-            if fileinput.isfirstline():
+            # This loop needs to be aware of whether it is processing the first
+            # line of a file.  This needs to work regardless of what stream is
+            # (might be a fileinput object if we were called from the command
+            # line, might be something else if we are being used as a library)
+            # The below try/except is a very ugly way to set the "first"
+            # variable correctly.  Can no doubt be done better.
+            try:
+                first = fileinput.isfirstline()
+            except RuntimeError:
+                if _first:
+                    first = True
+                    _first = False
+                else:
+                    first = False
+
+            if first:
                 self.firstline = True
                 # If this is the first line of a file, and we've already seen trees.
                 # then this is the second or subsequent file.  Before proceeding,
