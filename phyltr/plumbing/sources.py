@@ -155,7 +155,6 @@ class ComplexNewickParser:
     def yield_from_tempfile(self):
 
         trees_to_skip = int(round((self.burnin/100.0)*self.n))
-        self.n = 0
         self.fp.seek(0)
         n = 0
         for tree_string in self.fp.readlines():
@@ -172,6 +171,8 @@ class ComplexNewickParser:
             else:
                 n += 1
         self.fp.seek(0)
+        self.fp.truncate()
+        self.n = 0
 
 def get_tree(tree_string):
     # FIXME
