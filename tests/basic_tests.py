@@ -90,3 +90,13 @@ def test_beast_nexus_burnin_and_subsample():
     trees = ComplexNewickParser(burnin=50, subsample=5).consume(lines)
     assert sum([1 for t in trees]) == 1
 
+def test_burnin_with_files_of_unequal_length():
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = ComplexNewickParser(burnin=20).consume(lines)
+    assert sum([1 for t in trees]) == 5
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser(burnin=20).consume(lines)
+    assert sum([1 for t in trees]) == 8
+    lines = fileinput.input(["tests/treefiles/beast_output.nex", "tests/treefiles/basic.trees"])
+    trees = ComplexNewickParser(burnin=20).consume(lines)
+    assert sum([1 for t in trees]) == 13
