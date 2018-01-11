@@ -17,6 +17,12 @@ def test_consensus():
     consensus = list(Consensus().consume(trees))
     assert len(consensus) == 1
 
+def test_low_freq_consensus():
+    lines = fileinput.input("tests/treefiles/beast_output.nex")
+    trees = ComplexNewickParser().consume(lines)
+    consensus = list(Consensus(frequency=0.25).consume(trees))
+    assert len(consensus) == 1
+
 def test_annotation_consensus():
     lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
     trees = ComplexNewickParser().consume(lines)

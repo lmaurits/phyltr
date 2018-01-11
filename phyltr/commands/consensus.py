@@ -56,19 +56,30 @@ class Consensus(PhyltrCommand):
     def build_consensus_tree(self):
 
         # Build a list of all clades in the treestream with frequency above the
-        # requested threshold, sorted first by size and then by frequency.  Do not
-        # include the trivial clade of all leaves.
+        # requested threshold, sorted by frequency.  Do not include the trivial
+        # clade of all leaves.
         clades = []
         for clade, p in self.cp.clade_probs.items():
             if p >= self.frequency:
                 clade = clade.split(",")
-                clades.append((len(clade), p, set(clade)))
+                clades.append((p, set(clade)))
         clades.sort()
+
         # Pop the clade with highest probability, which *should* be the clade
         # with support 1.0 containing all leaves
-        taxon_count, prob, all_leaves = clades.pop()
+        prob, all_leaves = clades.pop()
         assert prob == 1.0
-        assert all((taxon_count > count for count, p, clade in clades))
+        clades.reverse()
+
+        # If our threshold is below 0.5, it is possible that the set of clades
+        # we just built contains clades which contradict one another.  Remove
+        # these, by removing clades which conflict with higher supported clades
+        clades = self.enforce_consistency(clades)
+
+        # Now sort the surviving clades by size, to make building the consensus
+        # tree easier
+        clades = [(len(clade), p, clade) for p, clade in clades]
+        clades.sort()
         clades.reverse()
 
         # Start out with a tree in which all leaves are joined in one big polytomy
@@ -77,10 +88,30 @@ class Consensus(PhyltrCommand):
             t.add_child(name=l)
 
         # Now recursively resolve the polytomy by greedily grouping clades
-        t = recursive_builder(t, clades)
-        cache = t.get_cached_content()
+        while clades:
+            n, p, clade = clades.pop()
+            # Pluck the children from the root which comprise this clade
+            clade_nodes = [node for node in t.get_children() if set((l.name for l in node.get_leaves())).issubset(set(clade))]
+            if len(clade_nodes) == 1:
+                continue
+            assert clade_nodes
+            for l in clade_nodes:
+                t.remove_child(l)
+            # Reattach them as descendents of a new child
+            child = t.add_child()
+            child.support = p
+            for l in clade_nodes:
+                child.add_child(l)
+
+        # Check all is right with the world
+        for n in t.traverse():
+            assert len(n.get_children()) != 1
+            assert n.support >= self.frequency
+            if n.is_leaf():
+                assert n.name
 
         # Add age annotations
+        cache = t.get_cached_content()
         for clade in t.traverse("postorder"):
             clade_key = ",".join(sorted([l.name for l in cache[clade]]))
             if not clade.is_leaf(): # all leaves have age zero, so don't bother
@@ -114,37 +145,53 @@ class Consensus(PhyltrCommand):
                 clade.add_feature("%s_mean" % f, mean)
                 clade.add_feature("%s_median" % f, median)
                 clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
+
         return t
 
-def recursive_builder(t, clades):
+    def enforce_consistency(self, clades):
+        # We don't need to worry about this if we only have clades
+        # that are supported at 0.5 or above, as these are
+        # guaranteed to be consistent
+        if self.frequency >= 0.5:
+            return clades
 
-    # Get a list of all my children
-    children = set([c.name for c in t.get_children()])
-    # For as long as it's possible...
-    while True:
-        matched = False
-        # ...find the largest clade which is a subset of my children
-        for length, p, clade in clades:
-            if clade.issubset(children):
-                matched = True
+        # First, find the index of the first clade which is potentially
+        # problematic
+        for n, (p,c) in enumerate(clades):
+            if p < 0.5:
                 break
-        if not matched:
-            break
-        # ...remove the children in that clade and add them under a new child
-        clades.remove((length, p, clade))
-        clade_nodes = set([t.get_leaves_by_name(l)[0] for l in clade])
-        for l in clade_nodes:
-            t.remove_child(l)
-        child = t.add_child()
-        child.support = p
-        for l in clade_nodes:
-            child.add_child(l)
-        # ...remove the children in the clade I just grouped from the list of
-        # children which I still need to group
-        children -= clade
-        if not children:
-            break
-    # Resolve polytomies one level down
-    for child in t.get_children():
-        recursive_builder(child, clades)
-    return t
+
+        # Now compare the first potentially problematic clade to all
+        # previous (i.e. more highly supported) clades and discard it
+        # if it conflicts with any of them.  Once we've found a clade
+        # compatible with all previous clades, iterate down to the next
+        # least supported clade and compare it to all previous clades,
+        # including the one we just accepted.  Rinse, repeat.
+        #
+        # This is not terribly clear or Pythonic code.
+        # If you can see how to make it better without sacrificing
+        # speed or correctness, feel free!
+        while True:
+            accepted = clades[0:n]
+            dubious = clades[n:]
+            if not dubious:
+                break
+            for p, susp in dubious:
+                for q, good in accepted:
+                    if not test_clade_compat(good, susp):
+                        clades.remove((p,susp))
+                        break
+                else:
+                    n += 1
+                    break
+
+        return clades
+
+def test_clade_compat(good, susp):
+    good = set(good)
+    susp = set(susp)
+    if len(good.intersection(susp)) == 0:
+        return True
+    elif good.issubset(susp) or susp.issubset(good):
+        return True
+    return False
