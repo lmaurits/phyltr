@@ -65,4 +65,7 @@ class Pretty(PhyltrCommand):
                     for child in node.get_children():
                         child.detach()
 
+        # Ladderize
+        t.ladderize()
+
         return t.get_ascii()
