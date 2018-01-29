@@ -1,4 +1,4 @@
-from main import run_command, build_pipeline
+from .main import run_command, build_pipeline
 
 from .commands.annotate import Annotate
 from .commands.cat import Cat
