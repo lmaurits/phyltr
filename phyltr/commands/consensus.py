@@ -125,17 +125,17 @@ class Consensus(PhyltrCommand):
                 clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
                 # Choose the canonical age for this clade
                 if self.lengths == "max":
-                    age = max(ages)
+                    clade_age = max(ages)
                 elif self.lengths == "mean":
-                    age = sum(ages) / len(ages)
+                    clade_age = sum(ages) / len(ages)
                 elif self.lengths == "median":
-                    age = median
+                    clade_age = median
                 elif self.lengths == "min":
-                    age = min(ages)
+                    clade_age = min(ages)
                 # Set branch lengths accordingly
-                for c in clade.get_children():
-                    leaf, age = c.get_farthest_leaf()
-                    c.dist = mean - age
+                for child in clade.get_children():
+                    irrelevant_leaf, child_height = c.get_farthest_leaf()
+                    child.dist = clade_age - child_height
 
             for f in self.cp.clade_attributes:
                 values = self.cp.clade_attributes[f][clade_key]
