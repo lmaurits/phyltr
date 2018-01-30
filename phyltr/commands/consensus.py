@@ -152,14 +152,20 @@ class Consensus(PhyltrCommand):
             heights.sort()
             lower, median, upper = [heights[int(x*len(heights))] for x in (0.05,0.5,0.95)]
             # Choose the canonical height for this leaf
+            # HUOM!  At first glance this code may look "backward" with regard to max and min.
+            # But note that maximising/minimising the height of a leaf above the "contemporaneous"
+            # line corresponds to minimising/maximising its originate branch length, respectively.
+            # In order to treat the self.lengths parameter consistently, "max" should mean maximum
+            # branch length and therefore *minimum* leaf height (leaf height being the thing we
+            # actually keep track of, because it's what people typically calibrate on).
             if self.lengths == "max":
-                leaf_height = max(heights)
+                leaf_height = min(heights)
             elif self.lengths == "mean":
                 leaf_height = sum(heights) / len(heights)
             elif self.lengths == "median":
                 leaf_height = median
             elif self.lengths == "min":
-                leaf_height = min(heights)
+                leaf_height = max(heights)
             # Change branch length
             leaf.dist -= leaf_height
             assert leaf.dist >= 0
