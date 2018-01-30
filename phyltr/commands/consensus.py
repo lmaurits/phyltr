@@ -114,7 +114,7 @@ class Consensus(PhyltrCommand):
         cache = t.get_cached_content()
         for clade in t.traverse("postorder"):
             clade_key = ",".join(sorted([l.name for l in cache[clade]]))
-            if not clade.is_leaf(): # all leaves have age zero, so don't bother
+            if not clade.is_leaf():
                 # Compute age statistics and annotate tree
                 ages = self.cp.clade_ages[clade_key]
                 ages.sort()
@@ -134,7 +134,7 @@ class Consensus(PhyltrCommand):
                     clade_age = min(ages)
                 # Set branch lengths accordingly
                 for child in clade.get_children():
-                    irrelevant_leaf, child_height = c.get_farthest_leaf()
+                    irrelevant_leaf, child_height = child.get_farthest_leaf()
                     child.dist = clade_age - child_height
 
             for f in self.cp.clade_attributes:
@@ -146,6 +146,24 @@ class Consensus(PhyltrCommand):
                 clade.add_feature("%s_median" % f, median)
                 clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
 
+        # Correct leaf heights
+        for leaf in cache[t]:
+            heights = self.cp.leaf_heights[leaf.name]
+            heights.sort()
+            lower, median, upper = [heights[int(x*len(heights))] for x in (0.05,0.5,0.95)]
+            # Choose the canonical height for this leaf
+            if self.lengths == "max":
+                leaf_height = max(heights)
+            elif self.lengths == "mean":
+                leaf_height = sum(heights) / len(heights)
+            elif self.lengths == "median":
+                leaf_height = median
+            elif self.lengths == "min":
+                leaf_height = min(heights)
+            # Change branch length
+            leaf.dist -= leaf_height
+            assert leaf.dist >= 0
+        # Done!
         return t
 
     def enforce_consistency(self, clades):

@@ -10,6 +10,7 @@ class CladeProbabilities:
         self.clade_counts = {}
         self.clade_ages = {}
         self.clade_attributes = {}
+        self.leaf_heights = {}
         self.caches ={}
 
     def add_tree(self, tree):
@@ -18,6 +19,9 @@ class CladeProbabilities:
 
         cache = tree.get_cached_content()
         self.tree_count += 1
+        # Find height of tree
+        irrelevant_leaf, tree_height = tree.get_farthest_leaf()
+        # Record clades
         for subtree in tree.traverse():
             leaves = [leaf.name for leaf in cache[subtree]]
             clade = ",".join(sorted(leaves))
@@ -47,6 +51,14 @@ class CladeProbabilities:
                         self.clade_attributes[f][clade] = [value]
                 except ValueError:
                     continue
+        # Record leaf heights
+        leaf_heights = [(leaf.name, tree.get_distance(leaf)) for leaf in cache[tree]]
+        tree_height = max((d for (l,d) in leaf_heights))
+        for leaf, leaf_height in leaf_heights:
+            if leaf not in self.leaf_heights:
+                self.leaf_heights[leaf] = []
+            self.leaf_heights[leaf].append((tree_height - leaf_height))
+
         self.caches[tree] = cache
 
     def compute_probabilities(self):
