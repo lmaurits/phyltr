@@ -35,6 +35,7 @@ class Uniq(PhyltrCommand):
             raise ValueError("--lengths option must be one of max, mean, median or min!")
 
         self.topologies = {}
+        self.ordered_exemplars = []
 
     @classmethod 
     def init_from_opts(cls, options, files):
@@ -50,11 +51,13 @@ class Uniq(PhyltrCommand):
                 break
         else:
             self.topologies[t] = [t]
+            self.ordered_exemplars.append(t)
 
         return None
        
     def postprocess(self):
-        for equ_class in self.topologies.values():
+        for exemplar in self.ordered_exemplars:
+            equ_class = self.topologies[exemplar]
             for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
