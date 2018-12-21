@@ -41,7 +41,10 @@ OPTIONS:
 
 import os.path
 
-import ete3
+try:
+    from ete3 import TreeStyle, TextFace, CircleFace
+except:
+    pass
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
@@ -91,7 +94,7 @@ class Plot(PhyltrCommand):
 
         if not self.dummy:
             # Setup TreeStyle
-            self.ts = ete3.TreeStyle()
+            self.ts = TreeStyle()
             self.ts.show_scale = False
             self.ts.show_branch_support = True
 
@@ -110,12 +113,12 @@ class Plot(PhyltrCommand):
             for l in t.iter_leaves():
                 mycolour = colour_map[getattr(l,self.attribute)]
                 if not self.dummy:
-                    l.add_face(ete3.CircleFace(radius=10,color=mycolour, style="sphere"), 0)
+                    l.add_face(CircleFace(radius=10,color=mycolour, style="sphere"), 0)
 
         # Apply labels
         if not self.dummy:
             for l in t.iter_leaves():
-                l.add_face(ete3.TextFace(getattr(l, self.label)), 1)
+                l.add_face(TextFace(getattr(l, self.label)), 1)
 
         # Plot or save
         if self.output:

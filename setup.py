@@ -22,6 +22,6 @@ setup(
         'console_scripts': ['phyltr=phyltr.main:run_command'],
     },
     requires=['ete3'],
-    install_requires=['six', 'PyQt5', 'ete3']
+    install_requires=['six', 'ete3']
 
 )
