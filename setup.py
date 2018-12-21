@@ -1,9 +1,5 @@
-#!/usr/bin/env python
+from setuptools import setup, find_packages
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
 
 setup(
     name='phyltr',
@@ -17,7 +13,10 @@ setup(
         'Programming Language :: Python',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     ],
-    packages = ['phyltr','phyltr/commands', 'phyltr/plumbing', 'phyltr/utils'],
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
+    include_package_data=True,
+    zip_safe=False,
     entry_points = {
         'console_scripts': ['phyltr=phyltr.main:run_command'],
     },
