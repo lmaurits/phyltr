@@ -92,7 +92,7 @@ class Plot(PhyltrCommand):
 
         self.dummy = dummy
 
-        if not self.dummy:
+        if not self.dummy:  # pragma: no cover
             # Setup TreeStyle
             self.ts = TreeStyle()
             self.ts.show_scale = False
@@ -112,11 +112,11 @@ class Plot(PhyltrCommand):
             colour_map = dict(zip(values, colours))
             for l in t.iter_leaves():
                 mycolour = colour_map[getattr(l,self.attribute)]
-                if not self.dummy:
+                if not self.dummy:  # pragma: no cover
                     l.add_face(CircleFace(radius=10,color=mycolour, style="sphere"), 0)
 
         # Apply labels
-        if not self.dummy:
+        if not self.dummy:  # pragma: no cover
             for l in t.iter_leaves():
                 l.add_face(TextFace(getattr(l, self.label)), 1)
 
