@@ -21,7 +21,15 @@ setup(
     entry_points = {
         'console_scripts': ['phyltr=phyltr.main:run_command'],
     },
-    requires=['ete3'],
-    install_requires=['six', 'ete3']
-
+    install_requires=['six', 'ete3'],
+    extras_require={
+        'dev': ['flake8', 'wheel', 'twine'],
+        'test': [
+            'mock',
+            'pytest>=3.1',
+            'pytest-mock',
+            'pytest-cov',
+            'coverage>=4.2',
+        ],
+    },
 )

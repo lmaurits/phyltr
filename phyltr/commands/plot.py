@@ -43,7 +43,7 @@ import os.path
 
 try:
     from ete3 import TreeStyle, TextFace, CircleFace
-except:
+except:  # pragma: no cover
     pass
 
 from phyltr.commands.base import PhyltrCommand

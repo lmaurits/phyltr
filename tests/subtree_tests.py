@@ -1,6 +1,6 @@
 import fileinput
 
-from nose.tools import raises
+import pytest
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.main import build_pipeline
@@ -17,21 +17,21 @@ def test_init_from_args():
     assert subtree.filename == None
     assert subtree.value == "bar"
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Subtree()
+    with pytest.raises(ValueError):
+        Subtree()
 
-@raises(ValueError)
 def test_bad_init_no_attribute_only():
-    Subtree(attribute="foo")
+    with pytest.raises(ValueError):
+        Subtree(attribute="foo")
 
-@raises(ValueError)
 def test_bad_init_no_value_only():
-    Subtree(value="bar")
+    with pytest.raises(ValueError):
+        Subtree(value="bar")
 
-@raises(ValueError)
 def test_bad_init_empty_file():
-    Subtree(filename="tests/argfiles/empty.txt")
+    with pytest.raises(ValueError):
+        Subtree(filename="tests/argfiles/empty.txt")
 
 def test_subtree():
     subtree = Subtree.init_from_args("A,B,C")
