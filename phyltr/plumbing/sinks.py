@@ -1,6 +1,9 @@
 import sys
 import types
 
+from six import string_types
+
+
 class NewickFormatter:
 
     def __init__(self, out=sys.stdout, annotations=True):
@@ -39,7 +42,7 @@ class StringFormatter:
 
     def consume(self, stream):
         for x in stream:
-            if isinstance(x, types.StringTypes):
+            if isinstance(x, string_types):
                 self.out.write(x)
             else:
                 try:
