@@ -37,6 +37,9 @@ from signal import signal, SIGPIPE, SIG_DFL
 import sys
 import types
 
+from six import string_types
+
+
 _COMMANDS = (
         "annotate",
         "cat",
@@ -118,7 +121,7 @@ def build_pipeline(string, source):
     for n, args in enumerate(components):
         command_obj = _get_phyltr_obj(args)
         if n==0:
-            if isinstance(source, types.StringTypes) and os.path.exists(source):
+            if isinstance(source, string_types) and os.path.exists(source):
                 # If source is a filename, feed it to the command's default
                 # Source
                 fp = open(source, "r")

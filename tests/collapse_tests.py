@@ -1,6 +1,6 @@
 import fileinput
 
-from nose.tools import raises
+import pytest
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.main import build_pipeline
@@ -14,9 +14,9 @@ def test_init():
     collapse = Collapse.init_from_args("--attribute collapsibility")
     assert collapse.attribute == "collapsibility"
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Collapse()
+    with pytest.raises(ValueError):
+        Collapse()
 
 def test_collapse():
     lines = fileinput.input("tests/treefiles/basic.trees")

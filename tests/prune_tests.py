@@ -1,6 +1,6 @@
 import fileinput
 
-from nose.tools import raises
+import pytest
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.prune import Prune
@@ -30,21 +30,21 @@ def test_init_from_args():
     assert prune.attribute == "foo"
     assert prune.value == "bar"
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Prune()
+    with pytest.raises(ValueError):
+        Prune()
 
-@raises(ValueError)
 def test_bad_init_no_attribute_only():
-    Prune(attribute="foo")
+    with pytest.raises(ValueError):
+        Prune(attribute="foo")
 
-@raises(ValueError)
 def test_bad_init_no_value_only():
-    Prune(value="bar")
+    with pytest.raises(ValueError):
+        Prune(value="bar")
 
-@raises(ValueError)
 def test_bad_init_empty_file():
-    Prune(filename="tests/argfiles/empty.txt")
+    with pytest.raises(ValueError):
+        Prune(filename="tests/argfiles/empty.txt")
 
 def test_prune():
     lines = fileinput.input("tests/treefiles/basic.trees")

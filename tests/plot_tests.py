@@ -9,10 +9,12 @@ from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.plot import Plot, ultrametric
 
 def dummy_wrapper_for_travis(f):
-    if os.environ.get("TRAVIS"):
-        dummy = True
-    else:
+    try:
+        from ete3 import TreeStyle
         dummy = False
+    except ImportError:
+        dummy = True
+
     def test_wrapped():
         return f(dummy)
     return test_wrapped

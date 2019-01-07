@@ -1,6 +1,6 @@
 import fileinput
 
-from nose.tools import raises
+import pytest
 
 from phyltr.commands.cat import Cat
 from phyltr.main import run_command
@@ -30,9 +30,9 @@ def test_command_4():
 def test_command__5():
     run_command("sibling")
 
-@raises(ValueError)
 def test_command_bad_args():
-    cat = Cat.init_from_args("cat --foobar")
+    with pytest.raises(ValueError):
+        _ = Cat.init_from_args("cat --foobar")
 
 def test_string_formatter_command():
     run_command("height tests/treefiles/basic.trees")

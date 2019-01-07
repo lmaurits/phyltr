@@ -1,9 +1,10 @@
 import fileinput
 
+import pytest
+
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.rename import Rename
 
-from nose.tools import raises
 
 def test_init():
     rename = Rename.init_from_args("--file tests/argfiles/rename.txt")
@@ -12,9 +13,9 @@ def test_init():
     rename = Rename.init_from_args("--file tests/argfiles/rename.txt --remove-missing")
     assert rename.remove == True
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Rename()
+    with pytest.raises(ValueError):
+        Rename()
 
 def test_rename():
     lines = fileinput.input("tests/treefiles/basic.trees")

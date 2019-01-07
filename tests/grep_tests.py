@@ -1,6 +1,6 @@
 import fileinput
 
-from nose.tools import raises
+import pytest
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.grep import Grep
@@ -18,13 +18,13 @@ def test_init_from_args():
     assert grep.taxa == set(("A","B","C"))
     assert grep.filename == "tests/argfiles/taxa_abc.txt"
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Grep()
+    with pytest.raises(ValueError):
+        Grep()
 
-@raises(ValueError)
 def test_bad_init_empty_file():
-    Grep(filename="tests/argfiles/empty.txt")
+    with pytest.raises(ValueError):
+        Grep(filename="tests/argfiles/empty.txt")
 
 def test_trivial_grep():
     """

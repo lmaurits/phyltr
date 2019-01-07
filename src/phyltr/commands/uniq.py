@@ -18,6 +18,7 @@ OPTIONS:
 """
 
 import itertools
+from six.moves import zip
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import OptionParser
@@ -58,7 +59,7 @@ class Uniq(PhyltrCommand):
     def postprocess(self):
         for exemplar in self.ordered_exemplars:
             equ_class = self.topologies[exemplar]
-            for nodes in itertools.izip(*[t.traverse() for t in equ_class]):
+            for nodes in zip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
                     dist = max(dists)
