@@ -11,11 +11,11 @@ OPTIONS:
 
     -a, --attribute
         An attribute to inspect to decide which leaves to keep.  Must be used
-        in conjunction with --value.
+        in conjunction with --values.
 
-    -v, --value
-        The value of the attribute specified with --attribute which specifies
-        which taxa to keep.
+    -v, --values
+        A comma-separated list of values of the attribute specified with
+        --attribute, which specifies which taxa to keep.
 
     files
         A whitespace-separated list of filenames to read treestreams from.
@@ -32,12 +32,12 @@ class Subtree(PhyltrCommand):
     parser.add_option('-a', '--attribute', default=None)
     parser.add_option('-f', '--file', dest="filename",
             help='Specifies a file from which to read taxa')
-    parser.add_option('-v', '--value', default=None)
+    parser.add_option('-v', '--values', default=None)
 
-    def __init__(self, taxa=None, filename=None, attribute=None, value=None):
+    def __init__(self, taxa=None, filename=None, attribute=None, values=None):
         self.attribute = attribute
         self.filename = filename
-        self.value = value
+        self.values = values
 
         self.by_attribute = False
 
@@ -48,8 +48,9 @@ class Subtree(PhyltrCommand):
                 self.taxa = [t.strip() for t in fp.readlines()]
             if not self.taxa:
                 raise ValueError("Empty file!")
-        elif self.attribute and self.value:
+        elif self.attribute and self.values:
             self.taxa = []
+            self.values = values.split(",")
         else:
             raise ValueError("Incompatible arguments")
 
@@ -59,7 +60,7 @@ class Subtree(PhyltrCommand):
             taxa = set(files.pop(0).split(","))
         else:
             taxa = []
-        subtree = Subtree(taxa, options.filename, options.attribute, options.value)
+        subtree = Subtree(taxa, options.filename, options.attribute, options.values)
         return subtree
 
     def process_tree(self, t):
@@ -68,7 +69,7 @@ class Subtree(PhyltrCommand):
             mrca = leaves[0].get_common_ancestor(leaves[1:])
             t = mrca
         else:
-            taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) == self.value]
+            taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) in self.values]
             mrca = taxa[0].get_common_ancestor(taxa[1:])
             t = mrca
         return t

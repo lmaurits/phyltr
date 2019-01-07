@@ -10,12 +10,13 @@ def test_init_from_args():
     subtree = Subtree.init_from_args("--file tests/argfiles/taxa_abc.txt")
     assert subtree.attribute == None
     assert subtree.filename == "tests/argfiles/taxa_abc.txt"
-    assert subtree.value == None
+    assert subtree.values == None
 
-    subtree = Subtree.init_from_args("--attribute foo --value bar")
+    subtree = Subtree.init_from_args("--attribute foo --values bar")
+    print(subtree.values)
     assert subtree.attribute == "foo"
     assert subtree.filename == None
-    assert subtree.value == "bar"
+    assert subtree.values == ["bar"]
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):
@@ -53,7 +54,7 @@ def test_file_subtree():
 def test_annotation_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
-    subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --value 0", trees)
+    subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --values 0", trees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n

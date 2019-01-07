@@ -58,7 +58,8 @@ def get_colour_set(n):
         return colours[0:n]
 
 def ultrametric(node): # pragma: no cover
-    node.img_style["vt_line_width"]=0
+    node.img_style["vt_line_width"]=3
+    node.img_style["hz_line_width"]=3
     if node.is_leaf():
         node.img_style["size"]=5
     else:
@@ -70,25 +71,27 @@ class Plot(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr plot")
     parser.add_option('-a', '--attribute', dest="attribute", default=None)
-    parser.add_option('-d', '--dpi', type="int", default=None)
+    parser.add_option('-d', '--dpi', type="int", default=300)
     parser.add_option('-H', '--height', type="int", dest="height", default=None)
     parser.add_option('-l', '--label', default="name")
     parser.add_option('-m', '--multiple', default=False, action="store_true")
+    parser.add_option('-s', '--no-support', default=False, action="store_true")
     parser.add_option('-o', '--output', default=None)
     parser.add_option('-u', '--units', default="px")
     parser.add_option('-w', '--width', type="int", dest="width", default=None)
 
-    def __init__(self, label="name", attribute=None, output=None, multiple=False, width=None, height=None, units="px", dpi=300, dummy=False):
+    def __init__(self, label="name", attribute=None, support=True, output=None, multiple=False, width=None, height=None, units="px", dpi=300, dummy=False):
 
-        self.label = label
         self.attribute = attribute
-        self.output = output
-        self.multiple = multiple
-        self.width = width
-        self.height = height
-        self.units = units
         self.dpi = dpi
+        self.height = height
+        self.label = label
+        self.multiple = multiple
         self.n = 0
+        self.output = output
+        self.support = support
+        self.units = units
+        self.width = width
 
         self.dummy = dummy
 
@@ -96,11 +99,12 @@ class Plot(PhyltrCommand):
             # Setup TreeStyle
             self.ts = TreeStyle()
             self.ts.show_scale = False
-            self.ts.show_branch_support = True
+            self.ts.show_branch_support = self.support
+            self.ts.show_leaf_name = False
 
     @classmethod
     def init_from_opts(cls, options, files):
-        plot = Plot(options.label, options.attribute, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
+        plot = Plot(options.label, options.attribute, not options.no_support, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
         return plot
 
     def process_tree(self, t):

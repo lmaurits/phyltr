@@ -6,7 +6,9 @@ Pass only those trees in a stream which contain some specified clade.
 OPTIONS:
 
     taxa
-        A comma-separated list of taxa which must be monophyletic
+        A comma-separated list of taxa which must be monophyletic, or a
+        Newick formatted tree structure (with no branch lengths or
+        internal node names) which must be part of the tree
 
     -f, --file
         A file specifying which taxa must be monophyletic.  One taxon
@@ -31,6 +33,7 @@ class Grep(PhyltrCommand):
     parser.add_option('-f', '--file', dest="filename",
             help='Specifies a file from which to read taxa')
     parser.add_option('-i', '--inverse', action="store_true", default=False, dest="inverse")
+    parser.add_option('-v', action="store_true", default=False, dest="inverse")
 
     def __init__(self, taxa=None, filename=None, inverse=False):
         self.filename = filename

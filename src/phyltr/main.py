@@ -9,15 +9,20 @@ The available phyltr commands are:
     clades      List clade supports
     collapse    Collapse clades to named taxa
     consensus   Build majority rules consensus tree
-    dedupe      Remove duplicate taxa (by name)
+    dist        Print pairwise distance matrices for each tree in a tree
+                stream
+    deduep      Remove duplicate taxa (by name)
+    grep        Pass only trees containing specified subtrees
     height      Print the height of each tree in a tree stream
     length      Print the length of each tree in a tree stream
     plot        Plot tree using ETE interactive viewer, or to file
     pretty      Pretty print a tree (ASCII art)
     prune       Prune specified taxa from a tree
     rename      Rename specified taxa
+    rf          Print the Robinson-Foulds distance between each tree in a
+                tree stream and a reference tree
     scale       Scale branch lengths of a set of trees
-    sibling    Print the sibling of a named taxon for each tree in a stream
+    sibling     Print the sibling of a named taxon for each tree in a stream
     stat        Summary statistics on a set of trees
     support     Add clade support information to a tree stream
     subtree     Extract minimal subtrees containing specified taxa
@@ -47,6 +52,7 @@ _COMMANDS = (
         "collapse",
         "consensus",
         "dedupe",
+        "dist",
         "grep",
         "height",
         "length",
@@ -54,6 +60,7 @@ _COMMANDS = (
         "pretty",
         "prune",
         "rename",
+        "rf",
         "scale",
         "sibling",
         "stat",

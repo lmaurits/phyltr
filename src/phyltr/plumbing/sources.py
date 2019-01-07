@@ -163,8 +163,8 @@ class ComplexNewickParser:
                 continue
             if (n-trees_to_skip) % self.subsample == 0:
                 t = get_tree(tree_string)
-                if not t:
-                    continue
+                if not t:       # What situation is this guarding against?
+                    continue    # Does this muck up subsampling accuracy?
                 self.nexify_tree(t)
                 n += 1
                 yield t

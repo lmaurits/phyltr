@@ -73,7 +73,7 @@ class PhyltrCommand:
         for tree in stream:
             try:
                 res = self.process_tree(tree)
-                if res:
+                if res is not None:
                     yield res
             except StopIteration:
                 stream.close()
