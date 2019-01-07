@@ -145,7 +145,7 @@ class ComplexNewickParser:
 
     def detect_tree(self, line):
         if self.isNexus:
-            return line.strip().startswith("tree")
+            return line.strip().lower().startswith("tree")
         else:
             return (    ")" in line and
                         ";" in line and
