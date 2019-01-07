@@ -28,7 +28,7 @@ def test_bad_init_no_attribute_only():
 
 def test_bad_init_no_value_only():
     with pytest.raises(ValueError):
-        Subtree(value="bar")
+        Subtree(values="bar")
 
 def test_bad_init_empty_file():
     with pytest.raises(ValueError):
