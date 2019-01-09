@@ -19,6 +19,7 @@ class CladeProbabilities:
 
         cache = tree.get_cached_content()
         self.tree_count += 1
+
         # Find height of tree
         irrelevant_leaf, tree_height = tree.get_farthest_leaf()
         # Record clades
@@ -108,6 +109,9 @@ class CladeProbabilities:
         # ...then by clade probability
         # (this results in a list sorted by probability and then name)
         clade_probs.sort(key=lambda x:x[0],reverse=True)
+
+        # Sanity check - the first clade in the sorted list *should* be the "everything" clade.
+        assert clade_probs[0][1].count(",") == len(self.leaf_heights) - 1
 
         fp = open(filename, "w")
         for p, c in clade_probs:
