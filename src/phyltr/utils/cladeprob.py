@@ -111,7 +111,8 @@ class CladeProbabilities:
         clade_probs.sort(key=lambda x:x[0],reverse=True)
 
         # Sanity check - the first clade in the sorted list *should* be the "everything" clade.
-        assert clade_probs[0][1].count(",") == len(self.leaf_heights) - 1
+        if clade_probs:
+            assert clade_probs[0][1].count(",") == len(self.leaf_heights) - 1
 
         fp = open(filename, "w")
         for p, c in clade_probs:

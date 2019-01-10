@@ -37,6 +37,13 @@ def test_clades():
     assert clades.cp.clade_probs["D,E,F"] == 5.0 / 6.0
     assert clades.cp.clade_probs["A,B,C,D,E,F"] == 6.0 / 6.0
 
+def test_degenerate_clades(tmpdir):
+    lines = fileinput.input("tests/treefiles/single_taxon.trees")
+    trees = NewickParser().consume(lines)
+    clades = Clades(ages=True)
+    for t in clades.consume(trees):
+        pass
+
 def test_categorical_annotation():
     # This is just to make sure the clade probability calculator doesnt't
     # erroneously try to calculate means etc. of categorical annotations
