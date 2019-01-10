@@ -4,3 +4,4 @@
 .pytest_cache/
 .idea/
 .tox/
+*.egg-info/
