@@ -68,6 +68,8 @@ class Subtree(PhyltrCommand):
             leaves = [l for l in t.get_leaves() if l.name in self.taxa]
             mrca = leaves[0].get_common_ancestor(leaves[1:])
             t = mrca
+            new_tree_leaves = [l.name for l in t.get_leaves()]
+            assert all((t in new_tree_leaves for t in self.taxa))
         else:
             taxa = [l for l in t.get_leaves() if hasattr(l,self.attribute) and getattr(l,self.attribute) in self.values]
             mrca = taxa[0].get_common_ancestor(taxa[1:])

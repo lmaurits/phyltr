@@ -43,6 +43,15 @@ def test_subtree():
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
+def test_subtree_2():
+    subtree = Subtree.init_from_args("A,B,F")
+    lines = fileinput.input("tests/treefiles/basic.trees")
+    trees = NewickParser().consume(lines)
+    subtrees = subtree.consume(trees)
+    expected_taxa = (6, 6, 6, 6, 6, 3)
+    for t, n in zip(subtrees, expected_taxa):
+        assert len(t.get_leaves()) == n
+
 def test_file_subtree():
     lines = fileinput.input("tests/treefiles/basic.trees")
     trees = NewickParser().consume(lines)
