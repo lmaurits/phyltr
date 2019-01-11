@@ -1,6 +1,3 @@
-import fileinput
-
-from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.commands.consensus import Consensus
 from phyltr.commands.length import Length
 
@@ -11,29 +8,22 @@ def test_init_from_args():
     consensus = Consensus.init_from_args("-f 0.42")
     assert consensus.frequency == 0.42
 
-def test_consensus():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    consensus = list(Consensus().consume(trees))
+def test_consensus(basictrees):
+    consensus = list(Consensus().consume(basictrees))
     assert len(consensus) == 1
 
-def test_low_freq_consensus():
-    lines = fileinput.input("tests/treefiles/beast_output.nex")
-    trees = ComplexNewickParser().consume(lines)
-    consensus = list(Consensus(frequency=0.25).consume(trees))
+def test_low_freq_consensus(treefilenewick):
+    consensus = list(Consensus(frequency=0.25).consume(treefilenewick('beast_output.nex')))
     assert len(consensus) == 1
 
-def test_annotation_consensus():
-    lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
-    trees = ComplexNewickParser().consume(lines)
-    consensus = list(Consensus().consume(trees))[0]
+def test_annotation_consensus(treefilenewick):
+    consensus = list(Consensus().consume(treefilenewick('beast_output_rate_annotations.nex')))[0]
     for n in consensus.traverse():
         for attr in ("rate_mean", "rate_median", "rate_HPD"):
             assert hasattr(n, attr)
 
-def test_min_med_max_consensus():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = list(NewickParser().consume(lines))
+def test_min_med_max_consensus(basictrees):
+    trees = list(basictrees)
 
     min_uniq = Consensus(lengths="min").consume(trees)
     min_lengths = Length().consume(min_uniq)

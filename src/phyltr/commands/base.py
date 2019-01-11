@@ -76,7 +76,8 @@ class PhyltrCommand:
                 if res is not None:
                     yield res
             except StopIteration:
-                stream.close()
+                if hasattr(stream, 'close'):
+                    stream.close()
                 break
         for tree in self.postprocess():
             yield tree

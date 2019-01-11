@@ -1,5 +1,4 @@
 import csv
-import fileinput
 import tempfile
 
 from phyltr.main import build_pipeline
@@ -7,8 +6,8 @@ from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.sinks import NewickFormatter, NullSink
 from phyltr.commands.annotate import Annotate
 
-def test_init():
-    annotate = Annotate.init_from_args("-f tests/argfiles/annotation.csv -k taxon")
+def test_init(argfilepath):
+    annotate = Annotate.init_from_args("-f {0} -k taxon".format(argfilepath('annotation.csv')))
     # Test defaults
     assert annotate.extract == False
     assert annotate.multiple == False
@@ -32,10 +31,10 @@ def test_init():
     assert annotate.extract == True
     assert annotate.multiple == True
 
-def test_annotate():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    annotated = Annotate("tests/argfiles/annotation.csv", "taxon").consume(trees)
+
+def test_annotate(treefile, argfilepath):
+    trees = NewickParser().consume(treefile('basic.trees'))
+    annotated = Annotate(argfilepath("annotation.csv"), "taxon").consume(trees)
     for t in annotated:
         t.write(features=[])
         for l in t.get_leaves():
@@ -43,16 +42,13 @@ def test_annotate():
             assert hasattr(l, "f2")
             assert hasattr(l, "f3")
 
-def test_extract_annotations():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = list(NewickParser().consume(lines))
-    lines.close()
+def test_extract_annotations(treefile, argfilepath):
+    trees = list(NewickParser().consume(treefile('basic.trees')))
     with tempfile.NamedTemporaryFile(mode="r") as fp:
-        for t in build_pipeline(
-                """annotate -f tests/argfiles/annotation.csv -k taxon |
-                 annotate --extract -f %s""" % fp.name,
-                 trees):
-            pass
+        list(build_pipeline(
+            "annotate -f {0} -k taxon | annotate --extract -f {1}".format(
+                argfilepath('annotation.csv'), fp.name),
+            trees))
         fp.seek(0)
         reader = csv.DictReader(fp)
         assert all((field in reader.fieldnames for field in ("f1","f2","f3")))
@@ -63,19 +59,14 @@ def test_extract_annotations():
                 assert row["f2"] == "1"
                 assert row["f3"] == "1"
 
-def test_extract_multiple_annotations():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = list(NewickParser().consume(lines))
-    lines.close()
+def test_extract_multiple_annotations(treefile, argfilepath):
+    trees = list(NewickParser().consume(treefile('basic.trees')))
     with tempfile.NamedTemporaryFile(mode="r") as fp:
-        for t in build_pipeline(
-                """annotate -f tests/argfiles/annotation.csv -k taxon |
-                 annotate --extract --multiple -f %s""" % fp.name,
-                 trees):
-            pass
+        list(build_pipeline(
+            "annotate -f {0} -k taxon | annotate --extract --multiple -f {1}".format(
+                argfilepath('annotation.csv'), fp.name),
+            trees))
         fp.seek(0)
-        fp.seek(0)
-
         reader = csv.DictReader(fp)
         assert all((field in reader.fieldnames for field in ("f1","f2","f3")))
         assert "tree_number" in reader.fieldnames
@@ -86,15 +77,11 @@ def test_extract_multiple_annotations():
                 assert row["f2"] == "1"
                 assert row["f3"] == "1"
 
-def test_extract_with_annotations_on_root():
-    lines = fileinput.input("tests/treefiles/beast_output_rate_annotations.nex")
-    trees = ComplexNewickParser().consume(lines)
+def test_extract_with_annotations_on_root(treefile):
+    trees = ComplexNewickParser().consume(treefile('beast_output_rate_annotations.nex'))
     with tempfile.NamedTemporaryFile(mode="r") as fp:
-        for t in Annotate(extract=True, multiple=True, filename=fp.name).consume(trees):
-            pass
+        list(Annotate(extract=True, multiple=True, filename=fp.name).consume(trees))
         fp.seek(0)
-        fp.seek(0)
-
         reader = csv.DictReader(fp)
         for row in reader:
             if row["name"] == "root":
