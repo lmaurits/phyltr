@@ -10,21 +10,21 @@ _BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)
 regex1 = re.compile(_BEAST_ANNOTATION_REGEX)
 regex2 = re.compile(_BEAST_ANNOTATION_REGEX_2)
 
+
+
 #FIXME We should be deleting and starting a new temp file for each tree file
 # otherwise we're going to have problems if file 2 is shorter than file 1
 
-class ComplexNewickParser:
+class ComplexNewickParser(object):
 
     def __init__(self, burnin=0, subsample=1):
         self.burnin = burnin
         self.subsample = subsample
         self.n = 0
-       
         if self.burnin:
             self.fp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
 
     def consume(self, stream):
-
         _first = True
         self.isNexus = False
         self.firstline = False   # Actually tracks whether a line is the first NON-BLANK line in a file
@@ -226,7 +226,7 @@ def repl(m):
         annotation = "[&&NHX:%s]" % ":".join(newbits)
     return "%s:%f%s" % (name, dist, annotation)
 
-class NewickParser:
+class NewickParser(object):
 
     def consume(self, stream):
         for tree_string in stream:

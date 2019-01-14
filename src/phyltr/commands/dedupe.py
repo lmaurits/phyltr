@@ -21,14 +21,9 @@ class Dedupe(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr dedupe")
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        dedupe = Dedupe()
-        return dedupe
-
     def process_tree(self, t):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
-        dupes = set([n for n in leaf_names if leaf_names.count(n) > 1])
+        dupes = set(n for n in leaf_names if leaf_names.count(n) > 1)
         if not dupes:
             return t
         # Remove dupes one at a time

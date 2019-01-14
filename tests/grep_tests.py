@@ -20,6 +20,9 @@ def test_bad_init_no_args():
     with pytest.raises(ValueError):
         Grep()
 
+    with pytest.raises(ValueError):
+        Grep(taxa=['A'])
+
 def test_bad_init_empty_file(emptyargs):
     with pytest.raises(ValueError):
         Grep(filename=emptyargs)

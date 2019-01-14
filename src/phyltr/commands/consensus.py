@@ -40,9 +40,8 @@ class Consensus(PhyltrCommand):
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
     @classmethod 
-    def init_from_opts(cls, options, files=[]):
-        consensus = Consensus(options.frequency, options.lengths)
-        return consensus
+    def init_from_opts(cls, options, files=None):
+        return cls(options.frequency, options.lengths)
 
     def process_tree(self, t):
         self.cp.add_tree(t)
@@ -78,9 +77,7 @@ class Consensus(PhyltrCommand):
 
         # Now sort the surviving clades by size, to make building the consensus
         # tree easier
-        clades = [(len(clade), p, clade) for p, clade in clades]
-        clades.sort()
-        clades.reverse()
+        clades = sorted([(len(clade), p, clade) for p, clade in clades], reverse=True)
 
         # Start out with a tree in which all leaves are joined in one big polytomy
         t = ete3.Tree()

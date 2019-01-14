@@ -42,8 +42,7 @@ class Clades(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        clades = Clades(options.frequency, options.age)
-        return clades
+        return cls(options.frequency, options.age)
 
     def process_tree(self, t):
         self.cp.add_tree(t)

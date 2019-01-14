@@ -53,8 +53,7 @@ class Support(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        support = Support(options.frequency, options.age, options.sort, options.filename)
-        return support
+        return cls(options.frequency, options.age, options.sort, options.filename)
 
     def process_tree(self, t):
         self.trees.append(t)

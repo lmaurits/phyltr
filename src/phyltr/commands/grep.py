@@ -52,14 +52,13 @@ class Grep(PhyltrCommand):
             raise ValueError("Must specify more than one taxon!")
 
     @classmethod 
-    def init_from_opts(cls, options, files=[]):
+    def init_from_opts(cls, options, files=None):
         if files:
             taxa = set(files.pop(0).split(","))
         else:
             taxa = []
 
-        grep = cls(taxa, options.filename, options.inverse)
-        return grep
+        return cls(taxa, options.filename, options.inverse)
 
     def process_tree(self, t):
         clade_leaves = [l for l in t.get_leaves() if l.name in self.taxa]

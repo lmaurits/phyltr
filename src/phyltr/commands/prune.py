@@ -69,8 +69,7 @@ class Prune(PhyltrCommand):
         else:
             taxa = []
 
-        prune = cls(taxa, options.filename, options.attribute, options.value, options.inverse)
-        return prune
+        return cls(taxa, options.filename, options.attribute, options.value, options.inverse)
 
     def process_tree(self, t):
         if self.taxa:

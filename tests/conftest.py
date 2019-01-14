@@ -1,5 +1,6 @@
 import os
 import fileinput
+from contextlib import closing
 
 import pytest
 
@@ -25,10 +26,12 @@ def treefilepath():
     return path
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def treefile(treefilepath):
     def lines(*fnames):
-        return fileinput.input([treefilepath(fname) for fname in fnames])
+        with closing(fileinput.input([treefilepath(fname) for fname in fnames])) as fp:
+            for line in fp:
+                yield line
     return lines
 
 
@@ -36,11 +39,7 @@ def treefile(treefilepath):
 def treefilenewick(treefile):
     def newick(fname):
         parser = NewickParser if fname.endswith('.trees') else ComplexNewickParser
-        lines = treefile(fname)
-        res = list(parser().consume(lines))
-        # Note: NewickParser and ComplexNewickParser do not close the stream upon consumption!
-        lines.close()
-        return res
+        return list(parser().consume(treefile(fname)))
     return newick
 
 

@@ -60,8 +60,7 @@ class Subtree(PhyltrCommand):
             taxa = set(files.pop(0).split(","))
         else:
             taxa = []
-        subtree = Subtree(taxa, options.filename, options.attribute, options.values)
-        return subtree
+        return cls(taxa, options.filename, options.attribute, options.values)
 
     def process_tree(self, t):
         if self.taxa:
