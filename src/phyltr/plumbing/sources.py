@@ -2,14 +2,18 @@ import fileinput
 import os
 import re
 import tempfile
+from functools import partial
 
 import ete3
 
-_BEAST_ANNOTATION_REGEX = "([a-zA-Z0-9_ \-]*?):(\[&.*?\])([0-9\.]+)([Ee])?(\-)?([0-9])*"
-_BEAST_ANNOTATION_REGEX_2 = "([a-zA-Z0-9_ \-]*?)(\[&.*?\]):([0-9\.]+)([Ee])?(\-)?([0-9])*"
-regex1 = re.compile(_BEAST_ANNOTATION_REGEX)
-regex2 = re.compile(_BEAST_ANNOTATION_REGEX_2)
+BEAST_ANNOTATION_REGEX = re.compile(
+    "(?P<name>[a-zA-Z0-9_ \-]*?):(\[&(?P<annotation>[^\]]*)\])(?P<dist>[0-9\.]+((E|e)(\-?[0-9]+)?)?)")
+BEAST_ANNOTATION_REGEX_2 = re.compile(
+    "(?P<name>[a-zA-Z0-9_ \-]*?)(\[&(?P<annotation>[^\]]*)\]):(?P<dist>[0-9\.]+((E|e)(\-?[0-9]+)?)?)")
 
+_NUMBER = '[0-9]+\.[0-9]+'
+COMPOSITE_BRANCHLENGTH_REGEX = re.compile(
+    ":(?P<dist>" + _NUMBER + ")@(?P<annotation>" + _NUMBER + ")")
 
 
 #FIXME We should be deleting and starting a new temp file for each tree file
@@ -174,16 +178,56 @@ class ComplexNewickParser(object):
         self.fp.truncate()
         self.n = 0
 
+
+def repl(m, style='beast', annotation_name=None):
+    annotation_data = m.groupdict()
+    annotation = annotation_data['annotation']
+    dist = annotation_data['dist']
+    if dist.lower().endswith('e'):
+        dist = dist[:-1]
+    dist = float(dist)
+    if annotation:
+        if style == 'beast':
+            # Handle BEAST's "vector annotations"
+            # (comma-separated elements inside {}s)
+            # by replacing the commas with pipes
+            # (this approach subject to change?)
+            newbits = []
+            inside = False
+            for bit in annotation.split(","):
+                if inside:
+                    newbits[-1] += "|" + bit
+                    if "}" in bit:
+                        inside = False
+                else:
+                    newbits.append(bit)
+                    if "{" in bit:
+                        inside = True
+            annotation = ":".join(newbits)
+        else:
+            if '=' not in annotation:
+                assert annotation_name
+                annotation = "{0}={1}".format(annotation_name, annotation)
+    return "%s:%f[&&NHX:%s]" % (annotation_data.get('name', '') or '', dist, annotation)
+
+
+ANNOTATION_FORMATS = [
+    (BEAST_ANNOTATION_REGEX, repl),
+    (BEAST_ANNOTATION_REGEX_2, repl),
+    (COMPOSITE_BRANCHLENGTH_REGEX, partial(repl, style='other', annotation_name='rate')),
+]
+
+
 def get_tree(tree_string):
     # FIXME
     # Make this much more elegant
     # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
 
     # Do we need regex magic?
-    if "[&" in tree_string and "&&NHX" not in tree_string:
-        tree_string = regex1.sub(repl, tree_string)
-        if "NHX" not in tree_string:
-            tree_string = regex2.sub(repl, tree_string)
+    if '&&NHX' not in tree_string:
+        for regex, repl in ANNOTATION_FORMATS:
+            if regex.search(tree_string):
+                tree_string = regex.sub(repl, tree_string)
 
     # Try to parse tree as is
     try:
@@ -194,37 +238,10 @@ def get_tree(tree_string):
 
     # Try to parse tree with internal node labels
     try:
-        t = ete3.Tree(tree_string, format=1)
-        return t
+        return ete3.Tree(tree_string, format=1)
     except (ValueError,ete3.parser.newick.NewickError):
         # That didn't fix it.  Give up
         return None
-
-def repl(m):
-    name, annotation, dist = m.groups()[0:3]
-    if len(m.groups()) > 3:
-        # Exponential notation
-        dist += "".join([str(x) for x in m.groups()[3:] if x])
-    dist = float(dist)
-    if annotation:
-        bits = annotation[2:-1].split(",")
-        # Handle BEAST's "vector annotations"
-        # (comma-separated elements inside {}s)
-        # by replacing the commas with pipes
-        # (this approach subject to change?)
-        newbits = []
-        inside = False
-        for bit in bits:
-            if inside:
-                newbits[-1] += "|" + bit
-                if "}" in bit:
-                    inside = False
-            else:
-                newbits.append(bit)
-                if "{" in bit:
-                    inside = True
-        annotation = "[&&NHX:%s]" % ":".join(newbits)
-    return "%s:%f%s" % (name, dist, annotation)
 
 class NewickParser(object):
 
@@ -245,4 +262,3 @@ class NewickParser(object):
             except (ValueError,ete3.parser.newick.NewickError):
                 # That didn't fix it.  Give up
                 continue
-
