@@ -1,6 +1,3 @@
-import fileinput
-
-from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.uniq import Uniq
 from phyltr.commands.length import Length
 
@@ -12,25 +9,20 @@ def test_init_from_args():
         uniq = Uniq.init_from_args("--lengths %s" % lengths)
         assert uniq.lengths == lengths
 
-def test_uniq():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = list(NewickParser().consume(lines))
-    uniq = Uniq().consume(trees)
+def test_uniq(basictrees):
+    uniq = Uniq().consume(basictrees)
     # The 6 basic trees comprise 5 unique topologies.
     # This is a pretty weak test, but...
     assert sum((1 for t in uniq)) == 5
 
-def test_min_med_max_uniq():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = list(NewickParser().consume(lines))
-
-    min_uniq = Uniq(lengths="min").consume(trees)
+def test_min_med_max_uniq(basictrees):
+    min_uniq = Uniq(lengths="min").consume(basictrees)
     min_lengths = Length().consume(min_uniq)
 
-    med_uniq = Uniq(lengths="median").consume(trees)
+    med_uniq = Uniq(lengths="median").consume(basictrees)
     med_lengths = Length().consume(med_uniq)
 
-    max_uniq = Uniq(lengths="max").consume(trees)
+    max_uniq = Uniq(lengths="max").consume(basictrees)
     max_lengths = Length().consume(max_uniq)
 
     for l, m, L in zip(min_lengths, med_lengths, max_lengths):

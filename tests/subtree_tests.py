@@ -1,8 +1,5 @@
-import fileinput
-
 import pytest
 
-from phyltr.plumbing.sources import NewickParser
 from phyltr.main import build_pipeline
 from phyltr.commands.subtree import Subtree
 
@@ -30,40 +27,33 @@ def test_bad_init_no_value_only():
     with pytest.raises(ValueError):
         Subtree(values="bar")
 
-def test_bad_init_empty_file():
+def test_bad_init_empty_file(emptyargs):
     with pytest.raises(ValueError):
-        Subtree(filename="tests/argfiles/empty.txt")
+        Subtree(filename=emptyargs)
 
-def test_subtree():
+def test_subtree(basictrees):
     subtree = Subtree.init_from_args("A,B,C")
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = subtree.consume(trees)
+    subtrees = subtree.consume(basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
-def test_subtree_2():
+def test_subtree_2(basictrees):
     subtree = Subtree.init_from_args("A,B,F")
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = subtree.consume(trees)
+    subtrees = subtree.consume(basictrees)
     expected_taxa = (6, 6, 6, 6, 6, 3)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
-def test_file_subtree():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = Subtree(filename="tests/argfiles/taxa_abc.txt").consume(trees)
+def test_file_subtree(basictrees):
+    subtrees = Subtree(filename="tests/argfiles/taxa_abc.txt").consume(basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
-def test_annotation_subtree():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --values 0", trees)
+def test_annotation_subtree(basictrees):
+    subtrees = build_pipeline(
+        "annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --values 0", basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n

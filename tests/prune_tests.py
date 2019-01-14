@@ -1,13 +1,9 @@
-import fileinput
-
 import pytest
 
-from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.prune import Prune
 from phyltr.commands.annotate import Annotate
-from phyltr.commands.height import Height
 
-def test_init_from_args():
+def test_init_from_args(argfilepath):
     prune = Prune.init_from_args("A,B,C")
     assert prune.taxa == set(("A","B","C"))
     assert prune.filename == None
@@ -18,9 +14,10 @@ def test_init_from_args():
     prune = Prune.init_from_args("A,B,C --inverse")
     assert prune.inverse == True
 
-    prune = Prune.init_from_args("--file tests/argfiles/taxa_abc.txt")
+    taxa_abc = argfilepath('taxa_abc.txt')
+    prune = Prune.init_from_args("--file {0}".format(taxa_abc))
     assert prune.taxa == set(("A","B","C"))
-    assert prune.filename == "tests/argfiles/taxa_abc.txt"
+    assert prune.filename == taxa_abc
     assert prune.attribute == None
     assert prune.value == None
 
@@ -42,52 +39,41 @@ def test_bad_init_no_value_only():
     with pytest.raises(ValueError):
         Prune(value="bar")
 
-def test_bad_init_empty_file():
+def test_bad_init_empty_file(emptyargs):
     with pytest.raises(ValueError):
-        Prune(filename="tests/argfiles/empty.txt")
+        Prune(filename=emptyargs)
 
-def test_prune():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    pruned = Prune(["A"]).consume(trees)
+def test_prune(basictrees):
+    pruned = Prune(["A"]).consume(basictrees)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert "A" not in leaves
         assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
 
-def test_inverse_prune():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    pruned = Prune(["A", "B"], inverse=True).consume(trees)
+def test_inverse_prune(basictrees):
+    pruned = Prune(["A", "B"], inverse=True).consume(basictrees)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert all((x in leaves for x in ("A", "B")))
         assert not any((x in leaves for x in ("C", "D", "E", "F")))
 
-def test_file_prune():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    pruned = Prune(filename="tests/argfiles/taxa_abc.txt").consume(trees)
+def test_file_prune(basictrees):
+    pruned = Prune(filename="tests/argfiles/taxa_abc.txt").consume(basictrees)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
 
-def test_annotation_prune():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(trees)
+def test_annotation_prune(basictrees, argfilepath):
+    annotated = Annotate(filename=argfilepath("annotation.csv"), key="taxon").consume(basictrees)
     pruned = Prune(attribute="f1", value="0").consume(annotated)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
 
-def test_inverse_annotation_prune():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(trees)
+def test_inverse_annotation_prune(basictrees):
+    annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(basictrees)
     pruned = Prune(attribute="f1", value="0", inverse=True).consume(annotated)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert all((x in leaves for x in ("A", "B", "C")))
         assert not any ((x in leaves for x in ("D", "E", "F")))
-

@@ -1,6 +1,3 @@
-import fileinput
-
-from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.support import Support
 
 def test_init_from_args():
@@ -20,10 +17,8 @@ def test_init_from_args():
     clades = Support.init_from_args("--sort")
     assert clades.sort == True
 
-def test_clades():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    supported = Support(filename="/dev/null").consume(trees)
+def test_clades(basictrees):
+    supported = Support(filename="/dev/null").consume(basictrees)
     for t in supported:
         for n in t.traverse():
             assert hasattr(n, "support")
