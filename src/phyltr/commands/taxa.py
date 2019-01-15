@@ -24,15 +24,9 @@ class Taxa(PhyltrCommand):
     def __init__(self):
         self.done = False
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        taxa = Taxa()
-        return taxa
-
     def process_tree(self, t):
         if self.done:
             raise StopIteration
         else:
-            names = [n.name for n in t.traverse() if n.name]
             self.done = True
-            return sorted(names)
+            return sorted([n.name for n in t.traverse() if n.name])

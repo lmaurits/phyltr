@@ -28,8 +28,7 @@ class Scale(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        scale = Scale(options.scale)
-        return scale
+        return cls(options.scale)
 
     def process_tree(self, t):
         for node in t.traverse():

@@ -25,6 +25,7 @@ OPTIONS:
 """
 
 import sys
+from collections import defaultdict
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import OptionParser
@@ -41,10 +42,9 @@ class Collapse(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        collapse = Collapse({}, options.translate, options.attribute)
-        return collapse
+        return cls({}, options.translate, options.attribute)
 
-    def __init__(self, clades={}, filename=None, attribute=None):
+    def __init__(self, clades=None, filename=None, attribute=None):
         if clades:
             self.trans = clades # trans = translation
         elif filename:
@@ -69,12 +69,11 @@ class Collapse(PhyltrCommand):
         this data."""
 
         self.trans = {}
-        fp = open(filename, "r")
-        for line in fp:
-            name, clade = line.strip().split(":")
-            clade = clade.strip().split(",")
-            self.trans[name] = clade
-        fp.close()
+        with open(filename, "r") as fp:
+            for line in fp:
+                name, clade = line.strip().split(":")
+                clade = clade.strip().split(",")
+                self.trans[name] = clade
 
     def collapse_by_dict(self, t):
         cache = t.get_cached_content()
@@ -96,15 +95,10 @@ class Collapse(PhyltrCommand):
         cache = t.get_cached_content()
         tree_leaves = cache[t]
         # Build a dictionary mapping attribute values to lists of leaves
-        values = {}
+        values = defaultdict(list)
         for leaf in tree_leaves:
-            if not hasattr(leaf, self.attribute):
-                continue
-            value = getattr(leaf, self.attribute)
-            if value not in values:
-                values[value] = [leaf,]
-            else:
-                values[value].append(leaf)
+            if hasattr(leaf, self.attribute):
+                values[getattr(leaf, self.attribute)].append(leaf)
         # Do monophyly tests
         for value, clade_leaves in values.items():
             try:

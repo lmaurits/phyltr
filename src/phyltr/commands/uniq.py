@@ -17,7 +17,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import itertools
 from six.moves import zip
 
 from phyltr.commands.base import PhyltrCommand
@@ -26,22 +25,27 @@ from phyltr.utils.topouniq import are_same_topology
 
 class Uniq(PhyltrCommand):
 
+    valid_lengths = ["max", "mean", "median", "min"]
     parser = OptionParser(__doc__, prog="phyltr uniq")
-    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
+    parser.add_option(
+        '-l', '--lengths',
+        action="store",
+        dest="lengths",
+        default="mean",
+        help="|".join(valid_lengths))
 
     def __init__(self, lengths="mean"):
-        if lengths in ("max", "mean", "median", "min"):
+        if lengths in self.valid_lengths:
             self.lengths = lengths
         else:
-            raise ValueError("--lengths option must be one of max, mean, median or min!")
+            raise ValueError("invalid --lengths option")
 
         self.topologies = {}
         self.ordered_exemplars = []
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        uniq = Uniq(options.lengths)
-        return uniq
+        return cls(options.lengths)
 
     def process_tree(self, t):
         # Compare this tree to all topology exemplars.  If we find a match,

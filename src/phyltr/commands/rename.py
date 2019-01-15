@@ -46,8 +46,7 @@ class Rename(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        rename = Rename(filename=options.filename, remove=options.remove)
-        return rename
+        return cls(filename=options.filename, remove=options.remove)
 
     def read_rename_file(self, filename):
 

@@ -31,11 +31,6 @@ class Stat(PhyltrCommand):
         self.tree_ages = []
         self.firsttree = True
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        stat = Stat()
-        return stat
-
     def process_tree(self, t):
         # Stuff we do to every tree...
         self.tree_count += 1

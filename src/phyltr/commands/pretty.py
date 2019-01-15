@@ -17,8 +17,6 @@ OPTIONS:
         specified, the treestream will be read from stdin.
 """
 
-import optparse
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 from phyltr.utils.phyltroptparse import OptionParser
@@ -37,9 +35,7 @@ class Pretty(PhyltrCommand):
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        pretty = Pretty(label=options.label, compress=options.compress)
-        return pretty
-    
+        return cls(label=options.label, compress=options.compress)
 
     def process_tree(self, t):
         # Change node names to get the desired appearance

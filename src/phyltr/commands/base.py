@@ -6,7 +6,7 @@ from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.sinks import NewickFormatter
 from phyltr.utils.phyltroptparse import OptionParser
 
-class PhyltrCommand:
+class PhyltrCommand(object):
 
     parser = OptionParser("Halp!")
     source = NewickParser
@@ -14,7 +14,7 @@ class PhyltrCommand:
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        raise NotImplementedError # pragma: no cover
+        return cls()
 
     @classmethod 
     def run_as_script(cls):

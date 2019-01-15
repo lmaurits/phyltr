@@ -21,10 +21,5 @@ class Length(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr length")
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        length = Length()
-        return length
-
     def process_tree(self, t):
         return sum([n.dist for n in t.traverse()])

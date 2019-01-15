@@ -20,14 +20,11 @@ OPTIONS:
         Use a filename of "-" to read from stdin.  If no filenames are
         specified, the treestream will be read from stdin.
 """
-
-import os
-import tempfile
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sources import ComplexNewickParser
 from phyltr.plumbing.sinks import NewickFormatter
 from phyltr.utils.phyltroptparse import OptionParser
+
 
 class Cat(PhyltrCommand):
 
@@ -42,9 +39,8 @@ class Cat(PhyltrCommand):
         self.annotations = annotations
 
     @classmethod 
-    def init_from_opts(cls, options, files=[]):
-        cat = Cat(options.burnin, options.subsample, annotations = not options.no_annotations)
-        return cat
+    def init_from_opts(cls, options, files=None):
+        return cls(options.burnin, options.subsample, annotations = not options.no_annotations)
 
     def init_source(self):
         return ComplexNewickParser(self.burnin, self.subsample)

@@ -104,8 +104,7 @@ class Plot(PhyltrCommand):
 
     @classmethod
     def init_from_opts(cls, options, files):
-        plot = Plot(options.label, options.attribute, not options.no_support, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
-        return plot
+        return cls(options.label, options.attribute, not options.no_support, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
 
     def process_tree(self, t):
 

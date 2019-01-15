@@ -21,10 +21,5 @@ class Height(PhyltrCommand):
 
     parser = OptionParser(__doc__, prog="phyltr height")
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        height = Height()
-        return height
-
     def process_tree(self, t):
         return t.get_farthest_leaf()[1]

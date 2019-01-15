@@ -35,8 +35,7 @@ class Sibling(PhyltrCommand):
             taxon = files.pop(0)
         else:    
             taxon = None
-        sibling = Sibling(taxon)
-        return sibling
+        return cls(taxon)
 
     def process_tree(self, t):
         # Find our taxon
