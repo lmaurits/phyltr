@@ -4,6 +4,8 @@
 Merge all sets of trees with identical topologies in a tree stream into
 single trees.  The branch lengths of the merged trees are computed from those
 of all the trees with that topology.  Mean lengths are used by default.
+Trees are output in order of topology frequency, i.e. the first tree in the
+output stream summarises the most frequent topology.
 
 OPTIONS:
 
@@ -41,7 +43,7 @@ class Uniq(PhyltrCommand):
             raise ValueError("invalid --lengths option")
 
         self.topologies = {}
-        self.ordered_exemplars = []
+        self.N = 0
 
     @classmethod 
     def init_from_opts(cls, options, files):
@@ -56,13 +58,17 @@ class Uniq(PhyltrCommand):
                 break
         else:
             self.topologies[t] = [t]
-            self.ordered_exemplars.append(t)
-
+        self.N += 1
         return None
        
     def postprocess(self):
-        for exemplar in self.ordered_exemplars:
-            equ_class = self.topologies[exemplar]
+        # Order topologies by frequency
+        topologies = [(len(v), k) for k,v in self.topologies.items()]
+        topologies.sort(reverse=True)
+        topologies = (t for (n,t) in topologies)
+        for topology in topologies:
+            equ_class = self.topologies[topology]
+            equ_class[0].support = 1.0*len(equ_class) / self.N
             for nodes in zip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
