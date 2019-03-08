@@ -76,7 +76,7 @@ class Uniq(PhyltrCommand):
     def postprocess(self):
         # Order topologies by frequency
         topologies = [(len(v), k) for k,v in self.topologies.items()]
-        topologies.sort(reverse=True)
+        topologies.sort(reverse=True, key=lambda x: x[0])
         topologies = (t for (n,t) in topologies)
         cumulative = 0.0
         for topology in topologies:
