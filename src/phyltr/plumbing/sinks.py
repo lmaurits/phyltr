@@ -6,9 +6,10 @@ from six import string_types
 
 class NewickFormatter:
 
-    def __init__(self, out=sys.stdout, annotations=True):
+    def __init__(self, out=sys.stdout, annotations=True, topology_only=False):
         self.out = out
         self.annotations = annotations
+        self.topology_only = topology_only
 
     def consume(self, stream):
         first = True
@@ -20,7 +21,9 @@ class NewickFormatter:
                     feature_names |= n.features
                 for standard_feature in ("dist", "name", "support"):
                     feature_names.remove(standard_feature)
-            if self.annotations:
+            if self.topology_only:
+                self.out.write(t.write(format=9))
+            elif self.annotations:
                 self.out.write(t.write(features=feature_names,format_root_node=True))
             else:
                 self.out.write(t.write())
