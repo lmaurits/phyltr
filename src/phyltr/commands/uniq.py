@@ -12,9 +12,11 @@ OPTIONS:
     -c, --cumulative
         Cumulative topology frequency after which to stop output (default 1.0,
         i.e. all topologies are included)
+
     -f, --frequency
         Minimum topology frequency to include in output (default 0.0, i.e. all
         topologies are included)
+
     -l, --length
         Specifies the method used to compute branch lengths when trees with
         identical topologies are merged.  Must be one of: "max", "mean",
@@ -90,6 +92,8 @@ class Uniq(PhyltrCommand):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
                     dist = max(dists)
+                elif self.lengths == "min":
+                    dist = min(dists)
                 elif self.lengths == "mean":
                     dist = sum(dists) / len(dists)
                 elif self.lengths == "median":
@@ -99,8 +103,6 @@ class Uniq(PhyltrCommand):
                         dist = 0.5*(dists[l//2]+dists[l//2-1])
                     else:
                         dist = dists[l//2]
-                elif self.lengths == "min":
-                    dist = min(dists)
                 nodes[0].dist = dist
             yield equ_class[0]
             if cumulative >= self.cumulative:
