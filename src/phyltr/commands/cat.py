@@ -10,6 +10,11 @@ OPTIONS:
     -b, --burnin
         Percentage of trees from each file to discard as "burn in".  Default is
         0, i.e. no burn in.
+
+    --no-annotations
+        Do not include any annotations on nodes (e.g. clock rates, phylogeographic
+        locations, etc.), print only standard metadata (i.e. branch lengths and
+        clade supports)
         
     -s, --subsample
         Frequency at which to subsample trees, i.e. "-s 10" will include
