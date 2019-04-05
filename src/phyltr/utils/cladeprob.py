@@ -120,7 +120,7 @@ class CladeProbabilities:
                 ages = self.clade_ages[c]
                 mean = sum(ages)/len(ages)
                 ages.sort()
-                lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
+                lower, median, upper = [ages[int(x*len(ages))] for x in (0.025,0.5,0.975)]
                 line = "%.4f, %.2f (%.2f-%.2f) [%s]\n" % (p, mean, lower, upper, c)
             else:
                 line = "%.4f, [%s]\n" % (p, c)
