@@ -22,6 +22,18 @@ OPTIONS:
         identical topologies are merged.  Must be one of: "max", "mean",
         "median", or "min".  Default is mean.
 
+    -s, --separate
+        Write all trees in the input tree stream into files grouping them by
+        topology, resulting in one file per topology.  Still passes all trees
+        to stdout as per usual.  Note that unless used in conjunction with an
+        option such as --frequency which limits how many topologies are to be
+        passed, this may result in hundreds or thousands of small files being
+        created!  Files are named `phyltr_uniq_$n.trees`, where $n is an
+        integer index beginning from 1.  phyltr_uniq_1.trees contains all trees
+        having the most frequent topology, for example.  Existing files will
+        be silently overwritten, users are responsible for organising the
+        results of consecutive runs.
+
     files
         A whitespace-separated list of filenames to read treestreams from.
         Use a filename of "-" to read from stdin.  If no filenames are
@@ -42,26 +54,27 @@ class Uniq(PhyltrCommand):
             default=1.0, help='Cumulative topology frequency to report.')
     parser.add_option('-f', '--frequency', type="float", dest="frequency",
             default=0.0, help='Minimum topology frequency to report.')
-    parser.add_option(
-        '-l', '--lengths',
-        action="store",
-        dest="lengths",
-        default="mean",
-        help="|".join(valid_lengths))
+    parser.add_option('-l', '--lengths', action="store", dest="lengths",
+            default="mean", help="|".join(valid_lengths))
+    parser.add_option('-s', '--separate', action="store", dest="separate",
+            type="boolean", default=False,
+            help="Separate trees into per-topology files.")
 
-    def __init__(self, cumulative=1.0, frequency=0.0, lengths="mean"):
+    def __init__(self, cumulative=1.0, frequency=0.0, lengths="mean", separate=False):
         if lengths in self.valid_lengths:
             self.lengths = lengths
         else:
             raise ValueError("invalid --lengths option")
         self.cumulative = cumulative
         self.frequency = frequency
+        self.separate = separate
         self.topologies = {}
         self.N = 0
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        return cls(options.cumulative, options.frequency, options.lengths)
+        return cls(options.cumulative, options.frequency, options.lengths,
+                options.separate)
 
     def process_tree(self, t):
         # Compare this tree to all topology exemplars.  If we find a match,
@@ -81,13 +94,22 @@ class Uniq(PhyltrCommand):
         topologies.sort(reverse=True, key=lambda x: x[0])
         topologies = (t for (n,t) in topologies)
         cumulative = 0.0
-        for topology in topologies:
+        for n, topology in enumerate(topologies):
             equ_class = self.topologies[topology]
+            representative = equ_class[0]   # This tree will be annotated and yielded
+            # Compute topoogy frequency
             top_freq = 1.0*len(equ_class) / self.N
-            equ_class[0].support = top_freq
-            cumulative += top_freq
             if top_freq < self.frequency:
                 continue
+            cumulative += top_freq
+            if self.separate:
+                # Save all pristine trees to file before annotating a representative
+                with open("phyltr_uniq_%d.trees" % (n+1), "w") as fp:
+                    for t in equ_class:
+                        fp.write(t.write()+"\n")
+            # Begin annotating rep
+            representative.support = top_freq
+            # Set branch distances
             for nodes in zip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
                 if self.lengths == "max":
@@ -104,6 +126,6 @@ class Uniq(PhyltrCommand):
                     else:
                         dist = dists[l//2]
                 nodes[0].dist = dist
-            yield equ_class[0]
+            yield representative
             if cumulative >= self.cumulative:
                 return
