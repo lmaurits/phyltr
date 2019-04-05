@@ -56,9 +56,8 @@ class Uniq(PhyltrCommand):
             default=0.0, help='Minimum topology frequency to report.')
     parser.add_option('-l', '--lengths', action="store", dest="lengths",
             default="mean", help="|".join(valid_lengths))
-    parser.add_option('-s', '--separate', action="store", dest="separate",
-            type="boolean", default=False,
-            help="Separate trees into per-topology files.")
+    parser.add_option('-s', '--separate', action="store_true", dest="separate",
+            default=False, help="Separate trees into per-topology files.")
 
     def __init__(self, cumulative=1.0, frequency=0.0, lengths="mean", separate=False):
         if lengths in self.valid_lengths:
