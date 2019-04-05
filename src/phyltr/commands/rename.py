@@ -57,7 +57,9 @@ class Rename(PhyltrCommand):
         with open(filename, "r") as fp:
             for line in fp:
                 old, new = line.strip().split(":")
-                rename[old.strip()] = new.strip()
+                old = ",".join((x.strip() for x in old.split(",")))
+                new = new.strip()
+                rename[old] = new
             fp.close()
         self.rename = rename
 
