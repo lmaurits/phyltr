@@ -113,7 +113,7 @@ class Uniq(PhyltrCommand):
             lower, median, upper = [heights[int(x*len(heights))] for x in (0.025, 0.5, 0.975)]
             representative.add_feature("age_mean", "%.2f" % (sum(heights)/len(heights)))
             representative.add_feature("age_median", "%.2f" % median)
-            representative.add_feature("age_95_HPD", "{%.2f-%.2f}" % (lower95 ,upper95))
+            representative.add_feature("age_95_HPD", "{%.2f-%.2f}" % (lower, upper))
             # Set branch distances
             for nodes in zip(*[t.traverse() for t in equ_class]):
                 dists = [n.dist for n in nodes]
