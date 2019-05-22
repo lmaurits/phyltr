@@ -76,7 +76,6 @@ class Support(PhyltrCommand):
             trees = [(self.cp.get_tree_prob(t),t) for t in self.trees]
             trees.sort(key=lambda i: i[0])
             trees.reverse()
-            print(trees)
             self.trees = [t for (p,t) in trees]
 
         # Output
