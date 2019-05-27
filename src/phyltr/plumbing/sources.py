@@ -95,10 +95,11 @@ class ComplexNewickParser(object):
         """
         Return value is whether or not this line needs to be processed further.
         """
+        line = line.strip()
         # Detect Nexus file format by checking first line
         if self.firstline:
             self.firstline = False
-            if line.strip() == "#NEXUS":
+            if line == "#NEXUS":
                 self.isNexus = True
                 self.inTranslate = False
                 self.nexus_trans = {}
@@ -118,14 +119,14 @@ class ComplexNewickParser(object):
         # Handle Nexus translate block
         if self.inTranslate:
             # Detect ending of translate block...
-            if line.strip() == ";":
+            if line == ";":
                 self.inTranslate = False
             # ...or handle a line of translate block
             else:
-                if line.strip().endswith(";"):
+                if line.endswith(";"):
                     line = line[:-1]
                     self.inTranslate = False
-                index, name = line.strip().split()
+                index, name = line.split()
                 if name.endswith(","):
                     name = name[:-1]
                 self.nexus_trans[index] = name
