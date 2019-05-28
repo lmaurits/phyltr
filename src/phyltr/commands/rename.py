@@ -38,10 +38,6 @@ class Rename(PhyltrCommand):
             raise ValueError("Must supply renaming dictionary or filename!")
         self.first = True
 
-    @classmethod 
-    def init_from_opts(cls, options, files):
-        return cls(filename=options.filename, remove=options.remove)
-
     def read_rename_file(self, filename):
 
         """Read a file of names and their desired replacements and return a
@@ -57,7 +53,7 @@ class Rename(PhyltrCommand):
             fp.close()
         self.rename = rename
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         # Rename nodes
         for node in t.traverse():
             node.name = self.rename.get(node.name,

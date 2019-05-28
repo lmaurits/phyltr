@@ -38,7 +38,7 @@ class Grep(PhyltrCommand):
     def init_from_opts(cls, options, files=None):
         return cls(taxa=set(files.pop(0).split(",")) if files else [], _opts=options)
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         clade_leaves = [l for l in t.get_leaves() if l.name in self.taxa]
         mrca = t.get_common_ancestor(clade_leaves)
         is_mono = set(mrca.get_leaves()) == set(clade_leaves)

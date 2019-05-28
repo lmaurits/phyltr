@@ -24,7 +24,7 @@ class Sibling(PhyltrCommand):
     def init_from_opts(cls, options, files):
         return cls(taxon=files.pop(0) if files else None)
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         # Find our taxon
         try:
             taxon = t.get_leaves_by_name(self.taxon)[0]

@@ -7,13 +7,7 @@ class Taxa(PhyltrCommand):
     """
     sink = ListPerLineFormatter
 
-    def __init__(self, **kw):
-        PhyltrCommand.__init__(self, **kw)
-        self.done = False
-
-    def process_tree(self, t):
-        if self.done:
+    def process_tree(self, t, n):
+        if n > 1:
             raise StopIteration
-        else:
-            self.done = True
-            return sorted([n.name for n in t.traverse() if n.name])
+        return sorted([n.name for n in t.traverse() if n.name])

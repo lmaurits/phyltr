@@ -35,7 +35,6 @@ class Annotate(PhyltrCommand):
 
     def __init__(self, **kw):
         PhyltrCommand.__init__(self, **kw)
-        self.n = 0
         self.annotations = {}
 
         if self.opts.extract and (self.opts.filename == "-" or not self.opts.filename):
@@ -46,16 +45,14 @@ class Annotate(PhyltrCommand):
         if not self.opts.extract:
             self.read_annotation_file()
 
-    def process_tree(self, t):
+    def process_tree(self, t, n):
         if self.opts.extract:
             # Break out of consume if we've done one
-            if not self.opts.multiple:
-                if self.n > 0:
-                    raise StopIteration
-            self.extract_annotations(t)
+            if not self.opts.multiple and n > 1:
+                raise StopIteration
+            self.extract_annotations(t, n)
         else:
             self.annotate_tree(t)
-        self.n += 1
         return t
 
     def read_annotation_file(self):
@@ -69,11 +66,11 @@ class Annotate(PhyltrCommand):
                 for key, value in self.annotations[node.name].items():
                     node.add_feature(key, value)
 
-    def extract_annotations(self, t):
+    def extract_annotations(self, t, n):
         if self.opts.filename == "-" or not self.opts.filename:
-            fp = sys.stdout # pragma: no cover
+            fp = sys.stdout  # pragma: no cover
         else:
-            fp = open(self.opts.filename, "a" if self.n > 0 else "w")
+            fp = open(self.opts.filename, "a" if n > 1 else "w")
         features = []
         for node in t.traverse():
             for f in node.features:
@@ -85,7 +82,7 @@ class Annotate(PhyltrCommand):
             fieldnames.append("tree_number")
         fieldnames.extend(features)
         writer = csv.DictWriter(fp, fieldnames=fieldnames)
-        if self.n == 0:
+        if n == 1:
             writer.writeheader()
         for node in t.traverse():
             # Only include the root node or nodes with names
@@ -100,7 +97,7 @@ class Annotate(PhyltrCommand):
                     fix_root_name = False
                 rowdict = {f:getattr(node, f, "?") for f in fieldnames}
                 if self.opts.multiple:
-                    rowdict["tree_number"] = self.n
+                    rowdict["tree_number"] = n
                 writer.writerow(rowdict)
                 if fix_root_name:
                     node.name = None

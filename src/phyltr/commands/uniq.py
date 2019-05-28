@@ -52,9 +52,8 @@ class Uniq(PhyltrCommand):
     def __init__(self, **kw):
         PhyltrCommand.__init__(self, **kw)
         self.topologies = {}
-        self.N = 0
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         # Compare this tree to all topology exemplars.  If we find a match,
         # add it to the record and move on to the next tree.
         for exemplar in self.topologies:
@@ -63,17 +62,16 @@ class Uniq(PhyltrCommand):
                 break
         else:
             self.topologies[t] = [t]
-        self.N += 1
         return None
        
-    def postprocess(self):
+    def postprocess(self, tree_count):
         # Order topologies by descending frequency
         cumulative = 0.0
         for n, (_, equ_class) in enumerate(
                 sorted(self.topologies.items(), key=lambda x: -len(x[1]))):
             representative = equ_class[0]   # This tree will be annotated and yielded
             # Compute topoogy frequency
-            top_freq = 1.0*len(equ_class) / self.N
+            top_freq = 1.0*len(equ_class) / tree_count
             if top_freq < self.opts.frequency:
                 continue
             cumulative += top_freq

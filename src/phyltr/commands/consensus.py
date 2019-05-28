@@ -21,10 +21,10 @@ class Consensus(PhyltrCommand):
         PhyltrCommand.__init__(self, **kw)
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         self.cp.add_tree(t)
 
-    def postprocess(self):
+    def postprocess(self, _):
         self.cp.compute_probabilities()
         # Build consensus tree
         t = self.build_consensus_tree()

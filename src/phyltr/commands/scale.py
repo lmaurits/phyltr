@@ -12,7 +12,7 @@ class Scale(PhyltrCommand):
                 help='The factor to scale by, expressed in floating point notation.')),
     ]
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         for node in t.traverse():
             node.dist *= self.opts.scalefactor
         return t

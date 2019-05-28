@@ -30,10 +30,10 @@ class Clades(PhyltrCommand):
         PhyltrCommand.__init__(self, **kw)
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         self.cp.add_tree(t)
 
-    def postprocess(self):
+    def postprocess(self, _):
         self.cp.compute_probabilities()
         self.cp.save_clade_report("/dev/stdout", self.opts.frequency, self.opts.ages)
         return []

@@ -7,5 +7,5 @@ class Length(PhyltrCommand):
     """
     sink = StringFormatter
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         return sum([n.dist for n in t.traverse()])

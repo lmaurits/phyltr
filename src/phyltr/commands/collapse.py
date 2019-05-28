@@ -39,7 +39,7 @@ class Collapse(PhyltrCommand):
         else:
             raise ValueError("Must provide a dictionary of clades, a filename or an attribute.")
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         if self.trans:
             self.collapse_by_dict(t)
         else:

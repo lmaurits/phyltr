@@ -7,5 +7,5 @@ class Height(PhyltrCommand):
     """
     sink = StringFormatter
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         return t.get_farthest_leaf()[1]

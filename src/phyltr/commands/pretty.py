@@ -20,7 +20,7 @@ class Pretty(PhyltrCommand):
 
     sink = StringFormatter
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         # Change node names to get the desired appearance
         for node in t.traverse():
             # Replace leaf node names with requested attribute

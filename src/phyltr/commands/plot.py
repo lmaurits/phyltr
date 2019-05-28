@@ -87,7 +87,6 @@ class Plot(PhyltrCommand):
 
     def __init__(self, dummy=False, **kw):
         PhyltrCommand.__init__(self, **kw)
-        self.n = 0
         self.dummy = dummy
 
         if not self.dummy:  # pragma: no cover
@@ -97,7 +96,7 @@ class Plot(PhyltrCommand):
             self.ts.show_branch_support = not self.opts.no_support
             self.ts.show_leaf_name = False
 
-    def process_tree(self, t):
+    def process_tree(self, t, n):
         # Add faces
         if self.opts.attribute:
             values = set([getattr(l, self.opts.attribute) for l in t.get_leaves()])
@@ -123,7 +122,7 @@ class Plot(PhyltrCommand):
                 kw["dpi"] = self.opts.dpi
             if self.opts.multiple:
                 base, ext = os.path.splitext(self.opts.output)
-                filename = base + ("_%06d" % (self.n+1)) + ext
+                filename = base + ("_%06d" % (n)) + ext
             else:
                 filename = self.opts.output
             if not self.dummy:
@@ -131,8 +130,6 @@ class Plot(PhyltrCommand):
         else: # pragma: no cover
             if not self.dummy:
                 t.show(ultrametric, tree_style=self.ts)
-
-        self.n += 1
 
         if self.opts.multiple:
             return None

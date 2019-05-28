@@ -7,7 +7,7 @@ class Dedupe(PhyltrCommand):
     Remove duplicate taxa (i.e. taxa with the same name) from each tree in the
     treestream.
     """
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
         dupes = set(n for n in leaf_names if leaf_names.count(n) > 1)
         if not dupes:

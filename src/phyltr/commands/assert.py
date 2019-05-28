@@ -9,9 +9,9 @@ class Assert(PhyltrCommand):
         PhyltrCommand.__init__(self, **kw)
         self.taxonset = None
 
-    def process_tree(self, t):
+    def process_tree(self, t, n):
         leaves = set(l.name for l in t.get_leaves())
-        if self.taxonset is None:
+        if n == 1:
             self.taxonset = leaves
         else:
             assert leaves == self.taxonset, 'Trees have different taxon sets'

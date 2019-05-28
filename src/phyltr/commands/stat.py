@@ -17,7 +17,7 @@ class Stat(PhyltrCommand):
         self.tree_ages = []
         self.firsttree = True
 
-    def process_tree(self, t):
+    def process_tree(self, t, n):
         # Stuff we do to every tree...
         self.tree_count += 1
         leaves = t.get_leaves()
@@ -39,15 +39,14 @@ class Stat(PhyltrCommand):
                 self.topologically_unique_trees.append(t)
         return t
 
-    def postprocess(self):
+    def postprocess(self, tree_count):
         self.topology_count = len(self.topologically_unique_trees)
         self.min_tree_height = min(self.tree_ages)
         self.max_tree_height = max(self.tree_ages)
-        self.mean_tree_height = sum(self.tree_ages) / self.tree_count
+        self.mean_tree_height = sum(self.tree_ages) / tree_count
         return []
 
     def post_print(self):
-
         print("Total taxa: %d" % self.taxa_count)
         print("Total trees: %d" % self.tree_count)
         print("Unique topologies: %d" % self.topology_count)

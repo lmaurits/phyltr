@@ -115,20 +115,22 @@ files:
     # The conceptual heart of phyltr...
 
     def consume(self, stream):
-        for tree in stream:
+        i = 0
+        for i, tree in enumerate(stream, start=1):
             try:
-                res = self.process_tree(tree)
+                res = self.process_tree(tree, i)
                 if res is not None:
                     yield res
             except StopIteration:
                 if hasattr(stream, 'close'):
                     stream.close()
                 break
-        for tree in self.postprocess():
+        for tree in self.postprocess(i):
             yield tree
 
-    def process_tree(self, t):
-        return t    # pragma: no cover
+    def process_tree(self, t, n):
+        # The default tree processing is just passing them through:
+        return t
 
-    def postprocess(self):
+    def postprocess(self, tree_count):
         return []

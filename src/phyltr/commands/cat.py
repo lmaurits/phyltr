@@ -42,6 +42,3 @@ The trees may contain trees formatted as a phyltr treestream or a NEXUS file.
     def init_sink(self, stream):
         return NewickFormatter(
             stream, annotations=not self.opts.no_annotations, topology_only=self.opts.topology_only)
-
-    def process_tree(self, t):
-        return t

@@ -49,7 +49,7 @@ class Prune(PhyltrCommand):
     def init_from_opts(cls, options, files=None):
         return cls(_opts=options, taxa=set(files.pop(0).split(",")) if files else [])
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         if self.taxa:
             # Pruning by a list of taxa
             if self.opts.inverse:

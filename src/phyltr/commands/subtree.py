@@ -45,7 +45,7 @@ class Subtree(PhyltrCommand):
     def init_from_opts(cls, options, files):
         return cls(taxa=set(files.pop(0).split(",")) if files else [], _opts=options)
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         if self.taxa:
             leaves = [l for l in t.get_leaves() if l.name in self.taxa]
             mrca = t.get_common_ancestor(leaves)

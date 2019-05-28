@@ -36,12 +36,12 @@ class Support(PhyltrCommand):
         self.trees = []
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
 
-    def process_tree(self, t):
+    def process_tree(self, t, _):
         self.trees.append(t)
         self.cp.add_tree(t)
         return None
 
-    def postprocess(self):
+    def postprocess(self, _):
         self.cp.compute_probabilities()
 
         # Save clade probabilities
