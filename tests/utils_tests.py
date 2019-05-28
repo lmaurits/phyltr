@@ -1,4 +1,14 @@
+import pytest
+
 from phyltr.utils import misc
+from phyltr.utils import cladeprob
+
+
+def test_parse_float():
+    assert cladeprob.parse_float("""'"1.0"'""") == pytest.approx(1.0)
+
+    with pytest.raises(ValueError):
+        cladeprob.parse_float("'x1.0'")
 
 
 def test_default():

@@ -3,6 +3,15 @@ from __future__ import division
 import collections
 import math
 
+
+def parse_float(value):
+    # Some BEAST classess wrap numeric annotations in quotation marks
+    while (value.startswith('"') and value.endswith('"')) or \
+            (value.startswith("'") and value.endswith("'")):
+        value = value[1:-1]
+    return float(value)
+
+
 class CladeProbabilities:
 
     def __init__(self):
@@ -34,13 +43,8 @@ class CladeProbabilities:
             extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
             # Record annotations for all clades, even leaves
             for f in extra_features:
-                value = getattr(subtree, f)
-                # Some BEAST classess wrap numeric annotations in quotation marks
-                while ((value.startswith('"') and value.endswith('"')) or
-                        (value.startswith("'") and value.endswith("'"))):
-                    value = value[1:-1]
                 try:
-                    self.clade_attributes[f][clade].append(float(value))
+                    self.clade_attributes[f][clade].append(parse_float(getattr(subtree, f)))
                 except ValueError:
                     continue
         # Record leaf heights
