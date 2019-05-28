@@ -67,13 +67,10 @@ class Uniq(PhyltrCommand):
         return None
        
     def postprocess(self):
-        # Order topologies by frequency
-        topologies = [(len(v), k) for k,v in self.topologies.items()]
-        topologies.sort(reverse=True, key=lambda x: x[0])
-        topologies = (t for (n,t) in topologies)
+        # Order topologies by descending frequency
         cumulative = 0.0
-        for n, topology in enumerate(topologies):
-            equ_class = self.topologies[topology]
+        for n, (_, equ_class) in enumerate(
+                sorted(self.topologies.items(), key=lambda x: -len(x[1]))):
             representative = equ_class[0]   # This tree will be annotated and yielded
             # Compute topoogy frequency
             top_freq = 1.0*len(equ_class) / self.N

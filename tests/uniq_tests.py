@@ -16,6 +16,10 @@ def test_uniq(basictrees, tmpdir):
     assert sum((1 for t in uniq)) == 5
     assert tmpdir.join('phyltr_uniq_5.trees').check()
 
+def test_uniq_high_frequency(basictrees):
+    # One topology is represented in two (of 6) trees:
+    assert sum((1 for t in Uniq(frequency=0.25).consume(basictrees))) == 1
+
 def test_min_med_max_uniq(basictrees):
     min_uniq = Uniq(lengths="min").consume(basictrees)
     min_lengths = Length().consume(min_uniq)
