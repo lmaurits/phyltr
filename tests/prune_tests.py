@@ -5,7 +5,6 @@ from phyltr.commands.annotate import Annotate
 
 def test_init_from_args(argfilepath):
     prune = Prune.init_from_args("A,B,C")
-    assert prune.taxa == {"A","B","C"}
     assert prune.opts.filename == None
     assert prune.opts.attribute == None
     assert prune.opts.value == None
@@ -16,13 +15,11 @@ def test_init_from_args(argfilepath):
 
     taxa_abc = argfilepath('taxa_abc.txt')
     prune = Prune.init_from_args("--file {0}".format(taxa_abc))
-    assert prune.taxa == {"A","B","C"}
     assert prune.opts.filename == taxa_abc
     assert prune.opts.attribute == None
     assert prune.opts.value == None
 
     prune = Prune.init_from_args("--attribute foo --value bar")
-    assert prune.taxa == []
     assert prune.opts.filename == None
     assert prune.opts.attribute == "foo"
     assert prune.opts.value == "bar"

@@ -15,7 +15,6 @@ class Stat(PhyltrCommand):
         self.ultrametric = True
         self.topologically_unique_trees = []
         self.tree_ages = []
-        self.firsttree = True
 
     def process_tree(self, t, n):
         # Stuff we do to every tree...
@@ -26,8 +25,7 @@ class Stat(PhyltrCommand):
         if abs(max(leave_ages) - min(leave_ages)) > max(leave_ages)/1000.0:
             self.ultrametric = False
         # Stuff we only do to the first tree...
-        if self.firsttree:
-            self.firsttree = False
+        if n == 1:
             self.taxa_count = len(leaves)
             self.topologically_unique_trees.append(t)
         # Stuff we only do to trees *other* than the first...

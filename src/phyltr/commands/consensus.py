@@ -31,15 +31,13 @@ class Consensus(PhyltrCommand):
         yield t
 
     def build_consensus_tree(self):
-
         # Build a list of all clades in the treestream with frequency above the
         # requested threshold, sorted by frequency.  Do not include the trivial
         # clade of all leaves.
         clades = []
         for clade, p in self.cp.clade_probs.items():
             if p >= self.opts.frequency:
-                clade = clade.split(",")
-                clades.append((p, set(clade)))
+               clades.append((p, set(clade.split(","))))
         clades.sort()
 
         # Pop the clade with highest probability, which *should* be the clade
@@ -66,7 +64,9 @@ class Consensus(PhyltrCommand):
         while clades:
             n, p, clade = clades.pop()
             # Pluck the children from the root which comprise this clade
-            clade_nodes = [node for node in t.get_children() if set((l.name for l in node.get_leaves())).issubset(set(clade))]
+            clade_nodes = [
+                node for node in t.get_children()
+                if set((l.name for l in node.get_leaves())).issubset(set(clade))]
             if len(clade_nodes) == 1:
                 continue
             assert clade_nodes

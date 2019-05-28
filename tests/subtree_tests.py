@@ -12,7 +12,7 @@ def test_init_from_args():
     subtree = Subtree.init_from_args("--attribute foo --values bar")
     assert subtree.opts.attribute == "foo"
     assert subtree.opts.filename == None
-    assert subtree.opts.values == ["bar"]
+    assert subtree.opts.values == "bar"
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):

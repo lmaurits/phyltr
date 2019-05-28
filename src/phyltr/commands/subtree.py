@@ -1,6 +1,6 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import TAXA_FILE_OPTIONS
-from phyltr.utils.misc import read_taxa
+from phyltr.utils.misc import read_taxa, DEFAULT
 
 class Subtree(PhyltrCommand):
     """Usage:
@@ -34,10 +34,11 @@ class Subtree(PhyltrCommand):
         self.by_attribute = False
 
         if taxa or self.opts.filename:
-            self.taxa = read_taxa(taxa=taxa, filename=self.opts.filename, column=self.opts.column)
+            taxa = read_taxa(taxa=taxa, filename=self.opts.filename, column=self.opts.column)
+            self.condition = lambda l: l.name in taxa
         elif self.opts.attribute and self.opts.values:
-            self.taxa = []
-            self.opts.values = self.opts.values.split(",")
+            self.condition = \
+                lambda l: getattr(l, self.opts.attribute, DEFAULT) in self.opts.values.split(",")
         else:
             raise ValueError("Incompatible arguments")
 
@@ -46,12 +47,4 @@ class Subtree(PhyltrCommand):
         return cls(taxa=set(files.pop(0).split(",")) if files else [], _opts=options)
 
     def process_tree(self, t, _):
-        if self.taxa:
-            leaves = [l for l in t.get_leaves() if l.name in self.taxa]
-            mrca = t.get_common_ancestor(leaves)
-            t = mrca
-        else:
-            taxa = [l for l in t.get_leaves() if hasattr(l,self.opts.attribute) and getattr(l,self.opts.attribute) in self.opts.values]
-            mrca = t.get_common_ancestor(taxa)
-            t = mrca
-        return t
+        return t.get_common_ancestor([l for l in t.get_leaves() if self.condition(l)])

@@ -37,5 +37,4 @@ class Sibling(PhyltrCommand):
         # Format string representation of sister node
         if sister.is_leaf():
             return sister.name
-        else:
-            return "(" + ",".join(sorted((sister.get_leaf_names()))) + ")"
+        return "({0})".format(",".join(sorted(sister.get_leaf_names())))

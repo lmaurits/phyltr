@@ -1,3 +1,6 @@
+import operator
+import functools
+
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import TAXA_FILE_OPTIONS
 from phyltr.utils.misc import read_taxa
@@ -39,9 +42,16 @@ class Prune(PhyltrCommand):
         self.by_attribute = False
 
         if taxa or self.opts.filename:
-            self.taxa = read_taxa(taxa=taxa, filename=self.opts.filename, column=self.opts.column)
+            taxa = read_taxa(taxa=taxa, filename=self.opts.filename, column=self.opts.column)
+            if self.opts.inverse:
+                self.prune_condition = lambda l: l.name in taxa
+            else:
+                self.prune_condition = lambda l: l.name not in taxa
         elif self.opts.attribute and self.opts.value:
-            self.taxa = []
+            op = operator.eq if self.opts.inverse else operator.ne
+            self.prune_condition = \
+                lambda l: hasattr(l, self.opts.attribute) and \
+                          op(getattr(l, self.opts.attribute), self.opts.value)
         else:
             raise ValueError("Incompatible arguments")
 
@@ -50,18 +60,5 @@ class Prune(PhyltrCommand):
         return cls(_opts=options, taxa=set(files.pop(0).split(",")) if files else [])
 
     def process_tree(self, t, _):
-        if self.taxa:
-            # Pruning by a list of taxa
-            if self.opts.inverse:
-                pruning_taxa = [l for l in t.get_leaves() if l.name in self.taxa]
-            else:
-                pruning_taxa = [l for l in t.get_leaves() if l.name not in self.taxa]
-        else:
-            # Pruning by an attribute value
-            if self.opts.inverse:
-                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,self.opts.attribute) and getattr(l,self.opts.attribute) == self.opts.value]
-            else:
-                pruning_taxa = [l for l in t.get_leaves() if hasattr(l,self.opts.attribute) and getattr(l,self.opts.attribute) != self.opts.value]
-        # Do the deed
-        t.prune(pruning_taxa, preserve_branch_length=True)
+        t.prune([l for l in t.get_leaves() if self.prune_condition(l)], preserve_branch_length=True)
         return t

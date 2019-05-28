@@ -1,6 +1,13 @@
 import csv
 
 
+class Default(object):
+    def __eq__(self, other):
+        return False
+
+DEFAULT = Default()
+
+
 def dicts_from_csv(fname):
     with open(fname, "r") as fp:
         dialect = csv.Sniffer().sniff(fp.read(1024))

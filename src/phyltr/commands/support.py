@@ -52,13 +52,10 @@ class Support(PhyltrCommand):
         for t in self.trees:
             self.cp.annotate_tree(t)
 
-        # Sort
         if self.opts.sort:
-            trees = [(self.cp.get_tree_prob(t),t) for t in self.trees]
-            trees.sort(key=lambda i: i[0])
-            trees.reverse()
-            self.trees = [t for (p,t) in trees]
-
-        # Output
-        for t in self.trees:
-            yield t
+            for _, t in sorted(
+                    ((self.cp.get_tree_prob(t), t) for t in self.trees), key=lambda i: -i[0]):
+                yield t
+        else:
+            for t in self.trees:
+                yield t

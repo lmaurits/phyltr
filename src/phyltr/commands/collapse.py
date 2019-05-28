@@ -40,11 +40,7 @@ class Collapse(PhyltrCommand):
             raise ValueError("Must provide a dictionary of clades, a filename or an attribute.")
 
     def process_tree(self, t, _):
-        if self.trans:
-            self.collapse_by_dict(t)
-        else:
-            self.collapse_by_attribute(t)
-        return t
+        return self.collapse_by_dict(t) if self.trans else self.collapse_by_attribute(t)
 
     def read_clade_file(self, filename):
 
@@ -72,7 +68,7 @@ class Collapse(PhyltrCommand):
                 # Clade is not monophyletic.  We can't collapse it.
                 sys.stderr.write("Monophyly failure for clade: %s\n" % name)
 #                sys.stderr.write("Interlopers: %s\n" % ",".join([n.name for n in set(mrca_leaves) - set(clade_leaves)]))
-                return 1
+        return t
 
     def collapse_by_attribute(self, t):
         cache = t.get_cached_content()
@@ -89,6 +85,7 @@ class Collapse(PhyltrCommand):
             except MonophylyFailure:
                 # Clade is not monophyletic.  We can't collapse it.
                 sys.stderr.write("Monophyly failure for attribute value: %s=%s\n" % (self.opts.attribute, value))
+        return t
 
     def test_monophyly_and_collapse(self, t, cache, clade, clade_leaves):
         # Check monophyly

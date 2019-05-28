@@ -36,7 +36,6 @@ class Rename(PhyltrCommand):
             self.read_rename_file(self.opts.filename)
         else:
             raise ValueError("Must supply renaming dictionary or filename!")
-        self.first = True
 
     def read_rename_file(self, filename):
 
@@ -53,17 +52,15 @@ class Rename(PhyltrCommand):
             fp.close()
         self.rename = rename
 
-    def process_tree(self, t, _):
+    def process_tree(self, t, n):
         # Rename nodes
         for node in t.traverse():
             node.name = self.rename.get(node.name,
                     "KILL-THIS-NODE" if self.opts.remove else node.name)
 
         keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
-        if self.first:
-            n_leaves = len(t.get_leaves())
-            self.pruning_needed = len(keepers) < n_leaves
-            self.first = False
+        if n == 1:
+            self.pruning_needed = len(keepers) < len(t.get_leaves())
 
         if self.pruning_needed:
             mrca = t.get_common_ancestor(keepers)

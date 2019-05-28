@@ -79,8 +79,7 @@ class Uniq(PhyltrCommand):
                 # Save all pristine trees to file before annotating a representative
                 with open(
                         os.path.join(self.opts.output, "phyltr_uniq_%d.trees" % (n+1)), "w") as fp:
-                    for t in equ_class:
-                        fp.write(t.write()+"\n")
+                    fp.write(''.join([t.write() + "\n" for t in equ_class]))
             # Begin annotating rep
             representative.support = top_freq
             # Compute root height stats
