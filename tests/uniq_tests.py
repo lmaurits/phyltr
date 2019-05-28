@@ -9,11 +9,12 @@ def test_init_from_args():
         uniq = Uniq.init_from_args("--lengths %s" % lengths)
         assert uniq.opts.lengths == lengths
 
-def test_uniq(basictrees):
-    uniq = Uniq().consume(basictrees)
+def test_uniq(basictrees, tmpdir):
+    uniq = Uniq(separate=True, output=str(tmpdir)).consume(basictrees)
     # The 6 basic trees comprise 5 unique topologies.
     # This is a pretty weak test, but...
     assert sum((1 for t in uniq)) == 5
+    assert tmpdir.join('phyltr_uniq_5.trees').check()
 
 def test_min_med_max_uniq(basictrees):
     min_uniq = Uniq(lengths="min").consume(basictrees)

@@ -1,7 +1,7 @@
 import collections
 try:
     import statistics
-except ImportError:
+except ImportError:  # pragma: no cover
     from backports import statistics
 
 TAXA_FILE_OPTIONS = [

@@ -1,3 +1,5 @@
+import os
+
 from six.moves import zip
 
 from phyltr.commands.base import PhyltrCommand
@@ -40,6 +42,11 @@ class Uniq(PhyltrCommand):
                      "phyltr_uniq_1.trees contains all trees having the most frequent topology, "
                      "for example. Existing files will be silently overwritten, users are "
                      "responsible for organising the results of consecutive runs.")),
+        (
+            ('-o', '--output'),
+            dict(
+                default='.',
+                help="If --separate is set, output files are written to this directory")),
     ]
 
     def __init__(self, **kw):
@@ -75,7 +82,8 @@ class Uniq(PhyltrCommand):
             cumulative += top_freq
             if self.opts.separate:
                 # Save all pristine trees to file before annotating a representative
-                with open("phyltr_uniq_%d.trees" % (n+1), "w") as fp:
+                with open(
+                        os.path.join(self.opts.output, "phyltr_uniq_%d.trees" % (n+1)), "w") as fp:
                     for t in equ_class:
                         fp.write(t.write()+"\n")
             # Begin annotating rep
