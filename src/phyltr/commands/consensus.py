@@ -1,47 +1,25 @@
-"""Usage:
-    phyltr consensus [<options>] [<files>]
-
-Produce a majority rules consensus tree for the tree stream.
-
-OPTIONS:
-
-    -f, --frequency
-        Minimum clade frequency to include in the consensus tree (default 0.5)
-
-    -l, --length
-        Specifies the method used to compute branch lengths for the consensus
-        tree.  Must be one of: "max", "mean", "median", or "min".  Default is
-        mean.
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 import ete3
 
 from phyltr.commands.base import PhyltrCommand
-from phyltr.utils.phyltroptparse import OptionParser
 import phyltr.utils.cladeprob
+from phyltr.utils.phyltroptparse import VALID_LENGTHS, length_option
 
 class Consensus(PhyltrCommand):
+    """
+    Produce a majority rules consensus tree for the tree stream.
+    """
+    __options__ = [
+        (
+            ('-f', '--frequency'),
+            dict(
+                type=float, dest="frequency", default=0.5,
+                help="Minimum clade frequency to include in the consensus tree.")),
+        length_option('The method used to compute branch lengths for the consensus tree.'),
+    ]
 
-    parser = OptionParser(__doc__, prog="phyltr consensus")
-    parser.add_option('-f', '--frequency', type="float",dest="frequency", default=0.5, help="Minimum clade support to include in tree.")
-    parser.add_option('-l', '--lengths', action="store", dest="lengths", default="mean")
-
-    def __init__(self, frequency=0.5, lengths="mean"):
-        self.frequency = frequency
-        if lengths in ("max", "mean", "median", "min"):
-            self.lengths = lengths
-        else:
-            raise ValueError("--lengths option must be one of max, mean, median or min!")
+    def __init__(self, **kw):
+        PhyltrCommand.__init__(self, **kw)
         self.cp = phyltr.utils.cladeprob.CladeProbabilities()
-
-    @classmethod 
-    def init_from_opts(cls, options, files=None):
-        return cls(options.frequency, options.lengths)
 
     def process_tree(self, t):
         self.cp.add_tree(t)
@@ -59,7 +37,7 @@ class Consensus(PhyltrCommand):
         # clade of all leaves.
         clades = []
         for clade, p in self.cp.clade_probs.items():
-            if p >= self.frequency:
+            if p >= self.opts.frequency:
                 clade = clade.split(",")
                 clades.append((p, set(clade)))
         clades.sort()
@@ -103,7 +81,7 @@ class Consensus(PhyltrCommand):
         # Check all is right with the world
         for n in t.traverse():
             assert len(n.get_children()) != 1
-            assert n.support >= self.frequency
+            assert n.support >= self.opts.frequency
             if n.is_leaf():
                 assert n.name
 
@@ -121,17 +99,10 @@ class Consensus(PhyltrCommand):
                 clade.add_feature("age_median", median)
                 clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
                 # Choose the canonical age for this clade
-                if self.lengths == "max":
-                    clade_age = max(ages)
-                elif self.lengths == "mean":
-                    clade_age = sum(ages) / len(ages)
-                elif self.lengths == "median":
-                    clade_age = median
-                elif self.lengths == "min":
-                    clade_age = min(ages)
+                clade_age = VALID_LENGTHS[self.opts.lengths](ages)
                 # Set branch lengths accordingly
                 for child in clade.get_children():
-                    irrelevant_leaf, child_height = child.get_farthest_leaf()
+                    _, child_height = child.get_farthest_leaf()
                     child.dist = clade_age - child_height
 
             for f in self.cp.clade_attributes:
@@ -145,9 +116,6 @@ class Consensus(PhyltrCommand):
 
         # Correct leaf heights
         for leaf in cache[t]:
-            heights = self.cp.leaf_heights[leaf.name]
-            heights.sort()
-            lower, median, upper = [heights[int(x*len(heights))] for x in (0.05,0.5,0.95)]
             # Choose the canonical height for this leaf
             # HUOM!  At first glance this code may look "backward" with regard to max and min.
             # But note that maximising/minimising the height of a leaf above the "contemporaneous"
@@ -155,16 +123,13 @@ class Consensus(PhyltrCommand):
             # In order to treat the self.lengths parameter consistently, "max" should mean maximum
             # branch length and therefore *minimum* leaf height (leaf height being the thing we
             # actually keep track of, because it's what people typically calibrate on).
-            if self.lengths == "max":
-                leaf_height = min(heights)
-            elif self.lengths == "mean":
-                leaf_height = sum(heights) / len(heights)
-            elif self.lengths == "median":
-                leaf_height = median
-            elif self.lengths == "min":
-                leaf_height = max(heights)
-            # Change branch length
-            leaf.dist -= leaf_height
+            if self.opts.lengths == 'max':
+                func = min
+            elif self.opts.lengths == 'min':
+                func = max
+            else:
+                func = VALID_LENGTHS[self.opts.lengths]
+            leaf.dist -= func(self.cp.leaf_heights[leaf.name])
             assert leaf.dist >= 0
         # Done!
         return t
@@ -173,11 +138,12 @@ class Consensus(PhyltrCommand):
         # We don't need to worry about this if we only have clades
         # that are supported at 0.5 or above, as these are
         # guaranteed to be consistent
-        if self.frequency >= 0.5:
+        if self.opts.frequency >= 0.5:
             return clades
 
         # First, find the index of the first clade which is potentially
         # problematic
+        n = -1
         for n, (p,c) in enumerate(clades):
             if p < 0.5:
                 break

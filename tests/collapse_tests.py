@@ -6,10 +6,10 @@ from phyltr.commands.collapse import Collapse
 
 def test_init(argfilepath):
     collapse = Collapse.init_from_args("--translate {0}".format(argfilepath('collapse.txt')))
-    assert collapse.filename == argfilepath('collapse.txt')
+    assert collapse.opts.filename == argfilepath('collapse.txt')
 
     collapse = Collapse.init_from_args("--attribute collapsibility")
-    assert collapse.attribute == "collapsibility"
+    assert collapse.opts.attribute == "collapsibility"
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):
@@ -17,7 +17,7 @@ def test_bad_init_no_args():
 
 def test_collapse(basictrees):
     collapsed = Collapse(
-        {"left":("A","B","C"), "right":("D","E","F")}).consume(basictrees)
+        clades={"left":("A","B","C"), "right":("D","E","F")}).consume(basictrees)
     # These groups are monophyletic in the first 5 of the 6 basic trees, so...
     for n, t in enumerate(collapsed):
         assert len(t.get_leaves()) == (2 if n < 5 else 6)
@@ -30,7 +30,7 @@ def test_file_collapse(basictrees, argfilepath):
 
 def test_attribute_collapse(basictrees):
     annotated = Annotate(
-        "tests/argfiles/annotation.csv", "taxon").consume(basictrees)
+        filename="tests/argfiles/annotation.csv", key="taxon").consume(basictrees)
     # f1 in the annotations applied above corresponds to the same left/right
     # split as the other tests above
     collapsed = Collapse(attribute="f1").consume(annotated)

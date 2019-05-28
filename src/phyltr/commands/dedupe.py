@@ -1,26 +1,12 @@
-"""Usage:
-    phyltr dedupe [<options>] [<files>]
-
-Remove duplicate taxa (i.e. taxa with the same name) from each tree in the
-treestream.
-
-OPTIONS:
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 import random
 
 from phyltr.commands.base import PhyltrCommand
-from phyltr.utils.phyltroptparse import OptionParser
 
 class Dedupe(PhyltrCommand):
-
-    parser = OptionParser(__doc__, prog="phyltr dedupe")
-
+    """
+    Remove duplicate taxa (i.e. taxa with the same name) from each tree in the
+    treestream.
+    """
     def process_tree(self, t):
         leaf_names = [l.name for l in t.get_leaves() if l.name]
         dupes = set(n for n in leaf_names if leaf_names.count(n) > 1)

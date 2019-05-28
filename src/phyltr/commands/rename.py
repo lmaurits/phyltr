@@ -1,47 +1,41 @@
-"""Usage:
-    phyltr rename [<options>] [<files>]
-
-Rename the nodes in a treestream.  The mapping from old to new names is read
-from a file.
-
-OPTIONS:
-
-    -f, --file
-        The filename of the translation file.  Each line of the translate
-        file should be of the format:
-            "old:new"
-
-    -r, --remove-missing
-        If there are taxa in the tree which are not in the translation file,
-        remove them (in the manner of subtree, not prune)
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 from phyltr.commands.base import PhyltrCommand
-from phyltr.utils.phyltroptparse import OptionParser
 
 class Rename(PhyltrCommand):
-    
-    parser = OptionParser(__doc__, prog="phyltr rename")
-    parser.add_option('-f', '--file', dest="filename",
-                help='Specifies the translation file.')
-    parser.add_option('-r', '--remove-missing', dest="remove",action="store_true",
-            default=False,
-                help='Remove untranslated taxa.')
+    """
+    Rename the nodes in a treestream.  The mapping from old to new names is read
+    from a file.
+    """
+    __options__ = [
+        (
+            ('-f', '--file'),
+            dict(
+                dest="filename",
+                help='The filename of the translation file.  Each line of the translate file '
+                     'should be of the format: "old:new"')),
+        (
+            ('--from',),
+            dict(
+                dest="from_", help='Column to lookup original taxa names.', default=None)),
+        (
+            ('--to',),
+            dict(
+                dest="to_", help='Column to lookup new taxa names.', default=None)),
+        (
+            ('-r', '--remove-missing'),
+            dict(
+                dest="remove",action="store_true", default=False,
+                help='If there are taxa in the tree which are not in the translation file, remove '
+                     'them (in the manner of subtree, not prune)')),
+    ]
 
-    def __init__(self, rename=None, filename=None, remove=False):
+    def __init__(self, rename=None, **kw):
+        PhyltrCommand.__init__(self, **kw)
         if rename:
             self.rename = rename
-        elif filename:
-            self.read_rename_file(filename)
+        elif self.opts.filename:
+            self.read_rename_file(self.opts.filename)
         else:
             raise ValueError("Must supply renaming dictionary or filename!")
-        self.remove = remove
-
         self.first = True
 
     @classmethod 
@@ -67,7 +61,7 @@ class Rename(PhyltrCommand):
         # Rename nodes
         for node in t.traverse():
             node.name = self.rename.get(node.name,
-                    "KILL-THIS-NODE" if self.remove else node.name)
+                    "KILL-THIS-NODE" if self.opts.remove else node.name)
 
         keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
         if self.first:

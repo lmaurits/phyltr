@@ -1,33 +1,10 @@
 """Phyltr
 
 Usage:
-    phyltr <command> [<args>]
+  phyltr <command> [<args>]
 
 The available phyltr commands are:
-    annotate    Annotate nodes with metadata from .csv file
-    cat         Convert file(s) to tree streams
-    clades      List clade supports
-    collapse    Collapse clades to named taxa
-    consensus   Build majority rules consensus tree
-    dist        Print pairwise distance matrices for each tree in a tree
-                stream
-    deduep      Remove duplicate taxa (by name)
-    grep        Pass only trees containing specified subtrees
-    height      Print the height of each tree in a tree stream
-    length      Print the length of each tree in a tree stream
-    plot        Plot tree using ETE interactive viewer, or to file
-    pretty      Pretty print a tree (ASCII art)
-    prune       Prune specified taxa from a tree
-    rename      Rename specified taxa
-    rf          Print the Robinson-Foulds distance between each tree in a
-                tree stream and a reference tree
-    scale       Scale branch lengths of a set of trees
-    sibling     Print the sibling of a named taxon for each tree in a stream
-    stat        Summary statistics on a set of trees
-    support     Add clade support information to a tree stream
-    subtree     Extract minimal subtrees containing specified taxa
-    taxa        Extract taxa names from a tree
-    uniq        Merge trees with matching topologies
+{0}
 
 All commands can be abbreviated to their first three letters, e.g. running
 "phyltr col" is the same as running "phyltr collapse".
@@ -35,40 +12,35 @@ All commands can be abbreviated to their first three letters, e.g. running
 Command specific help is availble via "phyltr <command> --help".
 """
 
-import importlib
 import os.path
 import shlex
 from signal import signal, SIGPIPE, SIG_DFL
 import sys
-import types
+try:
+    from textwrap import shorten
+except ImportError:  # pragma: no cover
+    # textwrap.shorten is available as of py3.4
+    def shorten(text, width):
+        if len(text) > width:
+            return text[:width - 5] + '[...]'
+        return text
 
 from six import string_types
 
+# import all commands:
+from phyltr.commands import *
+from phyltr.commands.base import PhyltrCommand
 
-_COMMANDS = (
-        "annotate",
-        "cat",
-        "clades",
-        "collapse",
-        "consensus",
-        "dedupe",
-        "dist",
-        "grep",
-        "height",
-        "length",
-        "plot",
-        "pretty",
-        "prune",
-        "rename",
-        "rf",
-        "scale",
-        "sibling",
-        "stat",
-        "support",
-        "subtree",
-        "taxa",
-        "uniq",
-    )
+
+_COMMANDS = {cls.__name__.lower(): cls for cls in PhyltrCommand.__subclasses__()}
+
+def _format_command_overview():
+    max_name = max(len(k) for k in _COMMANDS)
+    res = []
+    for cmd in sorted(_COMMANDS.keys()):
+        res.append('  {0} {1}'.format(
+            cmd.ljust(max_name), shorten(_COMMANDS[cmd].__doc__, 77 - max_name)))
+    return '\n'.join(res)
 
 def _split_string(spec_string):
     spec_string = spec_string.strip()
@@ -82,9 +54,7 @@ def _split_string(spec_string):
 def _get_class(command):
     for match in _COMMANDS:
         if command in (match, match[0:3]):
-            comm = importlib.import_module("phyltr.commands."+match)
-            class_ = getattr(comm, match.title())
-            return class_
+            return _COMMANDS[match]
 
     raise ValueError("Command not recognised")
 
@@ -113,7 +83,7 @@ def run_command(command_string=None):
     except ValueError:
         # If it wasn't a real command, maybe it was a request for help?
         if command in ("--help", "help", "--usage", "usage"):
-            print(__doc__)
+            print(__doc__.format(_format_command_overview()))
             return 0
         # If not, give up and tell the user to seek help 
         else:

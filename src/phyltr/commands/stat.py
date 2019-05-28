@@ -1,29 +1,15 @@
-"""Usage:
-    phyltr stat [<files>]
-
-Print basic properties of a tree stream, such as the number of trees and taxa.
-
-OPTIONS:
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
-from phyltr.utils.phyltroptparse import OptionParser
 from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
-
+    """
+    Print basic properties of a tree stream, such as the number of trees and taxa.
+    """
     sink = NullSink
 
-    parser = OptionParser(__doc__, prog="phyltr stat")
-
-    def __init__(self):
-
+    def __init__(self, **kw):
+        PhyltrCommand.__init__(self, **kw)
         self.tree_count = 0
         self.taxa_count = 0
         self.ultrametric = True

@@ -3,19 +3,19 @@ from phyltr.commands.support import Support
 def test_init_from_args():
 
     clades = Support.init_from_args("")
-    assert clades.frequency == 0.0
-    assert clades.ages == False
-    assert clades.sort == False
-    assert clades.filename == None
+    assert clades.opts.frequency == 0.0
+    assert clades.opts.age == False
+    assert clades.opts.sort == False
+    assert clades.opts.filename == None
     
     clades = Support.init_from_args("-f 0.42")
-    assert clades.frequency == 0.42
+    assert clades.opts.frequency == 0.42
 
     clades = Support.init_from_args("--age")
-    assert clades.ages == True
+    assert clades.opts.age == True
 
     clades = Support.init_from_args("--sort")
-    assert clades.sort == True
+    assert clades.opts.sort == True
 
 def test_clades(basictrees):
     supported = Support(filename="/dev/null").consume(basictrees)

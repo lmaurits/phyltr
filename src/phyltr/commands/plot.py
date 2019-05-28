@@ -1,44 +1,3 @@
-"""Usage:
-    phyltr plot [<options>] [<files>]
-
-Plot each tree in a treestream graphically.
-
-OPTIONS:
-
-    -a, --attribute
-        Specify the name of an attribute to colour leaves by
-
-    -d, --dpi
-        Paper resolution (dots per square inch) to use if saving to a file,
-        with height and/or width specified in non-pixel units
-
-    -H, --height
-        Height of image if saving to a file.  Units set by -u.
-
-    -l, --label
-        Specify the name of an attribute with which to label leaves
-
-    -m, --multiple
-        If specified, each tree in the treestream will be plotted, otherwise
-        only the first will be.
-
-    -o, --output
-        Filename to save plot to.  If not specified, ETE's interactive viewer
-        will be launched.
-
-    -u, --units
-        Units for --height and/or --width settings.  Should be "px" for pixels
-        (the default), "mm" for milimetres or "in" for inches.
-
-    -w, --width
-        Width of image if saving to a file.  Units set by -u.
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 import os.path
 
 try:
@@ -48,9 +7,12 @@ except:  # pragma: no cover
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
-from phyltr.utils.phyltroptparse import OptionParser
 
-colours = ((240,163,255),(0,117,220),(153,63,0),(76,0,92),(25,25,25),(0,92,49),(43,206,72),(255,204,153),(128,128,128),(148,255,181),(143,124,0),(157,204,0),(194,0,136),(0,51,128),(255,164,5),(255,168,187),(66,102,0),(255,0,16),(94,241,242),(0,153,143),(224,255,102),(116,10,255),(153,0,0),(255,255,128),(255,255,0),(255,80,5),(0,255,255))
+colours = (
+    (240,163,255),(0,117,220),(153,63,0),(76,0,92),(25,25,25),(0,92,49),(43,206,72),(255,204,153),
+    (128,128,128),(148,255,181),(143,124,0),(157,204,0),(194,0,136),(0,51,128),(255,164,5),
+    (255,168,187),(66,102,0),(255,0,16),(94,241,242),(0,153,143),(224,255,102),(116,10,255),
+    (153,0,0),(255,255,128),(255,255,0),(255,80,5),(0,255,255))
 colours = ['#%02x%02x%02x' % c for c in colours]
 
 def get_colour_set(n):
@@ -66,76 +28,104 @@ def ultrametric(node): # pragma: no cover
         node.img_style["size"]=0
 
 class Plot(PhyltrCommand):
+    """
+    Plot each tree in a treestream graphically.
+    """
+    __options__ = [
+        (
+            ('-a', '--attribute'),
+            dict(
+                dest="attribute", default=None,
+                help="The name of an attribute to colour leaves by")),
+        (
+            ('-d', '--dpi'),
+            dict(
+                type=int, default=300,
+                help="Paper resolution (dots per square inch) to use if saving to a file, with "
+                     "height and/or width specified in non-pixel units")),
+        (
+            ('-H', '--height'),
+            dict(
+                type=int, dest="height", default=None,
+                help="Height of image if saving to a file. Units set by -u.")),
+        (
+            ('-l', '--label'),
+            dict(
+                default="name",
+                help="Specify the name of an attribute with which to label leaves")),
+        (
+            ('-m', '--multiple'),
+            dict(
+                default=False, action="store_true",
+                help="If specified, each tree in the treestream will be plotted, otherwise only "
+                     "the first will be.")),
+        (
+            ('-s', '--no-support'),
+            dict(
+                default=False, action="store_true",
+                help="Don't show branch support")),
+        (
+            ('-o', '--output'),
+            dict(
+                default=None,
+                help="Filename to save plot to. If not specified, ETE's interactive viewer will "
+                     "be launched.")),
+        (
+            ('-u', '--units'),
+            dict(
+                default="px", choices=['px', 'mm', 'in'],
+                help='Units for --height and/or --width settings. "px" for pixels, '
+                     '"mm" for milimetres or "in" for inches.')),
+        (
+            ('-w', '--width'),
+            dict(
+                type=int, dest="width", default=None,
+                help="Width of image if saving to a file. Units set by -u.")),
+    ]
 
     sink = NullSink
 
-    parser = OptionParser(__doc__, prog="phyltr plot")
-    parser.add_option('-a', '--attribute', dest="attribute", default=None)
-    parser.add_option('-d', '--dpi', type="int", default=300)
-    parser.add_option('-H', '--height', type="int", dest="height", default=None)
-    parser.add_option('-l', '--label', default="name")
-    parser.add_option('-m', '--multiple', default=False, action="store_true")
-    parser.add_option('-s', '--no-support', default=False, action="store_true")
-    parser.add_option('-o', '--output', default=None)
-    parser.add_option('-u', '--units', default="px")
-    parser.add_option('-w', '--width', type="int", dest="width", default=None)
-
-    def __init__(self, label="name", attribute=None, support=True, output=None, multiple=False, width=None, height=None, units="px", dpi=300, dummy=False):
-
-        self.attribute = attribute
-        self.dpi = dpi
-        self.height = height
-        self.label = label
-        self.multiple = multiple
+    def __init__(self, dummy=False, **kw):
+        PhyltrCommand.__init__(self, **kw)
         self.n = 0
-        self.output = output
-        self.support = support
-        self.units = units
-        self.width = width
-
         self.dummy = dummy
 
         if not self.dummy:  # pragma: no cover
             # Setup TreeStyle
             self.ts = TreeStyle()
             self.ts.show_scale = False
-            self.ts.show_branch_support = self.support
+            self.ts.show_branch_support = not self.opts.no_support
             self.ts.show_leaf_name = False
 
-    @classmethod
-    def init_from_opts(cls, options, files):
-        return cls(options.label, options.attribute, not options.no_support, options.output, options.multiple, options.width, options.height, options.units, options.dpi)
-
     def process_tree(self, t):
-
         # Add faces
-        if self.attribute:
-            values = set([getattr(l, self.attribute) for l in t.get_leaves()])
+        if self.opts.attribute:
+            values = set([getattr(l, self.opts.attribute) for l in t.get_leaves()])
             colours = get_colour_set(len(values))
             colour_map = dict(zip(values, colours))
             for l in t.iter_leaves():
-                mycolour = colour_map[getattr(l,self.attribute)]
+                mycolour = colour_map[getattr(l,self.opts.attribute)]
                 if not self.dummy:  # pragma: no cover
                     l.add_face(CircleFace(radius=10,color=mycolour, style="sphere"), 0)
 
         # Apply labels
         if not self.dummy:  # pragma: no cover
             for l in t.iter_leaves():
-                l.add_face(TextFace(getattr(l, self.label)), 1)
+                l.add_face(TextFace(getattr(l, self.opts.label)), 1)
 
         # Plot or save
-        if self.output:
+        if self.opts.output:
             kw = {}
-            if self.height or self.width:
-                kw["h"] = self.height
-                kw["w"] = self.width
-                kw["units"] = self.units
-                kw["dpi"] = self.dpi
-            if self.multiple:
-                base, ext = os.path.splitext(self.output)
+            if self.opts.height or self.opts.width:
+                kw["h"] = self.opts.height
+                kw["w"] = self.opts.width
+                kw["units"] = self.opts.units
+                kw["dpi"] = self.opts.dpi
+            if self.opts.multiple:
+                base, ext = os.path.splitext(self.opts.output)
                 filename = base + ("_%06d" % (self.n+1)) + ext
             else:
-                filename = self.output
+                filename = self.opts.output
             if not self.dummy:
                 t.render(filename, ultrametric, tree_style=self.ts, **kw)
         else: # pragma: no cover
@@ -144,7 +134,7 @@ class Plot(PhyltrCommand):
 
         self.n += 1
 
-        if self.multiple:
+        if self.opts.multiple:
             return None
         else:
             raise StopIteration

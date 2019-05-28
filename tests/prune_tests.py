@@ -5,27 +5,27 @@ from phyltr.commands.annotate import Annotate
 
 def test_init_from_args(argfilepath):
     prune = Prune.init_from_args("A,B,C")
-    assert prune.taxa == set(("A","B","C"))
-    assert prune.filename == None
-    assert prune.attribute == None
-    assert prune.value == None
-    assert prune.inverse == False
+    assert prune.taxa == {"A","B","C"}
+    assert prune.opts.filename == None
+    assert prune.opts.attribute == None
+    assert prune.opts.value == None
+    assert prune.opts.inverse == False
 
     prune = Prune.init_from_args("A,B,C --inverse")
-    assert prune.inverse == True
+    assert prune.opts.inverse == True
 
     taxa_abc = argfilepath('taxa_abc.txt')
     prune = Prune.init_from_args("--file {0}".format(taxa_abc))
-    assert prune.taxa == set(("A","B","C"))
-    assert prune.filename == taxa_abc
-    assert prune.attribute == None
-    assert prune.value == None
+    assert prune.taxa == {"A","B","C"}
+    assert prune.opts.filename == taxa_abc
+    assert prune.opts.attribute == None
+    assert prune.opts.value == None
 
     prune = Prune.init_from_args("--attribute foo --value bar")
     assert prune.taxa == []
-    assert prune.filename == None
-    assert prune.attribute == "foo"
-    assert prune.value == "bar"
+    assert prune.opts.filename == None
+    assert prune.opts.attribute == "foo"
+    assert prune.opts.value == "bar"
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):
@@ -44,14 +44,14 @@ def test_bad_init_empty_file(emptyargs):
         Prune(filename=emptyargs)
 
 def test_prune(basictrees):
-    pruned = Prune(["A"]).consume(basictrees)
+    pruned = Prune(taxa=["A"]).consume(basictrees)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert "A" not in leaves
         assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
 
 def test_inverse_prune(basictrees):
-    pruned = Prune(["A", "B"], inverse=True).consume(basictrees)
+    pruned = Prune(taxa=["A", "B"], inverse=True).consume(basictrees)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert all((x in leaves for x in ("A", "B")))

@@ -5,22 +5,22 @@ from phyltr.commands.scale import Scale
 
 def test_init_from_args():
     scale = Scale.init_from_args("")
-    assert scale.scalefactor == 1.0
+    assert scale.opts.scalefactor == 1.0
 
     scale = Scale.init_from_args("--scale 4.2")
-    assert scale.scalefactor == 4.2
+    assert scale.opts.scalefactor == 4.2
 
 def test_scale(basictrees):
     scale_factor = 0.42
     old_heights = [t.get_farthest_leaf()[1] for t in basictrees]
-    scaled = Scale(scale_factor).consume(basictrees)
+    scaled = Scale(scalefactor=scale_factor).consume(basictrees)
     new_heights = [t.get_farthest_leaf()[1] for t in scaled]
     for old, new in zip(old_heights, new_heights):
         assert new == old * scale_factor
 
 def test_identity(basictrees):
     """Make sure scaling with a factor of 1.0 changes nothing."""
-    unscaled_trees = Scale(1.0).consume(basictrees)
+    unscaled_trees = Scale(scalefactor=1.0).consume(basictrees)
     for t1, t2 in zip(basictrees, unscaled_trees):
         assert t1.write() == t2.write()
 

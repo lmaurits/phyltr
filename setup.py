@@ -20,7 +20,11 @@ setup(
     entry_points = {
         'console_scripts': ['phyltr=phyltr.main:run_command'],
     },
-    install_requires=['six', 'ete3'],
+    install_requires=[
+        'six',
+        'ete3',
+        'backports.statistics; python_version < "3.5"',
+    ],
     extras_require={
         'dev': ['flake8', 'wheel', 'twine'],
         'test': [

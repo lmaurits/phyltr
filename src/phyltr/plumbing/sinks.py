@@ -1,5 +1,4 @@
 import sys
-import types
 
 from six import string_types
 

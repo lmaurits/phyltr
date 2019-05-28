@@ -1,25 +1,30 @@
-from optparse import OptionParser as StdOptionParser
-import sys
+import collections
+try:
+    import statistics
+except ImportError:
+    from backports import statistics
 
-class OptionParser(StdOptionParser):
+TAXA_FILE_OPTIONS = [
+    (
+        ('-f', '--file'), dict(dest="filename", help='Specifies a file from which to read taxa')),
+    (
+        ('--column',),
+        dict(
+            dest="column", default=None,
+            help='Specifies a column in the CSV file from which to read taxa')),
+]
+VALID_LENGTHS = collections.OrderedDict([
+    ("mean", statistics.mean),
+    ("max", max),
+    ("min", min),
+    ("median", statistics.median)])
 
-    def __init__(self, help_msg, *args, **kwargs):
-        self.help_msg = help_msg
-        kwargs["usage"] = help_msg
-        StdOptionParser.__init__(self, *args, **kwargs)
-
-    def format_help(self):  # pragma: no cover
-        return self.help_msg
-
-    def parse_args(self, *args, **kwargs):
-        self.exit_on_error = kwargs.pop("exit_on_error", True)
-        return StdOptionParser.parse_args(self, *args, **kwargs)
-
-    def error(self, msg):
-        # By default, do OptionParser's usual brutal thing
-        if self.exit_on_error:
-            StdOptionParser.error(self, msg) # pragma: no cover
-        # But if told to, raise an exception with a useful message, rather than
-        # killing the entire process.
-        else:
-            raise ValueError(msg)
+def length_option(help):
+    return (
+        ('-l', '--lengths'),
+        dict(
+            action="store",
+            dest="lengths",
+            default=list(VALID_LENGTHS.keys())[0],
+            choices=list(VALID_LENGTHS.keys()),
+            help=help))

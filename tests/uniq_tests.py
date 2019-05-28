@@ -1,18 +1,13 @@
-import pytest
-
 from phyltr.commands.uniq import Uniq
 from phyltr.commands.length import Length
 
 def test_init_from_args():
     uniq = Uniq.init_from_args("")
-    assert uniq.lengths == "mean"
+    assert uniq.opts.lengths == "mean"
 
     for lengths in ("min", "max", "median"):
         uniq = Uniq.init_from_args("--lengths %s" % lengths)
-        assert uniq.lengths == lengths
-
-    with pytest.raises(ValueError):
-        Uniq(lengths='xy')
+        assert uniq.opts.lengths == lengths
 
 def test_uniq(basictrees):
     uniq = Uniq().consume(basictrees)

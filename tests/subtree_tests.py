@@ -5,15 +5,14 @@ from phyltr.commands.subtree import Subtree
 
 def test_init_from_args():
     subtree = Subtree.init_from_args("--file tests/argfiles/taxa_abc.txt")
-    assert subtree.attribute == None
-    assert subtree.filename == "tests/argfiles/taxa_abc.txt"
-    assert subtree.values == None
+    assert subtree.opts.attribute == None
+    assert subtree.opts.filename == "tests/argfiles/taxa_abc.txt"
+    assert subtree.opts.values == None
 
     subtree = Subtree.init_from_args("--attribute foo --values bar")
-    print(subtree.values)
-    assert subtree.attribute == "foo"
-    assert subtree.filename == None
-    assert subtree.values == ["bar"]
+    assert subtree.opts.attribute == "foo"
+    assert subtree.opts.filename == None
+    assert subtree.opts.values == ["bar"]
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):

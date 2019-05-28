@@ -5,17 +5,17 @@ from phyltr.commands.rename import Rename
 
 def test_init(argfilepath):
     rename = Rename.init_from_args("--file {0}".format(argfilepath("rename.txt")))
-    assert rename.remove == False
+    assert rename.opts.remove == False
 
     rename = Rename.init_from_args("--file {0} --remove-missing".format(argfilepath("rename.txt")))
-    assert rename.remove == True
+    assert rename.opts.remove == True
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):
         Rename()
 
 def test_rename(basictrees):
-    renamed = Rename({"A":"X"}).consume(basictrees)
+    renamed = Rename(rename={"A":"X"}).consume(basictrees)
     for t in renamed:
         leaves = t.get_leaf_names()
         assert "A" not in leaves
@@ -31,7 +31,7 @@ def test_rename_from_file(basictrees):
         assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
 
 def test_rename_with_remove(basictrees):
-    renamed = Rename({
+    renamed = Rename(rename={
         "A":"X",
         "B":"Y",
         "C":"Z" }, remove=True).consume(basictrees)

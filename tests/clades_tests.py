@@ -5,14 +5,14 @@ from phyltr.commands.clades import Clades
 
 def test_init_from_args():
     clades = Clades.init_from_args("")
-    assert clades.frequency == 0.0
-    assert clades.ages == False
+    assert clades.opts.frequency == 0.0
+    assert clades.opts.ages == False
 
     clades = Clades.init_from_args("--ages")
-    assert clades.ages == True
+    assert clades.opts.ages == True
 
     clades = Clades.init_from_args("-f 0.42")
-    assert clades.frequency == 0.42
+    assert clades.opts.frequency == 0.42
 
 def test_clades(basictrees):
     clades = Clades(ages=True)
