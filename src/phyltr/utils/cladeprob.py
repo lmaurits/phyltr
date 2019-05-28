@@ -1,5 +1,6 @@
 from __future__ import division
 
+import collections
 import math
 
 class CladeProbabilities:
@@ -8,10 +9,10 @@ class CladeProbabilities:
 
         self.tree_count = 0
         self.clade_counts = {}
-        self.clade_ages = {}
-        self.clade_attributes = {}
-        self.leaf_heights = {}
-        self.caches ={}
+        self.clade_ages = collections.defaultdict(list)
+        self.clade_attributes = collections.defaultdict(lambda: collections.defaultdict(list))
+        self.leaf_heights = collections.defaultdict(list)
+        self.caches = {}
 
     def add_tree(self, tree):
 
@@ -29,11 +30,7 @@ class CladeProbabilities:
             # Record ages of non-leaf clades
             if len(leaves) > 1:
                 self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
-                leaf, age = subtree.get_farthest_leaf()
-                if clade in self.clade_ages:
-                    self.clade_ages[clade].append(age)
-                else:
-                    self.clade_ages[clade] = [age]
+                self.clade_ages[clade].append(subtree.get_farthest_leaf()[1])
             extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
             # Record annotations for all clades, even leaves
             for f in extra_features:
@@ -43,31 +40,21 @@ class CladeProbabilities:
                         (value.startswith("'") and value.endswith("'"))):
                     value = value[1:-1]
                 try:
-                    value = float(value)
-                    if f not in self.clade_attributes:
-                        self.clade_attributes[f] = {}
-                    if clade in self.clade_attributes[f]:
-                        self.clade_attributes[f][clade].append(value)
-                    else:
-                        self.clade_attributes[f][clade] = [value]
+                    self.clade_attributes[f][clade].append(float(value))
                 except ValueError:
                     continue
         # Record leaf heights
         leaf_heights = [(leaf.name, tree.get_distance(leaf)) for leaf in cache[tree]]
         tree_height = max((d for (l,d) in leaf_heights))
         for leaf, leaf_height in leaf_heights:
-            if leaf not in self.leaf_heights:
-                self.leaf_heights[leaf] = []
             self.leaf_heights[leaf].append((tree_height - leaf_height))
 
         self.caches[tree] = cache
 
     def compute_probabilities(self):
-
         """Populate the self.clade_probs dictionary with probability values,
         based on the current clade and tree counts."""
-
-        self.clade_probs = dict((c, self.clade_counts[c] / self.tree_count) for c in self.clade_counts)
+        self.clade_probs = {c: self.clade_counts[c] / self.tree_count for c in self.clade_counts}
 
     def get_tree_prob(self, t):
 
