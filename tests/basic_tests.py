@@ -1,7 +1,7 @@
 import pytest
 
 from phyltr.commands.cat import Cat
-from phyltr.main import run_command
+from phyltr import run_command
 from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
 
 

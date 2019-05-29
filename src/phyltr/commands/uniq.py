@@ -1,7 +1,5 @@
 import os
 
-from six.moves import zip
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.topouniq import are_same_topology
 from phyltr.utils.phyltroptparse import VALID_LENGTHS, length_option

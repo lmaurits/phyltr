@@ -1,6 +1,6 @@
-from phyltr.main import _COMMANDS
+from phyltr import COMMANDS
 
-Assert = _COMMANDS['assert']
+Assert = COMMANDS['assert']
 
 
 def test_assert(basictrees):

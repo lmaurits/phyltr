@@ -1,5 +1,4 @@
 import operator
-import functools
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import TAXA_FILE_OPTIONS

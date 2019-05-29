@@ -16,30 +16,21 @@ import os.path
 import shlex
 from signal import signal, SIGPIPE, SIG_DFL
 import sys
-try:
-    from textwrap import shorten
-except ImportError:  # pragma: no cover
-    # textwrap.shorten is available as of py3.4
-    def shorten(text, width):
-        if len(text) > width:
-            return text[:width - 5] + '[...]'
-        return text
-
-from six import string_types
+from textwrap import shorten
 
 # import all commands:
 from phyltr.commands import *
 from phyltr.commands.base import PhyltrCommand
 
 
-_COMMANDS = {cls.__name__.lower(): cls for cls in PhyltrCommand.__subclasses__()}
+COMMANDS = {cls.__name__.lower(): cls for cls in PhyltrCommand.__subclasses__()}
 
 def _format_command_overview():
-    max_name = max(len(k) for k in _COMMANDS)
+    max_name = max(len(k) for k in COMMANDS)
     res = []
-    for cmd in sorted(_COMMANDS.keys()):
+    for cmd in sorted(COMMANDS.keys()):
         res.append('  {0} {1}'.format(
-            cmd.ljust(max_name), shorten(_COMMANDS[cmd].__doc__, 77 - max_name)))
+            cmd.ljust(max_name), shorten(COMMANDS[cmd].__doc__, 77 - max_name)))
     return '\n'.join(res)
 
 def _split_string(spec_string):
@@ -52,9 +43,9 @@ def _split_string(spec_string):
     return command, args
 
 def _get_class(command):
-    for match in _COMMANDS:
+    for match in COMMANDS:
         if command in (match, match[0:3]):
-            return _COMMANDS[match]
+            return COMMANDS[match]
 
     raise ValueError("Command not recognised")
 
@@ -98,7 +89,7 @@ def build_pipeline(string, source):
     for n, args in enumerate(components):
         command_obj = _get_phyltr_obj(args)
         if n==0:
-            if isinstance(source, string_types) and os.path.exists(source):
+            if isinstance(source, str) and os.path.exists(source):
                 # If source is a filename, feed it to the command's default
                 # Source
                 fp = open(source, "r")
@@ -112,3 +103,6 @@ def build_pipeline(string, source):
     # "the code is the sink"
     return generator
 
+
+if __name__ == '__main__':  # pragma: no cover
+    run_command()

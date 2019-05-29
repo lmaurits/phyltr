@@ -12,18 +12,23 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Intended Audience :: Science/Research',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
     entry_points = {
-        'console_scripts': ['phyltr=phyltr.main:run_command'],
+        'console_scripts': ['phyltr=phyltr.__main__:run_command'],
     },
     install_requires=[
-        'six',
         'ete3',
-        'backports.statistics; python_version < "3.5"',
     ],
     extras_require={
         'dev': ['flake8', 'wheel', 'twine'],

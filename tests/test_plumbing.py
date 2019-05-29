@@ -1,8 +1,8 @@
 import fileinput
+from io import StringIO
 
 import pytest
 from ete3 import Tree
-from six import StringIO
 
 from phyltr.plumbing.sources import ComplexNewickParser, get_tree
 from phyltr.plumbing.sinks import NewickFormatter

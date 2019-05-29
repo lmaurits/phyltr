@@ -1,6 +1,4 @@
-from __future__ import division
-
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.clades import Clades
 
 def test_init_from_args():

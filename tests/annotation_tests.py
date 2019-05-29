@@ -1,7 +1,7 @@
 import csv
 import tempfile
 
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.sinks import NewickFormatter, NullSink
 from phyltr.commands.annotate import Annotate

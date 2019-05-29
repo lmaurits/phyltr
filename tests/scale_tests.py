@@ -1,4 +1,4 @@
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.height import Height
 from phyltr.commands.length import Length
 from phyltr.commands.scale import Scale

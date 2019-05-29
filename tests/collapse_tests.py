@@ -1,6 +1,6 @@
 import pytest
 
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.annotate import Annotate
 from phyltr.commands.collapse import Collapse
 

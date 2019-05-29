@@ -1,10 +1,10 @@
 import pytest
 
-from phyltr import main
+from phyltr import COMMANDS, run_command
 
 
 def test_help(capsys):
-    for cmd in main._COMMANDS:
+    for cmd in COMMANDS:
         with pytest.raises(SystemExit) as e:
-            main.run_command(cmd + ' --help')
+            run_command(cmd + ' --help')
             assert e.status == 0

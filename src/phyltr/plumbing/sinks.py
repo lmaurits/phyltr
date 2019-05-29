@@ -1,7 +1,5 @@
 import sys
 
-from six import string_types
-
 
 class NewickFormatter:
 
@@ -44,7 +42,7 @@ class StringFormatter:
 
     def consume(self, stream):
         for x in stream:
-            if isinstance(x, string_types):
+            if isinstance(x, str):
                 self.out.write(x)
             else:
                 try:
@@ -61,5 +59,3 @@ class ListPerLineFormatter:
     def consume(self, stream):
         for lst in stream:
             self.out.write("\n".join(lst))
-
-

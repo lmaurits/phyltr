@@ -1,4 +1,4 @@
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 
 def test_pipeline(basictrees):
     """Silly long pipeline to stress test build_pipeline."""
