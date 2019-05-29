@@ -9,10 +9,10 @@ def test_init_from_args():
     assert subtree.opts.filename == "tests/argfiles/taxa_abc.txt"
     assert subtree.opts.values == None
 
-    subtree = Subtree.init_from_args("--attribute foo --values bar")
+    subtree = Subtree.init_from_args("--attribute foo --values bar,baz")
     assert subtree.opts.attribute == "foo"
     assert subtree.opts.filename == None
-    assert subtree.opts.values == "bar"
+    assert subtree.opts.values == ["bar", "baz"]
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):

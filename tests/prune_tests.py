@@ -7,7 +7,7 @@ def test_init_from_args(argfilepath):
     prune = Prune.init_from_args("A,B,C")
     assert prune.opts.filename == None
     assert prune.opts.attribute == None
-    assert prune.opts.value == None
+    assert prune.opts.values == None
     assert prune.opts.inverse == False
 
     prune = Prune.init_from_args("A,B,C --inverse")
@@ -17,12 +17,12 @@ def test_init_from_args(argfilepath):
     prune = Prune.init_from_args("--file {0}".format(taxa_abc))
     assert prune.opts.filename == taxa_abc
     assert prune.opts.attribute == None
-    assert prune.opts.value == None
+    assert prune.opts.values == None
 
-    prune = Prune.init_from_args("--attribute foo --value bar")
+    prune = Prune.init_from_args("--attribute foo --values bar")
     assert prune.opts.filename == None
     assert prune.opts.attribute == "foo"
-    assert prune.opts.value == "bar"
+    assert prune.opts.values == ["bar"]
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):
@@ -62,14 +62,14 @@ def test_file_prune(basictrees):
 
 def test_annotation_prune(basictrees, argfilepath):
     annotated = Annotate(filename=argfilepath("annotation.csv"), key="taxon").consume(basictrees)
-    pruned = Prune(attribute="f1", value="0").consume(annotated)
+    pruned = Prune(attribute="f1", values="0").consume(annotated)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert not any((x in leaves for x in ("A", "B", "C")))
 
 def test_inverse_annotation_prune(basictrees):
     annotated = Annotate(filename="tests/argfiles/annotation.csv", key="taxon").consume(basictrees)
-    pruned = Prune(attribute="f1", value="0", inverse=True).consume(annotated)
+    pruned = Prune(attribute="f1", values="0", inverse=True).consume(annotated)
     for t in pruned:
         leaves = t.get_leaf_names()
         assert all((x in leaves for x in ("A", "B", "C")))
