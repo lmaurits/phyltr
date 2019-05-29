@@ -39,19 +39,8 @@ class PhyltrCommand(object):
         :return: ArgumentParser
         """
         cls.__opt_dests = []
-        prog = 'phyltr {0}'.format(cls.__name__.lower())
-        usage = """
-    {0}  [<optional arguments>] [<files>]
-
-{1}
-
-files:
-  A whitespace-separated list of filenames to read treestreams from.
-  Use a filename of "-" to read from stdin.  If no filenames are
-  specified, the treestream will be read from stdin.
-""".format(prog, re.sub('\s+', ' ', cls.__doc__.strip()))
         res = argparse.ArgumentParser(
-            usage=usage,
+            description=cls.__doc__.strip(),
             prog='phyltr {0}'.format(cls.__name__.lower()),
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
@@ -66,14 +55,16 @@ files:
     @classmethod 
     def run_as_script(cls):
         # Parse the arguments.
-        # If there's an error, let optparse kill the process in its usual
+        # If there's an error, let arparse kill the process in its usual
         # fashion, as we should only be in run_as_script if we're genuinely
         # running from an interactive shell.
-        options, files = cls.parser().parse_known_args()
+
+        #options, files = cls.parser().parse_known_args()
+        options = cls.parser().parse_args()
 
         # Attempt to instantiate command object
         try:
-            obj = cls.init_from_opts(options, files)
+            obj = cls.init_from_opts(options, [])
         except ValueError as e:
             # Bad arguments (e.g. incompatible or incomplete)
             sys.stderr.write(str(e))
@@ -81,7 +72,7 @@ files:
 
         obj.pre_print()
 
-        raw_source = fileinput.input(files)
+        raw_source = fileinput.input(getattr(options, 'files', []))
         in_trees = obj.init_source().consume(raw_source)
         out_trees = obj.consume(in_trees)
         obj.init_sink(sys.stdout).consume(out_trees)

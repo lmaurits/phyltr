@@ -9,6 +9,9 @@ The trees may contain trees formatted as a phyltr treestream or a NEXUS file.
     """
     __options__ = [
         (
+            ('files',),
+            dict(metavar='FILE', nargs='+')),
+        (
             ('-b', '--burnin'),
             dict(
                 action="store", dest="burnin", type=int, default=0,
