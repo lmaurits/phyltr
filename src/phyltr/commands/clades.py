@@ -20,7 +20,7 @@ class Clades(PhyltrCommand):
             ('-f', '--frequency'),
             dict(
                 type=float, dest="frequency", default=0.0,
-                help='Minimum clade frequency to include in output (default 0.0, i.e. all clades '
+                help='Minimum clade frequency to include in output (by default all clades '
                      'are included)')),
     ]
 

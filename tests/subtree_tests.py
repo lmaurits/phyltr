@@ -31,14 +31,14 @@ def test_bad_init_empty_file(emptyargs):
         Subtree(filename=emptyargs)
 
 def test_subtree(basictrees):
-    subtree = Subtree.init_from_args("A,B,C")
+    subtree = Subtree.init_from_args("A B C")
     subtrees = subtree.consume(basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
 def test_subtree_2(basictrees):
-    subtree = Subtree.init_from_args("A,B,F")
+    subtree = Subtree.init_from_args("A B F")
     subtrees = subtree.consume(basictrees)
     expected_taxa = (6, 6, 6, 6, 6, 3)
     for t, n in zip(subtrees, expected_taxa):

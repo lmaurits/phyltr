@@ -11,23 +11,22 @@ from phyltr.plumbing.sources import NewickParser, ComplexNewickParser
         ('', None),
         ('--help', None),
         ('kill_all_humans', None),
-        ('cat', 'basic.trees'),
         ('stat', 'basic.trees'),
+        ('cat', 'basic.trees'),
         ('pretty', 'basic.trees'),
         ('height', 'basic.trees'),
         ('taxa', 'basic.trees'),
         ('prune', None),
-        ('sibling', None),
     ]
 )
 def test_command(cmd, fname, treefilepath):
-    if fname:
-        cmd += ' {0}'.format(treefilepath(fname))
-    run_command(cmd)
+    run_command(cmd, files=[treefilepath(fname)] if fname else None)
 
 
 def test_command_bad_args():
-    if 1:#with pytest.raises(ValueError):
+    with pytest.raises(SystemExit):
+        run_command('sibling')
+    with pytest.raises(SystemExit):
         _ = Cat.init_from_args("cat --foobar")
 
 def test_parsing(treefile):

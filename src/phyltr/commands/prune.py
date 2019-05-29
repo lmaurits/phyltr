@@ -5,17 +5,15 @@ from phyltr.utils.phyltroptparse import TAXA_FILE_OPTIONS
 from phyltr.utils.misc import read_taxa
 
 class Prune(PhyltrCommand):
-    """Usage:
-        phyltr prune [taxa] [<options>] [<files>]
-
+    """
     Delete a specified set of nodes from the tree.
-
-    OPTIONS:
-
-        taxa
-            A comma-separated list of leaf taxa to delete from the tree
     """
     __options__ = TAXA_FILE_OPTIONS + [
+        (
+            ('taxa',),
+            dict(
+                metavar='TAXA', nargs='*',
+                help="Leaf taxa to delete from the tree",)),
         (
             ('-a', '--attribute'),
             dict(
@@ -36,16 +34,19 @@ class Prune(PhyltrCommand):
                      "taxa to prune.")),
     ]
 
-    def __init__(self, taxa=None, **kw):
+    def __init__(self, **kw):
         PhyltrCommand.__init__(self, **kw)
-        self.by_attribute = False
 
-        if taxa or self.opts.filename:
-            taxa = read_taxa(taxa=taxa, filename=self.opts.filename, column=self.opts.column)
+        if self.opts.taxa:
+            pass
+        elif self.opts.filename:
+            self.opts.taxa = read_taxa(self.opts.filename, column=self.opts.column)
+
+        if self.opts.taxa:
             if self.opts.inverse:
-                self.prune_condition = lambda l: l.name in taxa
+                self.prune_condition = lambda l: l.name in self.opts.taxa
             else:
-                self.prune_condition = lambda l: l.name not in taxa
+                self.prune_condition = lambda l: l.name not in self.opts.taxa
         elif self.opts.attribute and self.opts.value:
             op = operator.eq if self.opts.inverse else operator.ne
             self.prune_condition = \
@@ -53,10 +54,6 @@ class Prune(PhyltrCommand):
                           op(getattr(l, self.opts.attribute), self.opts.value)
         else:
             raise ValueError("Incompatible arguments")
-
-    @classmethod 
-    def init_from_opts(cls, options, files=None):
-        return cls(_opts=options, taxa=set(files.pop(0).split(",")) if files else [])
 
     def process_tree(self, t, _):
         t.prune([l for l in t.get_leaves() if self.prune_condition(l)], preserve_branch_length=True)

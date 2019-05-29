@@ -54,7 +54,7 @@ def _get_phyltr_obj(spec_string):
     class_ = _get_class(command)
     return class_.init_from_args(args)
 
-def run_command(command_string=None):
+def run_command(command_string=None, files=None):
     signal(SIGPIPE,SIG_DFL) 
 
     # If fed a command string, simulate having got it from the shell
@@ -82,7 +82,7 @@ def run_command(command_string=None):
             return 0
 
     # If we've gotten this far, we're running a real command, so let's do it!
-    return class_.run_as_script()
+    return class_.run_as_script(files=files)
 
 def build_pipeline(string, source):
     components = string.split("|")
