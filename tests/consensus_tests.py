@@ -3,10 +3,10 @@ from phyltr.commands.length import Length
 
 def test_init_from_args():
     consensus = Consensus.init_from_args("")
-    assert consensus.frequency == 0.5
+    assert consensus.opts.frequency == 0.5
 
     consensus = Consensus.init_from_args("-f 0.42")
-    assert consensus.frequency == 0.42
+    assert consensus.opts.frequency == 0.42
 
 def test_consensus(basictrees):
     consensus = list(Consensus().consume(basictrees))
@@ -34,5 +34,8 @@ def test_min_med_max_consensus(basictrees):
     max_uniq = Consensus(lengths="max").consume(trees)
     max_lengths = Length().consume(max_uniq)
 
-    for l, m, L in zip(min_lengths, med_lengths, max_lengths):
+    res = list(zip(min_lengths, med_lengths, max_lengths))
+    print(res)
+
+    for l, m, L in res:
         assert l <= m <= L

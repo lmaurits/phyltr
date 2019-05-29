@@ -1,37 +1,22 @@
-"""Usage:
-    phyltr stat [<files>]
-
-Print basic properties of a tree stream, such as the number of trees and taxa.
-
-OPTIONS:
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
-from phyltr.utils.phyltroptparse import OptionParser
 from phyltr.utils.topouniq import are_same_topology
 
 class Stat(PhyltrCommand):
-
+    """
+    Print basic properties of a tree stream, such as the number of trees and taxa.
+    """
     sink = NullSink
 
-    parser = OptionParser(__doc__, prog="phyltr stat")
-
-    def __init__(self):
-
+    def __init__(self, **kw):
+        PhyltrCommand.__init__(self, **kw)
         self.tree_count = 0
         self.taxa_count = 0
         self.ultrametric = True
         self.topologically_unique_trees = []
         self.tree_ages = []
-        self.firsttree = True
 
-    def process_tree(self, t):
+    def process_tree(self, t, n):
         # Stuff we do to every tree...
         self.tree_count += 1
         leaves = t.get_leaves()
@@ -40,8 +25,7 @@ class Stat(PhyltrCommand):
         if abs(max(leave_ages) - min(leave_ages)) > max(leave_ages)/1000.0:
             self.ultrametric = False
         # Stuff we only do to the first tree...
-        if self.firsttree:
-            self.firsttree = False
+        if n == 1:
             self.taxa_count = len(leaves)
             self.topologically_unique_trees.append(t)
         # Stuff we only do to trees *other* than the first...
@@ -53,15 +37,14 @@ class Stat(PhyltrCommand):
                 self.topologically_unique_trees.append(t)
         return t
 
-    def postprocess(self):
+    def postprocess(self, tree_count):
         self.topology_count = len(self.topologically_unique_trees)
         self.min_tree_height = min(self.tree_ages)
         self.max_tree_height = max(self.tree_ages)
-        self.mean_tree_height = sum(self.tree_ages) / self.tree_count
+        self.mean_tree_height = sum(self.tree_ages) / tree_count
         return []
 
     def post_print(self):
-
         print("Total taxa: %d" % self.taxa_count)
         print("Total trees: %d" % self.tree_count)
         print("Unique topologies: %d" % self.topology_count)

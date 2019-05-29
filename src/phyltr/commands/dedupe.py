@@ -1,41 +1,27 @@
-"""Usage:
-    phyltr dedupe [<options>] [<files>]
-
-Remove duplicate taxa (i.e. taxa with the same name) from each tree in the
-treestream.
-
-OPTIONS:
-
-    files
-        A whitespace-separated list of filenames to read treestreams from.
-        Use a filename of "-" to read from stdin.  If no filenames are
-        specified, the treestream will be read from stdin.
-"""
-
 import random
+import collections
 
 from phyltr.commands.base import PhyltrCommand
-from phyltr.utils.phyltroptparse import OptionParser
 
 class Dedupe(PhyltrCommand):
-
-    parser = OptionParser(__doc__, prog="phyltr dedupe")
-
-    def process_tree(self, t):
-        leaf_names = [l.name for l in t.get_leaves() if l.name]
-        dupes = set(n for n in leaf_names if leaf_names.count(n) > 1)
-        if not dupes:
-            return t
+    """
+    Remove duplicate taxa (i.e. taxa with the same name) from each tree in the
+    treestream.
+    """
+    def process_tree(self, t, _):
+        leaf_names = collections.Counter([l.name for l in t.get_leaves() if l.name])
         # Remove dupes one at a time
         victims = []
-        for dupe in dupes:
-            dupe_taxa = t.get_leaves_by_name(dupe)
+        for leaf_name, count in leaf_names.most_common():
+            if count == 1:  # leaf name only occurs once.
+                break
+            dupe_taxa = t.get_leaves_by_name(leaf_name)
             assert all([d.is_leaf() for d in dupe_taxa])
             # First try to collapse monophyletic dupes
-            is_mono, junk, trash = t.check_monophyly([dupe],"name")
+            is_mono, junk, trash = t.check_monophyly([leaf_name],"name")
             if is_mono:
                 mrca = t.get_common_ancestor(dupe_taxa)
-                mrca.name = dupe
+                mrca.name = leaf_name
                 for child in mrca.get_children():
                     child.detach()
             # If the dupe is non-monophyletic, kill at random

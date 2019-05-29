@@ -1,6 +1,6 @@
 import pytest
 
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.sibling import Sibling
 
 def test_init_from_args():

@@ -1,20 +1,67 @@
 import fileinput
 import shlex
 import sys
+import argparse
+import re
 
 from phyltr.plumbing.sources import NewickParser
 from phyltr.plumbing.sinks import NewickFormatter
-from phyltr.utils.phyltroptparse import OptionParser
+
 
 class PhyltrCommand(object):
 
-    parser = OptionParser("Halp!")
     source = NewickParser
     sink = NewickFormatter
+    __options__ = []  # Derived classes should add parser arguments here.
+    __opt_dests = []  # When initializing an ArgumentParser, we store the argument dests here.
+
+    def __init__(self, _opts=None, **kw):
+        """
+        Command options can be initialized in two ways:
+
+        1. By passing an `argparse.Namespace` object as `_opts`.
+        2. By passing values for individual options a keyword arguments.
+        """
+        if _opts:
+            self.opts = _opts
+        else:
+            # We initialize the options with the default values of the ArgumentParser:
+            p = self.parser()
+            defaults = {d: p.get_default(d) for d in self.__opt_dests}
+            defaults.update(kw)
+            self.opts = argparse.Namespace(**defaults)
+
+    @classmethod
+    def parser(cls):
+        """
+        Assembles a pre-subcommand ArgumentParser, with the command-specific options added.
+
+        :return: ArgumentParser
+        """
+        cls.__opt_dests = []
+        prog = 'phyltr {0}'.format(cls.__name__.lower())
+        usage = """
+    {0}  [<optional arguments>] [<files>]
+
+{1}
+
+files:
+  A whitespace-separated list of filenames to read treestreams from.
+  Use a filename of "-" to read from stdin.  If no filenames are
+  specified, the treestream will be read from stdin.
+""".format(prog, re.sub('\s+', ' ', cls.__doc__.strip()))
+        res = argparse.ArgumentParser(
+            usage=usage,
+            prog='phyltr {0}'.format(cls.__name__.lower()),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
+        for args, kw in cls.__options__:
+            cls.__opt_dests.append(res.add_argument(*args, **kw).dest)
+        return res
 
     @classmethod 
     def init_from_opts(cls, options, files):
-        return cls()
+        return cls(_opts=options)
 
     @classmethod 
     def run_as_script(cls):
@@ -22,7 +69,7 @@ class PhyltrCommand(object):
         # If there's an error, let optparse kill the process in its usual
         # fashion, as we should only be in run_as_script if we're genuinely
         # running from an interactive shell.
-        options, files = cls.parser.parse_args(exit_on_error=True)
+        options, files = cls.parser().parse_known_args()
 
         # Attempt to instantiate command object
         try:
@@ -51,9 +98,7 @@ class PhyltrCommand(object):
         # If there is an error, do not kill the process!  Rather, raise a
         # ValueError with some helpful message and let it bubble up to the
         # caller.
-        options, files = cls.parser.parse_args(args, exit_on_error=False)
-        obj = cls.init_from_opts(options, files)
-        return obj
+        return cls.init_from_opts(*cls.parser().parse_known_args(args))
 
     def init_source(cls):
         return cls.source()
@@ -70,20 +115,22 @@ class PhyltrCommand(object):
     # The conceptual heart of phyltr...
 
     def consume(self, stream):
-        for tree in stream:
+        i = 0
+        for i, tree in enumerate(stream, start=1):
             try:
-                res = self.process_tree(tree)
+                res = self.process_tree(tree, i)
                 if res is not None:
                     yield res
             except StopIteration:
                 if hasattr(stream, 'close'):
                     stream.close()
                 break
-        for tree in self.postprocess():
+        for tree in self.postprocess(i):
             yield tree
 
-    def process_tree(self, t):
-        return t    # pragma: no cover
+    def process_tree(self, t, n):
+        # The default tree processing is just passing them through:
+        return t
 
-    def postprocess(self):
+    def postprocess(self, tree_count):
         return []

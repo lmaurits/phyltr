@@ -1,7 +1,4 @@
 import sys
-import types
-
-from six import string_types
 
 
 class NewickFormatter:
@@ -24,7 +21,7 @@ class NewickFormatter:
             if self.topology_only:
                 self.out.write(t.write(format=9))
             elif self.annotations:
-                self.out.write(t.write(features=feature_names,format_root_node=True))
+                self.out.write(t.write(features=feature_names, format_root_node=True))
             else:
                 self.out.write(t.write())
             self.out.write("\n")
@@ -45,7 +42,7 @@ class StringFormatter:
 
     def consume(self, stream):
         for x in stream:
-            if isinstance(x, string_types):
+            if isinstance(x, str):
                 self.out.write(x)
             else:
                 try:
@@ -62,5 +59,3 @@ class ListPerLineFormatter:
     def consume(self, stream):
         for lst in stream:
             self.out.write("\n".join(lst))
-
-

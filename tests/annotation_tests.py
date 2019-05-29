@@ -1,7 +1,7 @@
 import csv
 import tempfile
 
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.plumbing.sources import ComplexNewickParser, NewickParser
 from phyltr.plumbing.sinks import NewickFormatter, NullSink
 from phyltr.commands.annotate import Annotate
@@ -9,32 +9,32 @@ from phyltr.commands.annotate import Annotate
 def test_init(argfilepath):
     annotate = Annotate.init_from_args("-f {0} -k taxon".format(argfilepath('annotation.csv')))
     # Test defaults
-    assert annotate.extract == False
-    assert annotate.multiple == False
+    assert annotate.opts.extract == False
+    assert annotate.opts.multiple == False
     # Test file was parsed
     assert annotate.annotations
 
     # Test extract flag
     annotate = Annotate.init_from_args("--extract -f my_output_file.csv")
-    assert annotate.extract == True
-    assert annotate.multiple == False
+    assert annotate.opts.extract == True
+    assert annotate.opts.multiple == False
     assert annotate.sink == NewickFormatter
 
     # Test that extracting to stdin disables tree output
     annotate = Annotate.init_from_args("--extract")
-    assert annotate.extract == True
-    assert annotate.multiple == False
+    assert annotate.opts.extract == True
+    assert annotate.opts.multiple == False
     assert annotate.sink == NullSink
 
     # Test multiple flag
     annotate = Annotate.init_from_args("--extract --multiple")
-    assert annotate.extract == True
-    assert annotate.multiple == True
+    assert annotate.opts.extract == True
+    assert annotate.opts.multiple == True
 
 
 def test_annotate(treefile, argfilepath):
     trees = NewickParser().consume(treefile('basic.trees'))
-    annotated = Annotate(argfilepath("annotation.csv"), "taxon").consume(trees)
+    annotated = Annotate(filename=argfilepath("annotation.csv"), key="taxon").consume(trees)
     for t in annotated:
         t.write(features=[])
         for l in t.get_leaves():

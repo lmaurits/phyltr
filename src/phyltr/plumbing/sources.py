@@ -27,6 +27,8 @@ class ComplexNewickParser(object):
         self.n = 0
         if self.burnin:
             self.fp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
+        self.with_annotations = None
+        self.newick_format = None
 
     def consume(self, stream):
         _first = True
@@ -57,6 +59,8 @@ class ComplexNewickParser(object):
                 if self.burnin and self.n > 0:
                     for t in self.yield_from_tempfile():
                         yield t
+                self.with_annotations = None
+                self.newick_format = None
 
             # Skip blank lines
             if not line.strip():
@@ -78,7 +82,10 @@ class ComplexNewickParser(object):
                     self.fp.write(tree_string+"\n")
                 elif self.n % self.subsample == 0:
                     # Yield now
-                    t = get_tree(tree_string)
+                    t, self.with_annotations, self.newick_format = get_tree(
+                        tree_string,
+                        with_annotations=self.with_annotations,
+                        newick_format=self.newick_format)
                     if not t:
                         continue
                     self.nexify_tree(t)
@@ -158,7 +165,6 @@ class ComplexNewickParser(object):
                 )
 
     def yield_from_tempfile(self):
-
         trees_to_skip = int(round((self.burnin/100.0)*self.n))
         self.fp.seek(0)
         n = 0
@@ -167,7 +173,10 @@ class ComplexNewickParser(object):
                 n += 1
                 continue
             if (n-trees_to_skip) % self.subsample == 0:
-                t = get_tree(tree_string)
+                t, self.with_annotations, self.newick_format = get_tree(
+                    tree_string,
+                    with_annotations=self.with_annotations,
+                    newick_format=self.newick_format)
                 if not t:       # What situation is this guarding against?
                     continue    # Does this muck up subsampling accuracy?
                 self.nexify_tree(t)
@@ -219,30 +228,34 @@ ANNOTATION_FORMATS = [
 ]
 
 
-def get_tree(tree_string):
+def get_tree(tree_string, with_annotations=None, newick_format=None):
     # FIXME
     # Make this much more elegant
     # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
 
-    # Do we need regex magic?
-    if '&&NHX' not in tree_string:
+    if with_annotations is None:
+        # Do we need regex magic?
+        with_annotations = '&&NHX' in tree_string
+
+    if not with_annotations:
         for regex, repl in ANNOTATION_FORMATS:
             if regex.search(tree_string):
                 tree_string = regex.sub(repl, tree_string)
 
-    # Try to parse tree as is
-    try:
-        t = ete3.Tree(tree_string)
-        return t
-    except (ValueError,ete3.parser.newick.NewickError):
-        pass
+    if newick_format is not None:  # A newick format is known from previous trees.
+        try:
+            return ete3.Tree(tree_string, format=newick_format), with_annotations, newick_format
+        except (ValueError, ete3.parser.newick.NewickError):
+            pass
 
-    # Try to parse tree with internal node labels
-    try:
-        return ete3.Tree(tree_string, format=1)
-    except (ValueError,ete3.parser.newick.NewickError):
-        # That didn't fix it.  Give up
-        return None
+    for newick_format in [0, 1]:
+        try:
+            return ete3.Tree(tree_string, format=newick_format), with_annotations, newick_format
+        except (ValueError, ete3.parser.newick.NewickError):
+            pass
+
+    return None, None, None
+
 
 class NewickParser(object):
 

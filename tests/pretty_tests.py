@@ -1,16 +1,16 @@
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.pretty import Pretty
 
 def test_init_from_args():
     pretty = Pretty.init_from_args("")
-    assert pretty.compress == False
-    assert pretty.label == "name"
+    assert pretty.opts.compress == False
+    assert pretty.opts.label == "name"
 
     pretty = Pretty.init_from_args("--compress")
-    assert pretty.compress == True
+    assert pretty.opts.compress == True
 
     pretty = Pretty.init_from_args("--label foo")
-    assert pretty.label == "foo"
+    assert pretty.opts.label == "foo"
 
 def test_pretty(basictrees):
     for x in Pretty().consume(basictrees):

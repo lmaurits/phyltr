@@ -1,24 +1,24 @@
-import pytest
-
 from phyltr.commands.uniq import Uniq
 from phyltr.commands.length import Length
 
 def test_init_from_args():
     uniq = Uniq.init_from_args("")
-    assert uniq.lengths == "mean"
+    assert uniq.opts.lengths == "mean"
 
     for lengths in ("min", "max", "median"):
         uniq = Uniq.init_from_args("--lengths %s" % lengths)
-        assert uniq.lengths == lengths
+        assert uniq.opts.lengths == lengths
 
-    with pytest.raises(ValueError):
-        Uniq(lengths='xy')
-
-def test_uniq(basictrees):
-    uniq = Uniq().consume(basictrees)
+def test_uniq(basictrees, tmpdir):
+    uniq = Uniq(separate=True, output=str(tmpdir)).consume(basictrees)
     # The 6 basic trees comprise 5 unique topologies.
     # This is a pretty weak test, but...
     assert sum((1 for t in uniq)) == 5
+    assert tmpdir.join('phyltr_uniq_5.trees').check()
+
+def test_uniq_high_frequency(basictrees):
+    # One topology is represented in two (of 6) trees:
+    assert sum((1 for t in Uniq(frequency=0.25).consume(basictrees))) == 1
 
 def test_min_med_max_uniq(basictrees):
     min_uniq = Uniq(lengths="min").consume(basictrees)
