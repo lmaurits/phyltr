@@ -19,11 +19,11 @@ import sys
 from textwrap import shorten
 
 # import all commands:
-from phyltr.commands import *
+from phyltr.commands import *  # noqa: F401, F403
 from phyltr.commands.base import PhyltrCommand
 
-
 COMMANDS = {cls.__name__.lower(): cls for cls in PhyltrCommand.__subclasses__()}
+
 
 def _format_command_overview():
     max_name = max(len(k) for k in COMMANDS)
@@ -32,6 +32,7 @@ def _format_command_overview():
         res.append('  {0} {1}'.format(
             cmd.ljust(max_name), shorten(COMMANDS[cmd].__doc__, 77 - max_name)))
     return '\n'.join(res)
+
 
 def _split_string(spec_string):
     spec_string = spec_string.strip()
@@ -42,6 +43,7 @@ def _split_string(spec_string):
         command, args = bits
     return command, args
 
+
 def _get_class(command):
     for match in COMMANDS:
         if command in (match, match[0:3]):
@@ -49,13 +51,15 @@ def _get_class(command):
 
     raise ValueError("Command not recognised")
 
+
 def _get_phyltr_obj(spec_string):
     command, args = _split_string(spec_string)
     class_ = _get_class(command)
     return class_.init_from_args(args)
 
+
 def run_command(command_string=None, files=None):
-    signal(SIGPIPE,SIG_DFL) 
+    signal(SIGPIPE, SIG_DFL)
 
     # If fed a command string, simulate having got it from the shell
     if command_string is not None:
@@ -76,19 +80,21 @@ def run_command(command_string=None, files=None):
         if command in ("--help", "help", "--usage", "usage"):
             print(__doc__.format(_format_command_overview()))
             return 0
-        # If not, give up and tell the user to seek help 
+        # If not, give up and tell the user to seek help
         else:
-            sys.stderr.write("phyltr: '%s' is not a phyltr command.  See 'phyltr --help'.\n" % command)
+            sys.stderr.write(
+                "phyltr: '%s' is not a phyltr command.  See 'phyltr --help'.\n" % command)
             return 0
 
     # If we've gotten this far, we're running a real command, so let's do it!
     return class_.run_as_script(files=files)
 
+
 def build_pipeline(string, source):
     components = string.split("|")
     for n, args in enumerate(components):
         command_obj = _get_phyltr_obj(args)
-        if n==0:
+        if n == 0:
             if isinstance(source, str) and os.path.exists(source):
                 # If source is a filename, feed it to the command's default
                 # Source

@@ -3,6 +3,8 @@ import os
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.topouniq import are_same_topology
 from phyltr.utils.phyltroptparse import VALID_LENGTHS, length_option
+from phyltr.utils.cladeprob import add_mean_median_hpd
+
 
 class Uniq(PhyltrCommand):
     """
@@ -61,7 +63,7 @@ class Uniq(PhyltrCommand):
         else:
             self.topologies[t] = [t]
         return None
-       
+
     def postprocess(self, tree_count):
         # Order topologies by descending frequency
         cumulative = 0.0
@@ -69,23 +71,26 @@ class Uniq(PhyltrCommand):
                 sorted(self.topologies.items(), key=lambda x: -len(x[1]))):
             representative = equ_class[0]   # This tree will be annotated and yielded
             # Compute topoogy frequency
-            top_freq = 1.0*len(equ_class) / tree_count
+            top_freq = 1.0 * len(equ_class) / tree_count
             if top_freq < self.opts.frequency:
                 continue
             cumulative += top_freq
             if self.opts.separate:
                 # Save all pristine trees to file before annotating a representative
-                with open(
-                        os.path.join(self.opts.output, "phyltr_uniq_%d.trees" % (n+1)), "w") as fp:
+                with open(os.path.join(
+                        self.opts.output, "phyltr_uniq_%d.trees" % (n + 1)), "w") as fp:
                     fp.write(''.join([t.write() + "\n" for t in equ_class]))
             # Begin annotating rep
             representative.support = top_freq
             # Compute root height stats
-            heights = sorted([t.get_farthest_leaf()[1] for t in equ_class])
-            lower, median, upper = [heights[int(x*len(heights))] for x in (0.025, 0.5, 0.975)]
-            representative.add_feature("age_mean", "%.2f" % (sum(heights)/len(heights)))
-            representative.add_feature("age_median", "%.2f" % median)
-            representative.add_feature("age_95_HPD", "{%.2f-%.2f}" % (lower, upper))
+            add_mean_median_hpd(
+                representative,
+                [t.get_farthest_leaf()[1] for t in equ_class],
+                (0.025, 0.975),
+                prefix='age_',
+                hpd_prefix='age_95_',
+                precision=2)
+
             # Set branch distances
             for nodes in zip(*[t.traverse() for t in equ_class]):
                 nodes[0].dist = VALID_LENGTHS[self.opts.lengths]([n.dist for n in nodes])

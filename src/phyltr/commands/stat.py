@@ -2,6 +2,7 @@ from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
 from phyltr.utils.topouniq import are_same_topology
 
+
 class Stat(PhyltrCommand):
     """
     Print basic properties of a tree stream, such as the number of trees and taxa.
@@ -22,7 +23,7 @@ class Stat(PhyltrCommand):
         leaves = t.get_leaves()
         leave_ages = [t.get_distance(l) for l in leaves]
         self.tree_ages.append(t.get_farthest_leaf()[1])
-        if abs(max(leave_ages) - min(leave_ages)) > max(leave_ages)/1000.0:
+        if abs(max(leave_ages) - min(leave_ages)) > max(leave_ages) / 1000.0:
             self.ultrametric = False
         # Stuff we only do to the first tree...
         if n == 1:

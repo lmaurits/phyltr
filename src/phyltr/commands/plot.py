@@ -2,30 +2,34 @@ import os.path
 
 try:
     from ete3 import TreeStyle, TextFace, CircleFace
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import NullSink
 
 colours = (
-    (240,163,255),(0,117,220),(153,63,0),(76,0,92),(25,25,25),(0,92,49),(43,206,72),(255,204,153),
-    (128,128,128),(148,255,181),(143,124,0),(157,204,0),(194,0,136),(0,51,128),(255,164,5),
-    (255,168,187),(66,102,0),(255,0,16),(94,241,242),(0,153,143),(224,255,102),(116,10,255),
-    (153,0,0),(255,255,128),(255,255,0),(255,80,5),(0,255,255))
+    (240, 163, 255), (0, 117, 220), (153, 63, 0), (76, 0, 92), (25, 25, 25), (0, 92, 49),
+    (43, 206, 72), (255, 204, 153), (128, 128, 128), (148, 255, 181), (143, 124, 0), (157, 204, 0),
+    (194, 0, 136), (0, 51, 128), (255, 164, 5), (255, 168, 187), (66, 102, 0), (255, 0, 16),
+    (94, 241, 242), (0, 153, 143), (224, 255, 102), (116, 10, 255),
+    (153, 0, 0), (255, 255, 128), (255, 255, 0), (255, 80, 5), (0, 255, 255))
 colours = ['#%02x%02x%02x' % c for c in colours]
+
 
 def get_colour_set(n):
     if n <= len(colours):
         return colours[0:n]
 
-def ultrametric(node): # pragma: no cover
-    node.img_style["vt_line_width"]=3
-    node.img_style["hz_line_width"]=3
+
+def ultrametric(node):  # pragma: no cover
+    node.img_style["vt_line_width"] = 3
+    node.img_style["hz_line_width"] = 3
     if node.is_leaf():
-        node.img_style["size"]=5
+        node.img_style["size"] = 5
     else:
-        node.img_style["size"]=0
+        node.img_style["size"] = 0
+
 
 class Plot(PhyltrCommand):
     """
@@ -103,9 +107,9 @@ class Plot(PhyltrCommand):
             colours = get_colour_set(len(values))
             colour_map = dict(zip(values, colours))
             for l in t.iter_leaves():
-                mycolour = colour_map[getattr(l,self.opts.attribute)]
+                mycolour = colour_map[getattr(l, self.opts.attribute)]
                 if not self.dummy:  # pragma: no cover
-                    l.add_face(CircleFace(radius=10,color=mycolour, style="sphere"), 0)
+                    l.add_face(CircleFace(radius=10, color=mycolour, style="sphere"), 0)
 
         # Apply labels
         if not self.dummy:  # pragma: no cover
@@ -127,7 +131,7 @@ class Plot(PhyltrCommand):
                 filename = self.opts.output
             if not self.dummy:
                 t.render(filename, ultrametric, tree_style=self.ts, **kw)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             if not self.dummy:
                 t.show(ultrametric, tree_style=self.ts)
 

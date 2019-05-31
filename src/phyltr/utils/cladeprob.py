@@ -1,5 +1,6 @@
 import collections
 import math
+import statistics
 
 
 def parse_float(value):
@@ -8,6 +9,36 @@ def parse_float(value):
             (value.startswith("'") and value.endswith("'")):
         value = value[1:-1]
     return float(value)
+
+
+def compute_mean_median_hpd(values, interval):
+    values = sorted(values)
+    return (
+        statistics.mean(values),
+        statistics.median(values),
+        [values[int(x * len(values))] for x in interval]
+    )
+
+
+def add_mean_median_hpd(clade, values, interval, prefix='', hpd_prefix=None, precision=None):
+    """
+    Annotate a tree node with summary statistics.
+
+    :param clade: Tree node to annotate
+    :param values: List of numbers to compute statistics for
+    :param interval: Pair of lower/upper percentiles for HPD interval
+    :param prefix: Prefix to use for the feature names
+    :param hpd_prefix: Prefix to use for the HPD feature
+    :param precision: Precision for formatting floating point numbers
+    """
+    precision = '' if precision is None else '.{}'.format(precision)
+    mean, median, hpd = compute_mean_median_hpd(values, interval)
+    values = sorted(values)
+    clade.add_feature(prefix + 'mean', '{:{precision}f}'.format(mean, precision=precision))
+    clade.add_feature(prefix + 'median', '{:{precision}f}'.format(median, precision=precision))
+    clade.add_feature(
+        (hpd_prefix or prefix) + "HPD",
+        '{:{precision}f}-{:{precision}f}'.format(*hpd, **dict(precision=precision)))
 
 
 class CladeProbabilities:
@@ -36,9 +67,9 @@ class CladeProbabilities:
             clade = ",".join(sorted(leaves))
             # Record ages of non-leaf clades
             if len(leaves) > 1:
-                self.clade_counts[clade] = self.clade_counts.get(clade,0) + 1
+                self.clade_counts[clade] = self.clade_counts.get(clade, 0) + 1
                 self.clade_ages[clade].append(subtree.get_farthest_leaf()[1])
-            extra_features = [f for f in subtree.features if f not in ("name","dist","support")]
+            extra_features = [f for f in subtree.features if f not in ("name", "dist", "support")]
             # Record annotations for all clades, even leaves
             for f in extra_features:
                 try:
@@ -47,7 +78,7 @@ class CladeProbabilities:
                     continue
         # Record leaf heights
         leaf_heights = [(leaf.name, tree.get_distance(leaf)) for leaf in cache[tree]]
-        tree_height = max((d for (l,d) in leaf_heights))
+        tree_height = max(d for (l, d) in leaf_heights)
         for leaf, leaf_height in leaf_heights:
             self.leaf_heights[leaf].append((tree_height - leaf_height))
 
@@ -64,7 +95,7 @@ class CladeProbabilities:
         probabilities of all of its constituent clades according to the
         current self.clade_probs values."""
 
-        cache = self.caches.get(t,t.get_cached_content())
+        cache = self.caches.get(t, t.get_cached_content())
         prob = 0
         for node in t.traverse():
             if node == t:
@@ -81,7 +112,7 @@ class CladeProbabilities:
         """Set the support attribute of the nodes in tree using the current
         self.clade_probs values."""
 
-        cache = self.caches.get(tree,tree.get_cached_content())
+        cache = self.caches.get(tree, tree.get_cached_content())
         for node in tree.traverse():
             leaves = [leaf.name for leaf in cache[node]]
             if len(leaves) == 1:
@@ -94,24 +125,19 @@ class CladeProbabilities:
         if threshold < 1.0:
             clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
         # Sort by clade size and then case-insensitive alpha...
-        clade_probs.sort(key=lambda x:(x[1].count(","),x[1].lower()),reverse=True)
+        clade_probs.sort(key=lambda x: (x[1].count(","), x[1].lower()), reverse=True)
         # ...then by clade probability
         # (this results in a list sorted by probability and then name)
-        clade_probs.sort(key=lambda x:x[0],reverse=True)
+        clade_probs.sort(key=lambda x: x[0], reverse=True)
 
         # Sanity check - the first clade in the sorted list *should* be the "everything" clade.
         if clade_probs:
             assert clade_probs[0][1].count(",") == len(self.leaf_heights) - 1
 
-        fp = open(filename, "w")
-        for p, c in clade_probs:
-            if age:
-                ages = self.clade_ages[c]
-                mean = sum(ages)/len(ages)
-                ages.sort()
-                lower, median, upper = [ages[int(x*len(ages))] for x in (0.025,0.5,0.975)]
-                line = "%.4f, %.2f (%.2f-%.2f) [%s]\n" % (p, mean, lower, upper, c)
-            else:
-                line = "%.4f, [%s]\n" % (p, c)
-            fp.write(line)
-        fp.close()
+        with open(filename, "w") as fp:
+            for p, c in clade_probs:
+                mean_and_hpd = ''
+                if age:
+                    mean_and_hpd = "{0:.2f} ({2[0]:.2f}-{2[1]:.2f}) ".format(
+                        *compute_mean_median_hpd(self.clade_ages[c], (0.025, 0.975)))
+                fp.write("%.4f, %s[%s]\n" % (p, mean_and_hpd, c))

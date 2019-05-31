@@ -4,6 +4,7 @@ from phyltr.commands.base import PhyltrCommand
 import phyltr.utils.cladeprob
 from phyltr.utils.phyltroptparse import VALID_LENGTHS, length_option
 
+
 class Consensus(PhyltrCommand):
     """
     Produce a majority rules consensus tree for the tree stream.
@@ -37,7 +38,7 @@ class Consensus(PhyltrCommand):
         clades = []
         for clade, p in self.cp.clade_probs.items():
             if p >= self.opts.frequency:
-               clades.append((p, set(clade.split(","))))
+                clades.append((p, set(clade.split(","))))
         clades.sort()
 
         # Pop the clade with highest probability, which *should* be the clade
@@ -92,12 +93,8 @@ class Consensus(PhyltrCommand):
             if not clade.is_leaf():
                 # Compute age statistics and annotate tree
                 ages = self.cp.clade_ages[clade_key]
-                ages.sort()
-                mean = sum(ages)/len(ages)
-                lower, median, upper = [ages[int(x*len(ages))] for x in (0.05,0.5,0.95)]
-                clade.add_feature("age_mean", mean)
-                clade.add_feature("age_median", median)
-                clade.add_feature("age_HPD", "{%f-%f}" % (lower,upper))
+                phyltr.utils.cladeprob.add_mean_median_hpd(clade, ages, (0.05, 0.95), prefix='age_')
+
                 # Choose the canonical age for this clade
                 clade_age = VALID_LENGTHS[self.opts.lengths](ages)
                 # Set branch lengths accordingly
@@ -106,13 +103,8 @@ class Consensus(PhyltrCommand):
                     child.dist = clade_age - child_height
 
             for f in self.cp.clade_attributes:
-                values = self.cp.clade_attributes[f][clade_key]
-                mean = sum(values)/len(values)
-                values.sort()
-                lower, median, upper = [values[int(x*len(values))] for x in (0.025,0.5,0.975)]
-                clade.add_feature("%s_mean" % f, mean)
-                clade.add_feature("%s_median" % f, median)
-                clade.add_feature("%s_HPD" % f, "{%f-%f}" % (lower,upper))
+                phyltr.utils.cladeprob.add_mean_median_hpd(
+                    clade, self.cp.clade_attributes[f][clade_key], (0.025, 0.975), prefix=f + '_')
 
         # Correct leaf heights
         for leaf in cache[t]:
@@ -144,7 +136,7 @@ class Consensus(PhyltrCommand):
         # First, find the index of the first clade which is potentially
         # problematic
         n = -1
-        for n, (p,c) in enumerate(clades):
+        for n, (p, c) in enumerate(clades):
             if p < 0.5:
                 break
 
@@ -166,13 +158,14 @@ class Consensus(PhyltrCommand):
             for p, susp in dubious:
                 for q, good in accepted:
                     if not test_clade_compat(good, susp):
-                        clades.remove((p,susp))
+                        clades.remove((p, susp))
                         break
                 else:
                     n += 1
                     break
 
         return clades
+
 
 def test_clade_compat(good, susp):
     good = set(good)

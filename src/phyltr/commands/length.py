@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 
+
 class Length(PhyltrCommand):
     """
     Print the length of each tree in a stream.

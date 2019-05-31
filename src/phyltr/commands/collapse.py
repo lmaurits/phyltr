@@ -3,8 +3,10 @@ from collections import defaultdict
 
 from phyltr.commands.base import PhyltrCommand
 
+
 class MonophylyFailure(Exception):
     """Raised when asked to collapse a non monophyletic taxon set."""
+
 
 class Collapse(PhyltrCommand):
     """
@@ -31,7 +33,7 @@ class Collapse(PhyltrCommand):
     def __init__(self, clades=None, **kw):
         PhyltrCommand.__init__(self, **kw)
         if clades:
-            self.trans = clades # trans = translation
+            self.trans = clades  # trans = translation
         elif self.opts.filename:
             self.read_clade_file(self.opts.filename)
         elif self.opts.attribute:
@@ -67,7 +69,6 @@ class Collapse(PhyltrCommand):
             except MonophylyFailure:
                 # Clade is not monophyletic.  We can't collapse it.
                 sys.stderr.write("Monophyly failure for clade: %s\n" % name)
-#                sys.stderr.write("Interlopers: %s\n" % ",".join([n.name for n in set(mrca_leaves) - set(clade_leaves)]))
         return t
 
     def collapse_by_attribute(self, t):
@@ -84,7 +85,8 @@ class Collapse(PhyltrCommand):
                 self.test_monophyly_and_collapse(t, cache, value, clade_leaves)
             except MonophylyFailure:
                 # Clade is not monophyletic.  We can't collapse it.
-                sys.stderr.write("Monophyly failure for attribute value: %s=%s\n" % (self.opts.attribute, value))
+                sys.stderr.write(
+                    "Monophyly failure for attribute value: %s=%s\n" % (self.opts.attribute, value))
         return t
 
     def test_monophyly_and_collapse(self, t, cache, clade, clade_leaves):

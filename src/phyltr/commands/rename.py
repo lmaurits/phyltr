@@ -1,5 +1,6 @@
 from phyltr.commands.base import PhyltrCommand
 
+
 class Rename(PhyltrCommand):
     """
     Rename the nodes in a treestream.  The mapping from old to new names is read
@@ -23,7 +24,7 @@ class Rename(PhyltrCommand):
         (
             ('-r', '--remove-missing'),
             dict(
-                dest="remove",action="store_true", default=False,
+                dest="remove", action="store_true", default=False,
                 help='If there are taxa in the tree which are not in the translation file, remove '
                      'them (in the manner of subtree, not prune)')),
     ]
@@ -55,8 +56,8 @@ class Rename(PhyltrCommand):
     def process_tree(self, t, n):
         # Rename nodes
         for node in t.traverse():
-            node.name = self.rename.get(node.name,
-                    "KILL-THIS-NODE" if self.opts.remove else node.name)
+            node.name = self.rename.get(
+                node.name, "KILL-THIS-NODE" if self.opts.remove else node.name)
 
         keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
         if n == 1:

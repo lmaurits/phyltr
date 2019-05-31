@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import taxa_spec_options, selector_from_taxa_spec
 
+
 class Subtree(PhyltrCommand):
     """
     Replace each tree with the minimal subtree containing the specified taxa.

@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 
+
 class Sibling(PhyltrCommand):
     """
     Print the sibling of a specific taxon for each tree in a stream.
