@@ -1,3 +1,4 @@
+import csv
 import collections
 import math
 import statistics
@@ -10,6 +11,8 @@ def parse_float(value):
         value = value[1:-1]
     return float(value)
 
+def format_floats(row):
+    return (("{0:0.4f}".format(x) if type(x) == float else x for x in row))
 
 def compute_mean_median_hpd(values, interval):
     values = sorted(values)
@@ -64,7 +67,7 @@ class CladeProbabilities:
         # Record clades
         for subtree in tree.traverse():
             leaves = [leaf.name for leaf in cache[subtree]]
-            clade = ",".join(sorted(leaves))
+            clade = " ".join(sorted(leaves))
             # Record ages of non-leaf clades
             if len(leaves) > 1:
                 self.clade_counts[clade] = self.clade_counts.get(clade, 0) + 1
@@ -103,7 +106,7 @@ class CladeProbabilities:
             leaves = [leaf.name for leaf in cache[node]]
             if len(leaves) == 1:
                 continue
-            clade = ",".join(sorted(leaves))
+            clade = " ".join(sorted(leaves))
             prob += math.log(self.clade_probs[clade])
         return prob
 
@@ -117,7 +120,7 @@ class CladeProbabilities:
             leaves = [leaf.name for leaf in cache[node]]
             if len(leaves) == 1:
                 continue
-            clade = ",".join(sorted(leaves))
+            clade = " ".join(sorted(leaves))
             node.support = self.clade_probs[clade]
 
     def save_clade_report(self, filename, threshold=0.0, age=False):
@@ -125,19 +128,30 @@ class CladeProbabilities:
         if threshold < 1.0:
             clade_probs = [(p, c) for (p, c) in clade_probs if p >= threshold]
         # Sort by clade size and then case-insensitive alpha...
-        clade_probs.sort(key=lambda x: (x[1].count(","), x[1].lower()), reverse=True)
+        clade_probs.sort(key=lambda x:(len(x[1].split()),x[1].lower()),reverse=True)
         # ...then by clade probability
         # (this results in a list sorted by probability and then name)
         clade_probs.sort(key=lambda x: x[0], reverse=True)
 
         # Sanity check - the first clade in the sorted list *should* be the "everything" clade.
         if clade_probs:
-            assert clade_probs[0][1].count(",") == len(self.leaf_heights) - 1
+            assert len(clade_probs[0][1].split()) == len(self.leaf_heights)
 
-        with open(filename, "w") as fp:
-            for p, c in clade_probs:
-                mean_and_hpd = ''
-                if age:
-                    mean_and_hpd = "{0:.2f} ({2[0]:.2f}-{2[1]:.2f}) ".format(
-                        *compute_mean_median_hpd(self.clade_ages[c], (0.025, 0.975)))
-                fp.write("%.4f, %s[%s]\n" % (p, mean_and_hpd, c))
+        fp = open(filename, "w")
+        writer = csv.writer(fp)
+        if age:
+            writer.writerow(["support","age_mean","age_95HPD_lower","age_95HPD_upper","clade taxa"])
+        else:
+            writer.writerow(["support","clade taxa"])
+        for p, c in clade_probs:
+            if age:
+                ages = self.clade_ages[c]
+                mean = sum(ages)/len(ages)
+                ages.sort()
+                lower, median, upper = [ages[int(x*len(ages))] for x in (0.025,0.5,0.975)]
+                line = "%.4f, %.2f (%.2f-%.2f) [%s]\n" % (p, mean, lower, upper, c)
+                writer.writerow(format_floats([p, mean, lower, upper, c]))
+            else:
+                line = "%.4f, [%s]\n" % (p, c)
+                writer.writerow(format_floats([p, c]))
+        fp.close()

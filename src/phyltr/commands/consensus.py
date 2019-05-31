@@ -38,7 +38,7 @@ class Consensus(PhyltrCommand):
         clades = []
         for clade, p in self.cp.clade_probs.items():
             if p >= self.opts.frequency:
-                clades.append((p, set(clade.split(","))))
+               clades.append((p, set(clade.split())))
         clades.sort()
 
         # Pop the clade with highest probability, which *should* be the clade
@@ -89,7 +89,7 @@ class Consensus(PhyltrCommand):
         # Add age annotations
         cache = t.get_cached_content()
         for clade in t.traverse("postorder"):
-            clade_key = ",".join(sorted([l.name for l in cache[clade]]))
+            clade_key = " ".join(sorted([l.name for l in cache[clade]]))
             if not clade.is_leaf():
                 # Compute age statistics and annotate tree
                 ages = self.cp.clade_ages[clade_key]

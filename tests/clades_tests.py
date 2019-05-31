@@ -18,16 +18,16 @@ def test_clades(basictrees):
     list(clades.consume(basictrees))
     # Check that the computed probabilities agree
     # with hand calculated equivalents
-    assert clades.cp.clade_probs["A,B"] == 4.0 / 6.0
-    assert clades.cp.clade_probs["A,C"] == 2.0 / 6.0
-    assert clades.cp.clade_probs["A,B,C"] == 5.0 / 6.0
-    assert clades.cp.clade_probs["E,F"] == 3.0 / 6.0
-    assert clades.cp.clade_probs["A,C"] == 2.0 / 6.0
-    assert clades.cp.clade_probs["D,F"] == 1.0 / 6.0
-    assert clades.cp.clade_probs["D,E"] == 1.0 / 6.0
-    assert clades.cp.clade_probs["C,E"] == 1.0 / 6.0
-    assert clades.cp.clade_probs["D,E,F"] == 5.0 / 6.0
-    assert clades.cp.clade_probs["A,B,C,D,E,F"] == 6.0 / 6.0
+    assert clades.cp.clade_probs["A B"] == 4.0 / 6.0
+    assert clades.cp.clade_probs["A C"] == 2.0 / 6.0
+    assert clades.cp.clade_probs["A B C"] == 5.0 / 6.0
+    assert clades.cp.clade_probs["E F"] == 3.0 / 6.0
+    assert clades.cp.clade_probs["A C"] == 2.0 / 6.0
+    assert clades.cp.clade_probs["D F"] == 1.0 / 6.0
+    assert clades.cp.clade_probs["D E"] == 1.0 / 6.0
+    assert clades.cp.clade_probs["C E"] == 1.0 / 6.0
+    assert clades.cp.clade_probs["D E F"] == 5.0 / 6.0
+    assert clades.cp.clade_probs["A B C D E F"] == 6.0 / 6.0
 
 def test_degenerate_clades(treefilenewick):
     clades = Clades(ages=True)
