@@ -70,12 +70,10 @@ class PhyltrCommand(object):
         out_trees = obj.consume(in_trees)
         obj.init_sink(sys.stdout).consume(out_trees)
         raw_source.close()
-
         obj.post_print()
-
         return 0
 
-    @classmethod 
+    @classmethod
     def init_from_args(cls, string):
         # Parse the arguments.
         # If there is an error, do not kill the process!  Rather, raise a

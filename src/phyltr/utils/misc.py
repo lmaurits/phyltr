@@ -5,6 +5,7 @@ class Default(object):
     def __eq__(self, other):
         return False
 
+
 DEFAULT = Default()
 
 

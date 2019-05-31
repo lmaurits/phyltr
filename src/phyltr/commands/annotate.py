@@ -88,14 +88,14 @@ class Annotate(PhyltrCommand):
             # Only include the root node or nodes with names
             if not node.name and node.up:
                 continue
-            if any([hasattr(node,f) for f in features]):
+            if any([hasattr(node, f) for f in features]):
                 if not node.name:
                     # Temporarily give the node a name
                     node.name = "root"
                     fix_root_name = True
                 else:
                     fix_root_name = False
-                rowdict = {f:getattr(node, f, "?") for f in fieldnames}
+                rowdict = {f: getattr(node, f, "?") for f in fieldnames}
                 if self.opts.multiple:
                     rowdict["tree_number"] = n
                 writer.writerow(rowdict)

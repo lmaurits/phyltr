@@ -1,5 +1,6 @@
 from phyltr.commands.base import PhyltrCommand
 
+
 class Scale(PhyltrCommand):
     """
     Scale the branch lengths in a treestream by a constant factor.

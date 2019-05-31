@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import ListPerLineFormatter
 
+
 class Taxa(PhyltrCommand):
     """
     Extract the taxa names from the first tree in a stream.

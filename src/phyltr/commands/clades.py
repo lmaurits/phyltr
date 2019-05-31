@@ -2,6 +2,7 @@ from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 import phyltr.utils.cladeprob
 
+
 class Clades(PhyltrCommand):
     """
     Produce a list showing all clades in a treestream and the proportion of trees

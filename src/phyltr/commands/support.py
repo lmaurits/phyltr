@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 import phyltr.utils.cladeprob
 
+
 class Support(PhyltrCommand):
     """
     Annotate a treestream with clade support probabilities, and optionally save
@@ -31,6 +32,7 @@ class Support(PhyltrCommand):
                 help='Reorder tree stream to print trees in order from highest to lowest product '
                      'of clade credibilities.')),
     ]
+
     def __init__(self, **kw):
         PhyltrCommand.__init__(self, **kw)
         self.trees = []

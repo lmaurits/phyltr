@@ -6,17 +6,20 @@ from functools import partial
 
 import ete3
 
-BEAST_ANNOTATION_REGEX = re.compile(
-    "(?P<name>[a-zA-Z0-9_ \-]*?):(\[&(?P<annotation>[^\]]*)\])(?P<dist>[0-9\.]+((E|e)(\-?[0-9]+)?)?)")
-BEAST_ANNOTATION_REGEX_2 = re.compile(
-    "(?P<name>[a-zA-Z0-9_ \-]*?)(\[&(?P<annotation>[^\]]*)\]):(?P<dist>[0-9\.]+((E|e)(\-?[0-9]+)?)?)")
+_name, _annotation, _number = (
+    "(?P<name>[a-zA-Z0-9_ \-]*?)",
+    "(\[&(?P<annotation>[^\]]*)\])",
+    "(?P<dist>[0-9.]+([Ee](-?[0-9]+)?)?)"
+)
+BEAST_ANNOTATION_REGEX = re.compile(_name + ':' + _annotation + _number)
+BEAST_ANNOTATION_REGEX_2 = re.compile(_name + _annotation + ':' + _number)
 
 _NUMBER = '[0-9]+\.[0-9]+'
 COMPOSITE_BRANCHLENGTH_REGEX = re.compile(
     ":(?P<dist>" + _NUMBER + ")@(?P<annotation>" + _NUMBER + ")")
 
 
-#FIXME We should be deleting and starting a new temp file for each tree file
+# FIXME We should be deleting and starting a new temp file for each tree file
 # otherwise we're going to have problems if file 2 is shorter than file 1
 
 class ComplexNewickParser(object):
@@ -33,7 +36,8 @@ class ComplexNewickParser(object):
     def consume(self, stream):
         _first = True
         self.isNexus = False
-        self.firstline = False   # Actually tracks whether a line is the first NON-BLANK line in a file
+        # Track whether a line is the first NON-BLANK line in a file:
+        self.firstline = False
         for line in stream:
             # This loop needs to be aware of whether it is processing the first
             # line of a file.  This needs to work regardless of what stream is
@@ -65,7 +69,7 @@ class ComplexNewickParser(object):
             # Skip blank lines
             if not line.strip():
                 continue
-           
+
             # Handle Nexus stuff
             cont = self.handle_nexus_stuff(line)
             if cont:
@@ -79,7 +83,7 @@ class ComplexNewickParser(object):
                 tree_string = line[start:end]
                 if self.burnin:
                     # Save for later
-                    self.fp.write(tree_string+"\n")
+                    self.fp.write(tree_string + "\n")
                 elif self.n % self.subsample == 0:
                     # Yield now
                     t, self.with_annotations, self.newick_format = get_tree(
@@ -158,21 +162,17 @@ class ComplexNewickParser(object):
     def detect_tree(self, line):
         if self.isNexus:
             return line.strip().lower().startswith("tree")
-        else:
-            return (    ")" in line and
-                        ";" in line and
-                        line.count("(") == line.count(")")
-                )
+        return ")" in line and ";" in line and line.count("(") == line.count(")")
 
     def yield_from_tempfile(self):
-        trees_to_skip = int(round((self.burnin/100.0)*self.n))
+        trees_to_skip = int(round((self.burnin / 100.0) * self.n))
         self.fp.seek(0)
         n = 0
         for tree_string in self.fp.readlines():
             if n < trees_to_skip:
                 n += 1
                 continue
-            if (n-trees_to_skip) % self.subsample == 0:
+            if (n - trees_to_skip) % self.subsample == 0:
                 t, self.with_annotations, self.newick_format = get_tree(
                     tree_string,
                     with_annotations=self.with_annotations,
@@ -231,7 +231,6 @@ ANNOTATION_FORMATS = [
 def get_tree(tree_string, with_annotations=None, newick_format=None):
     # FIXME
     # Make this much more elegant
-    # Also, once a successful parse is achieved, remember the strategy and avoid brute force on subsequent trees
 
     if with_annotations is None:
         # Do we need regex magic?
@@ -266,13 +265,13 @@ class NewickParser(object):
                 t = ete3.Tree(tree_string)
                 yield t
                 continue
-            except (ValueError,ete3.parser.newick.NewickError):
+            except (ValueError, ete3.parser.newick.NewickError):
                 pass
 
             # Try to parse tree with internal node labels
             try:
                 t = ete3.Tree(tree_string, format=1)
                 yield t
-            except (ValueError,ete3.parser.newick.NewickError):
+            except (ValueError, ete3.parser.newick.NewickError):
                 # That didn't fix it.  Give up
                 continue

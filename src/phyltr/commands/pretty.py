@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.plumbing.sinks import StringFormatter
 
+
 class Pretty(PhyltrCommand):
     """
     Print an "ASCII art" representation of a treestream.
@@ -38,9 +39,10 @@ class Pretty(PhyltrCommand):
                     continue
                 desc = node.get_descendants()
                 desc.append(node)
-                if all([n.support >=0.9 for n in desc]):
+                if all([n.support >= 0.9 for n in desc]):
                     dead_nodes.extend(desc)
-                    node.name = "(%.2f) %s" % (node.support, "+".join(sorted([l.name for l in node.get_leaves()])))
+                    node.name = "(%.2f) %s" % (
+                        node.support, "+".join(sorted([l.name for l in node.get_leaves()])))
                     for child in node.get_children():
                         child.detach()
 

@@ -1,6 +1,7 @@
 from phyltr.commands.base import PhyltrCommand
 from phyltr.utils.phyltroptparse import taxa_spec_options, selector_from_taxa_spec
 
+
 class Prune(PhyltrCommand):
     """
     Delete a specified set of nodes from the tree.

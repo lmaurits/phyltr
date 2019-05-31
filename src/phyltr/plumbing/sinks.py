@@ -26,6 +26,7 @@ class NewickFormatter:
                 self.out.write(t.write())
             self.out.write("\n")
 
+
 class NullSink:
 
     def __init__(self, out=sys.stdout):
@@ -34,6 +35,7 @@ class NullSink:
     def consume(self, stream):
         for t in stream:
             pass
+
 
 class StringFormatter:
 
@@ -50,6 +52,7 @@ class StringFormatter:
                 except TypeError:
                     self.out.write(str(x))
             self.out.write("\n")
+
 
 class ListPerLineFormatter:
 
