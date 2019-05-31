@@ -7,11 +7,11 @@ def test_init_from_args():
     Sibling.init_from_args("A")
 
 def test_bad_init_no_args():
-    with pytest.raises(ValueError):
-        Sibling()
+    with pytest.raises(SystemExit):
+        Sibling.init_from_args('')
 
 def test_sibling(basictrees):
-    siblings = list(Sibling("A").consume(basictrees))
+    siblings = list(Sibling(taxon="A").consume(basictrees))
     assert siblings == ["B","C","B","B","C","B"]
 
 def test_non_leaf_sibling(basictrees):
@@ -20,4 +20,4 @@ def test_non_leaf_sibling(basictrees):
 
 def test_bad_params_missing_taxa(basictrees):
     with pytest.raises(ValueError):
-        list(Sibling("X").consume(basictrees))
+        list(Sibling(taxon="X").consume(basictrees))

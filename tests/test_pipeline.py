@@ -1,9 +1,10 @@
 from phyltr import build_pipeline
 
-def test_pipeline(basictrees):
+def test_pipeline(basictrees, argfilepath):
     """Silly long pipeline to stress test build_pipeline."""
     output = build_pipeline(
-        "cat -s 2 | rename -f tests/argfiles/rename.txt | prune X,B | dedupe | uniq | support --sort | stat",
+        "cat -s 2 | rename -f {0} | prune X B | dedupe | uniq | support --sort | stat".format(
+            argfilepath('rename.txt')),
         source=basictrees)
     for t in output:
         leaves = t.get_leaf_names()
@@ -13,9 +14,10 @@ def test_pipeline(basictrees):
         assert "B" not in leaves
         assert all((x in leaves for x in ("C", "D", "E", "F")))
 
-def test_implicit_source(treefilepath):
+def test_implicit_source(treefilepath, argfilepath):
     output = build_pipeline(
-        "cat -s 2 | rename -f tests/argfiles/rename.txt | prune X,B | dedupe | uniq | support --sort | stat",
+        "cat -s 2 | rename -f {0} | prune X B | dedupe | uniq | support --sort | stat".format(
+            argfilepath('rename.txt')),
         source=treefilepath("basic.trees"))
     for t in output:
         leaves = t.get_leaf_names()

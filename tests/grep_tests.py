@@ -3,22 +3,22 @@ import pytest
 from phyltr.commands.grep import Grep
 
 def test_init_from_args(argfilepath):
-    grep = Grep.init_from_args("A,B,C")
-    assert grep.taxa == {"A","B","C"}
+    grep = Grep.init_from_args("A B C")
+    assert grep.opts.taxa == {"A", "B", "C"}
     assert grep.opts.filename == None
     assert grep.opts.inverse == False
 
-    grep = Grep.init_from_args("A,B,C --inverse")
+    grep = Grep.init_from_args("A B C --inverse")
     assert grep.opts.inverse == True
 
     taxa_abc = argfilepath('taxa_abc.txt')
     grep = Grep.init_from_args("--file {0}".format(taxa_abc))
-    assert grep.taxa == {"A","B","C"}
+    assert grep.opts.taxa == {"A", "B", "C"}
     assert grep.opts.filename == taxa_abc
 
     taxa_abc = argfilepath('argfile.csv')
     grep = Grep.init_from_args("--file {0} --column=COL1".format(taxa_abc))
-    assert grep.taxa == {"A","B","C"}
+    assert grep.opts.taxa == {"A", "B", "C"}
 
 def test_bad_init_no_args():
     with pytest.raises(ValueError):

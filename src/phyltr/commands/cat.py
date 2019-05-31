@@ -9,17 +9,24 @@ The trees may contain trees formatted as a phyltr treestream or a NEXUS file.
     """
     __options__ = [
         (
+            ('files',),
+            dict(
+                metavar='FILE', nargs='*',
+                help='Filename to read treestreams from. Use a filename of "-" to read from '
+                     'stdin. If no filenames are specified, the treestream will be read from '
+                     'stdin.')),
+        (
             ('-b', '--burnin'),
             dict(
                 action="store", dest="burnin", type=int, default=0,
-                help="Percentage of trees from each file to discard as 'burn in'.  Default is 0, "
-                     "i.e. no burn in.")),
+                help="Percentage of trees from each file to discard as 'burn in'. "
+                     "Default is no burn in.")),
         (
             ('-s', '--subsample'),
             dict(
                 action="store", dest="subsample", type=int, default=1,
                 help="Frequency at which to subsample trees, i.e. '-s 10' will include only every "
-                     "10th tree in the treestream.  Default is 1.")),
+                     "10th tree in the treestream.")),
         (
             ('--no-annotations',),
             dict(
