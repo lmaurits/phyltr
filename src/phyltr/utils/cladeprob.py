@@ -12,7 +12,7 @@ def parse_float(value):
     return float(value)
 
 def format_floats(row):
-    return (("{0:0.4f}".format(x) if type(x) == float else x for x in row))
+    return [("{0:0.4f}".format(x) if type(x) == float else x for x in row)]
 
 def compute_mean_median_hpd(values, interval):
     values = sorted(values)
