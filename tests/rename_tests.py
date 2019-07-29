@@ -4,10 +4,10 @@ from phyltr.commands.rename import Rename
 
 
 def test_init(argfilepath):
-    rename = Rename.init_from_args("--file {0}".format(argfilepath("rename.txt")))
+    rename = Rename.init_from_args("--file {0} --from old --to new".format(argfilepath("rename.txt")))
     assert rename.opts.remove == False
 
-    rename = Rename.init_from_args("--file {0} --remove-missing".format(argfilepath("rename.txt")))
+    rename = Rename.init_from_args("--file {0} --from old --to new --remove-missing".format(argfilepath("rename.txt")))
     assert rename.opts.remove == True
 
 def test_bad_init_no_args():
@@ -23,7 +23,7 @@ def test_rename(basictrees):
         assert all((x in leaves for x in ("B", "C", "D", "E", "F")))
 
 def test_rename_from_file(basictrees):
-    renamed = Rename(filename="tests/argfiles/rename.txt").consume(basictrees)
+    renamed = Rename(filename="tests/argfiles/rename.txt", from_="old", to_="new").consume(basictrees)
     for t in renamed:
         leaves = t.get_leaf_names()
         assert "A" not in leaves

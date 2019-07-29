@@ -38,7 +38,7 @@ class Rename(PhyltrCommand):
         elif self.opts.filename and self.opts.from_ and self.opts.to_:
             self.read_rename_file(self.opts.filename, self.opts.from_, self.opts.to_)
         else:
-            raise ValueError("Must supply renaming dictionary or filename!")
+            raise ValueError("Must supply renaming dictionary or filename and columns!")
 
     def read_rename_file(self, filename, old_column, new_column):
 
