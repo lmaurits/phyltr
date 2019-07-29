@@ -1,3 +1,5 @@
+import csv
+
 from phyltr.commands.base import PhyltrCommand
 
 
@@ -33,22 +35,22 @@ class Rename(PhyltrCommand):
         PhyltrCommand.__init__(self, **kw)
         if rename:
             self.rename = rename
-        elif self.opts.filename:
-            self.read_rename_file(self.opts.filename)
+        elif self.opts.filename and self.opts.from_ and self.opts.to_:
+            self.read_rename_file(self.opts.filename, self.opts.from_, self.opts.to_)
         else:
             raise ValueError("Must supply renaming dictionary or filename!")
 
-    def read_rename_file(self, filename):
+    def read_rename_file(self, filename, old_column, new_column):
 
         """Read a file of names and their desired replacements and return a
         dictionary of this data."""
 
         rename = {}
         with open(filename, "r") as fp:
-            for line in fp:
-                old, new = line.strip().split(":")
-                old = ",".join((x.strip() for x in old.split(",")))
-                new = new.strip()
+            reader = csv.DictReader(fp)
+            for row in reader:
+                old = row[old_column]
+                new = row[new_column]
                 rename[old] = new
             fp.close()
         self.rename = rename
@@ -56,8 +58,11 @@ class Rename(PhyltrCommand):
     def process_tree(self, t, n):
         # Rename nodes
         for node in t.traverse():
-            node.name = self.rename.get(
-                node.name, "KILL-THIS-NODE" if self.opts.remove else node.name)
+            new_name = self.rename.get(node.name, None)
+            if new_name:
+                node.name = new_name
+            elif self.opts.remove:
+                node.name = "KILL-THIS-NODE"
 
         keepers = [l for l in t.get_leaves() if l.name != "KILL-THIS-NODE"]
         if n == 1:
