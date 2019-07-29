@@ -122,7 +122,7 @@ class Consensus(PhyltrCommand):
             else:
                 func = VALID_LENGTHS[self.opts.lengths]
             leaf.dist -= func(self.cp.leaf_heights[leaf.name])
-            assert leaf.dist >= 0
+            #assert leaf.dist >= 0
         # Done!
         return t
 
