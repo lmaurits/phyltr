@@ -17,8 +17,8 @@ def test_monophyletic_dedupe(treefilenewick):
     trees = list(treefilenewick('monophyletic_dupe_taxa.trees'))
     for t in trees:
         leaves = t.get_leaf_names()
-        assert not all((leaves.count(x) == 1  for x in ("A", "B", "C", "E", "F")))
+        assert any(leaves.count(x) != 1  for x in ("A", "B", "C", "D", "E", "F"))
     deduped = Dedupe().consume(trees)
     for t in deduped:
         leaves = t.get_leaf_names()
-        assert all((leaves.count(x) == 1  for x in ("A", "B", "C", "E", "F")))
+        assert all((leaves.count(x) == 1  for x in ("A", "B", "C", "D", "E", "F")))
