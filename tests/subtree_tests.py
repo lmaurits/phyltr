@@ -1,59 +1,66 @@
-import fileinput
+import pytest
 
-from nose.tools import raises
-
-from phyltr.plumbing.sources import NewickParser
-from phyltr.main import build_pipeline
+from phyltr import build_pipeline
 from phyltr.commands.subtree import Subtree
 
 def test_init_from_args():
     subtree = Subtree.init_from_args("--file tests/argfiles/taxa_abc.txt")
-    assert subtree.attribute == None
-    assert subtree.filename == "tests/argfiles/taxa_abc.txt"
-    assert subtree.value == None
+    assert subtree.opts.attribute == None
+    assert subtree.opts.filename == "tests/argfiles/taxa_abc.txt"
+    assert subtree.opts.values == None
 
-    subtree = Subtree.init_from_args("--attribute foo --value bar")
-    assert subtree.attribute == "foo"
-    assert subtree.filename == None
-    assert subtree.value == "bar"
+    subtree = Subtree.init_from_args("--attribute foo --values bar,baz")
+    assert subtree.opts.attribute == "foo"
+    assert subtree.opts.filename == None
+    assert subtree.opts.values == ["bar", "baz"]
 
-@raises(ValueError)
 def test_bad_init_no_args():
-    Subtree()
+    with pytest.raises(ValueError):
+        Subtree()
 
-@raises(ValueError)
 def test_bad_init_no_attribute_only():
-    Subtree(attribute="foo")
+    with pytest.raises(ValueError):
+        Subtree(attribute="foo")
 
-@raises(ValueError)
 def test_bad_init_no_value_only():
-    Subtree(value="bar")
+    with pytest.raises(ValueError):
+        Subtree(values="bar")
 
-@raises(ValueError)
-def test_bad_init_empty_file():
-    Subtree(filename="tests/argfiles/empty.txt")
+def test_bad_init_empty_file(emptyargs):
+    with pytest.raises(ValueError):
+        Subtree(filename=emptyargs)
 
-def test_subtree():
-    subtree = Subtree.init_from_args("A,B,C")
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = subtree.consume(trees)
+
+def extracted_taxa(subtrees):
+    return [[l.name for l in t.get_leaves()] for t in subtrees]
+
+
+def test_subtree(basictrees):
+    subtree = Subtree.init_from_args("A B C")
+    subtrees = subtree.consume(basictrees)
+    assert [3, 3, 3, 3, 3, 6] == [len(t) for t in extracted_taxa(subtrees)]
+
+def test_subtree_2(basictrees):
+    subtree = Subtree.init_from_args("A B F")
+    subtrees = subtree.consume(basictrees)
+    assert [6, 6, 6, 6, 6, 3] == [len(t) for t in extracted_taxa(subtrees)]
+
+def test_file_subtree(basictrees):
+    subtrees = Subtree(filename="tests/argfiles/taxa_abc.txt").consume(basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
-def test_file_subtree():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = Subtree(filename="tests/argfiles/taxa_abc.txt").consume(trees)
+def test_annotation_subtree(basictrees):
+    subtrees = build_pipeline(
+        "annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --values 0", basictrees)
     expected_taxa = (3, 3, 3, 3, 3, 6)
     for t, n in zip(subtrees, expected_taxa):
         assert len(t.get_leaves()) == n
 
-def test_annotation_subtree():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    subtrees = build_pipeline("annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --value 0", trees)
-    expected_taxa = (3, 3, 3, 3, 3, 6)
-    for t, n in zip(subtrees, expected_taxa):
-        assert len(t.get_leaves()) == n
+    subtrees = build_pipeline(
+        "annotate -f tests/argfiles/annotation.csv -k taxon | subtree --attribute f1 --values 1", basictrees)
+    taxa = extracted_taxa(subtrees)
+    subtrees = build_pipeline(
+        "annotate -f tests/argfiles/annotation.csv -k taxon | subtree D E F", basictrees)
+    assert taxa == extracted_taxa(subtrees)

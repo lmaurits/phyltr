@@ -1,14 +1,11 @@
-import fileinput
+from phyltr import build_pipeline
 
-from phyltr.main import build_pipeline
-from phyltr.plumbing.sources import NewickParser
-
-def test_pipeline():
+def test_pipeline(basictrees, argfilepath):
     """Silly long pipeline to stress test build_pipeline."""
-
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    output = build_pipeline("cat -s 2 | rename -f tests/argfiles/rename.txt | prune X,B | dedupe | uniq | support --sort | stat", source=trees)
+    output = build_pipeline(
+        "cat -s 2 | rename -f {0} --from old --to new | prune X B | dedupe | uniq | support --sort | stat".format(
+            argfilepath('rename.txt')),
+        source=basictrees)
     for t in output:
         leaves = t.get_leaf_names()
         assert all((leaves.count(x) == 1  for x in leaves))
@@ -17,8 +14,11 @@ def test_pipeline():
         assert "B" not in leaves
         assert all((x in leaves for x in ("C", "D", "E", "F")))
 
-def test_implicit_source():
-    output = build_pipeline("cat -s 2 | rename -f tests/argfiles/rename.txt | prune X,B | dedupe | uniq | support --sort | stat", source="tests/treefiles/basic.trees")
+def test_implicit_source(treefilepath, argfilepath):
+    output = build_pipeline(
+        "cat -s 2 | rename -f {0} --from old --to new | prune X B | dedupe | uniq | support --sort | stat".format(
+            argfilepath('rename.txt')),
+        source=treefilepath("basic.trees"))
     for t in output:
         leaves = t.get_leaf_names()
         assert all((leaves.count(x) == 1  for x in leaves))

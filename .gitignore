@@ -1,2 +1,7 @@
 *.pyc
 *.swp
+.coverage
+.pytest_cache/
+.idea/
+.tox/
+*.egg-info/

@@ -1,15 +1,8 @@
-import fileinput
-import tempfile
-
-from phyltr.plumbing.sources import NewickParser
 from phyltr.commands.taxa import Taxa
 
 def test_init_from_args():
-    taxa = Taxa.init_from_args("")
+    Taxa.init_from_args("")
 
-def test_taxa():
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    for taxa in Taxa().consume(trees):
+def test_taxa(basictrees):
+    for taxa in Taxa().consume(basictrees):
         assert taxa == ["A", "B", "C", "D", "E", "F"]
-    lines.close()

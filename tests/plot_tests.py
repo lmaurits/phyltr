@@ -1,61 +1,32 @@
-import fileinput
-import tempfile
-import os
+import pytest
 
-import ete3
+from phyltr import build_pipeline
+from phyltr.commands.plot import Plot
 
-from phyltr.main import build_pipeline
-from phyltr.plumbing.sources import NewickParser
-from phyltr.commands.plot import Plot, ultrametric
 
-def dummy_wrapper_for_travis(f):
-    if os.environ.get("TRAVIS"):
-        dummy = True
-    else:
-        dummy = False
-    def test_wrapped():
-        return f(dummy)
-    return test_wrapped
+@pytest.fixture
+def with_ete3():
+    try:
+        from ete3 import TreeStyle
+        return True
+    except ImportError:
+        return False
 
-@dummy_wrapper_for_travis
-def test_init_from_args(dummy=False):
-    if dummy:
+def test_init_from_args(with_ete3):
+    if not with_ete3:
         assert True
     else:
-        plot = Plot.init_from_args("")
+        Plot.init_from_args("")
 
-@dummy_wrapper_for_travis
-def test_plot(dummy=False):
+def test_plot(tmpdir, basictrees, with_ete3):
+    plot = Plot(dummy=not with_ete3, output=str(tmpdir.join('test')), height=600, width=800)
+    list(plot.consume(basictrees))
 
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    with tempfile.NamedTemporaryFile() as fp:
-        plot = Plot(dummy=dummy, output=fp.name, height=600, width=800)
-        for x in plot.consume(trees):
-            pass
-    lines.close()
+def test_plot_multiple(tmpdir, basictrees, with_ete3):
+    plot = Plot(dummy=not with_ete3, output=str(tmpdir.join('test')), height=600, width=800, multiple=True)
+    list(plot.consume(basictrees))
 
-@dummy_wrapper_for_travis
-def test_plot_multiple(dummy=False):
-
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    with tempfile.NamedTemporaryFile() as fp:
-        plot = Plot(dummy=dummy, output=fp.name, height=600, width=800, multiple=True)
-        for x in plot.consume(trees):
-            pass
-    lines.close()
-
-@dummy_wrapper_for_travis
-def test_plot_annotated(dummy=False):
-
-    lines = fileinput.input("tests/treefiles/basic.trees")
-    trees = NewickParser().consume(lines)
-    annotated_trees = build_pipeline("annotate --f tests/argfiles/annotation.csv -k taxon", source=trees)
-    with tempfile.NamedTemporaryFile() as fp:
-        plot = Plot(output=fp.name, attribute="f1", dummy=dummy)
-        for x in plot.consume(annotated_trees):
-            pass
-    lines.close()
-
-
+def test_plot_annotated(tmpdir, basictrees, with_ete3):
+    annotated_trees = build_pipeline("annotate --f tests/argfiles/annotation.csv -k taxon", source=basictrees)
+    plot = Plot(output=str(tmpdir.join('test')), attribute="f1", dummy=not with_ete3)
+    list(plot.consume(annotated_trees))
