@@ -23,7 +23,7 @@ def compute_mean_median_hpd(values, interval):
     )
 
 
-def add_mean_median_hpd(clade, values, interval, prefix='', hpd_prefix=None, precision=None):
+def add_mean_median_hpd(clade, values, prefix='', precision=4):
     """
     Annotate a tree node with summary statistics.
 
@@ -34,15 +34,22 @@ def add_mean_median_hpd(clade, values, interval, prefix='', hpd_prefix=None, pre
     :param hpd_prefix: Prefix to use for the HPD feature
     :param precision: Precision for formatting floating point numbers
     """
+    print(values)
     precision = '' if precision is None else '.{}'.format(precision)
-    mean, median, hpd = compute_mean_median_hpd(values, interval)
-    values = sorted(values)
+    minvalue = min(values)
+    maxvalue = max(values)
+    mean = statistics.mean(values)
+    median = statistics.median(values)
+    stdev = statistics.stdev(values) if len(values) > 1 else 0
+    values.sort()
+    hpd = [values[int(x * len(values))] for x in (0.025, 0.975)]
+
+    clade.add_feature(prefix + 'min', '{:{precision}f}'.format(minvalue, precision=precision))
+    clade.add_feature(prefix + 'max', '{:{precision}f}'.format(maxvalue, precision=precision))
     clade.add_feature(prefix + 'mean', '{:{precision}f}'.format(mean, precision=precision))
     clade.add_feature(prefix + 'median', '{:{precision}f}'.format(median, precision=precision))
-    clade.add_feature(
-        (hpd_prefix or prefix) + "HPD",
+    clade.add_feature(prefix + "HPD",
         '{:{precision}f}-{:{precision}f}'.format(*hpd, **dict(precision=precision)))
-
 
 class CladeProbabilities:
 

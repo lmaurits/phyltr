@@ -86,10 +86,7 @@ class Uniq(PhyltrCommand):
             add_mean_median_hpd(
                 representative,
                 [t.get_farthest_leaf()[1] for t in equ_class],
-                (0.025, 0.975),
-                prefix='age_',
-                hpd_prefix='age_95_',
-                precision=2)
+                'age_')
 
             # Set branch distances
             for nodes in zip(*[t.traverse() for t in equ_class]):

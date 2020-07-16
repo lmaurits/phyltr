@@ -93,7 +93,7 @@ class Consensus(PhyltrCommand):
             if not clade.is_leaf():
                 # Compute age statistics and annotate tree
                 ages = self.cp.clade_ages[clade_key]
-                phyltr.utils.cladeprob.add_mean_median_hpd(clade, ages, (0.05, 0.95), prefix='age_')
+                phyltr.utils.cladeprob.add_mean_median_hpd(clade, ages, 'age_')
 
                 # Choose the canonical age for this clade
                 clade_age = VALID_LENGTHS[self.opts.lengths](ages)
@@ -104,7 +104,7 @@ class Consensus(PhyltrCommand):
 
             for f in self.cp.clade_attributes:
                 phyltr.utils.cladeprob.add_mean_median_hpd(
-                    clade, self.cp.clade_attributes[f][clade_key], (0.025, 0.975), prefix=f + '_')
+                    clade, self.cp.clade_attributes[f][clade_key], prefix=f + '_')
 
         # Correct leaf heights
         for leaf in cache[t]:
