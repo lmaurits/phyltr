@@ -48,6 +48,7 @@ def add_mean_median_hpd(clade, values, prefix='', precision=4):
     clade.add_feature(prefix + 'max', '{:{precision}f}'.format(maxvalue, precision=precision))
     clade.add_feature(prefix + 'mean', '{:{precision}f}'.format(mean, precision=precision))
     clade.add_feature(prefix + 'median', '{:{precision}f}'.format(median, precision=precision))
+    clade.add_feature(prefix + 'stdev', '{:{precision}f}'.format(stdev, precision=precision))
     clade.add_feature(prefix + "HPD",
         '{:{precision}f}-{:{precision}f}'.format(*hpd, **dict(precision=precision)))
 
